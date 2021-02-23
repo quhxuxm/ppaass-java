@@ -16,14 +16,14 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 
-class SocksAgentUdpProxyChannelBindListener implements ChannelFutureListener {
-    private static final Logger logger = LoggerFactory.getLogger(SocksAgentUdpProxyChannelBindListener.class);
+class SocksAgentProxyUdpChannelBindListener implements ChannelFutureListener {
+    private static final Logger logger = LoggerFactory.getLogger(SocksAgentProxyUdpChannelBindListener.class);
     private final Channel agentTcpChannel;
     private final Bootstrap socksProxyTcpBootstrap;
     private final AgentConfiguration agentConfiguration;
     private final Socks5CommandRequest socks5CommandRequest;
 
-    public SocksAgentUdpProxyChannelBindListener(Channel agentTcpChannel,
+    public SocksAgentProxyUdpChannelBindListener(Channel agentTcpChannel,
                                                  Bootstrap socksProxyTcpBootstrap,
                                                  AgentConfiguration agentConfiguration,
                                                  Socks5CommandRequest socks5CommandRequest) {

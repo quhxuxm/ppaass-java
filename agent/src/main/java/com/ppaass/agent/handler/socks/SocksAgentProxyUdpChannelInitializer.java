@@ -9,21 +9,24 @@ import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
 @Service
-class SocksAgentUdpProxyChannelInitializer extends ChannelInitializer<NioDatagramChannel> {
+class SocksAgentProxyUdpChannelInitializer extends ChannelInitializer<NioDatagramChannel> {
     private final PrintExceptionHandler printExceptionHandler;
     private final AgentConfiguration agentConfiguration;
+    private final SocksAgentA2PUdpChannelHandler socksAgentA2PUdpChannelHandler;
 
-    public SocksAgentUdpProxyChannelInitializer(PrintExceptionHandler printExceptionHandler,
-                                                AgentConfiguration agentConfiguration) {
+    public SocksAgentProxyUdpChannelInitializer(PrintExceptionHandler printExceptionHandler,
+                                                AgentConfiguration agentConfiguration,
+                                                SocksAgentA2PUdpChannelHandler socksAgentA2PUdpChannelHandler) {
         this.printExceptionHandler = printExceptionHandler;
         this.agentConfiguration = agentConfiguration;
+        this.socksAgentA2PUdpChannelHandler = socksAgentA2PUdpChannelHandler;
     }
 
     @Override
     protected void initChannel(NioDatagramChannel agentUdpChannel) throws Exception {
         var agentUdpChannelPipeline = agentUdpChannel.pipeline();
         agentUdpChannelPipeline.addLast(new SocksAgentUdpMessageDecoder());
-        agentUdpChannelPipeline.addLast(socksForwardUdpMessageToProxyTcpChannelHandler);
+        agentUdpChannelPipeline.addLast(this.socksAgentA2PUdpChannelHandler);
         agentUdpChannelPipeline.addLast(printExceptionHandler);
     }
 }

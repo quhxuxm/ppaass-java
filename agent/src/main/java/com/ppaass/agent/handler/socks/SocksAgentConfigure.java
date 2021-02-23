@@ -16,7 +16,7 @@ class SocksAgentConfigure {
     @Bean
     public Bootstrap socksProxyTcpBootstrap(
             EventLoopGroup proxyTcpLoopGroup, AgentConfiguration agentConfiguration,
-            SocksAgentTcpProxyChannelInitializer proxyChannelInitializer) {
+            SocksAgentProxyTcpChannelInitializer proxyChannelInitializer) {
         var result = new Bootstrap();
         result.group(proxyTcpLoopGroup);
         result.channel(NioSocketChannel.class);
@@ -40,7 +40,7 @@ class SocksAgentConfigure {
 
     @Bean
     public Bootstrap socksProxyUdpBootstrap(AgentConfiguration agentConfiguration,
-                                            SocksAgentUdpProxyChannelInitializer proxyChannelInitializer) {
+                                            SocksAgentProxyUdpChannelInitializer proxyChannelInitializer) {
         var result = new Bootstrap();
         var socksProxyUdpLoopGroup = new NioEventLoopGroup(
                 agentConfiguration.getAgentUdpThreadNumber());

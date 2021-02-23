@@ -67,12 +67,17 @@ public class SocksAgentProtocolHandler extends SimpleChannelInboundHandler<Socks
         if (socks5CommandRequest.type() == Socks5CommandType.CONNECT) {
             this.socksProxyTcpBootstrap
                     .connect(this.agentConfiguration.getProxyHost(), this.agentConfiguration.getProxyPort())
-                    .addListener(new SocksAgentTcpProxyChannelConnectListener());
+                    .addListener(future -> {
+                        if (future.isSuccess()) {
+                            return;
+                        }
+                        agentChannel.close();
+                    });
             return;
         }
         if (socks5CommandRequest.type() == Socks5CommandType.UDP_ASSOCIATE) {
             agentChannel.config().setOption(ChannelOption.SO_KEEPALIVE, true);
-            this.socksProxyUdpBootstrap.bind(0).addListener(new SocksAgentUdpProxyChannelBindListener(agentChannel,
+            this.socksProxyUdpBootstrap.bind(0).addListener(new SocksAgentProxyUdpChannelBindListener(agentChannel,
                     socksProxyTcpBootstrap, agentConfiguration, socks5CommandRequest));
             return;
         }

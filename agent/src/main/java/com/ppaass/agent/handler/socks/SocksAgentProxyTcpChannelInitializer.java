@@ -15,14 +15,17 @@ import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
 @Service
-class SocksAgentTcpProxyChannelInitializer extends ChannelInitializer<ServerChannel> {
+class SocksAgentProxyTcpChannelInitializer extends ChannelInitializer<ServerChannel> {
     private final PrintExceptionHandler printExceptionHandler;
     private final AgentConfiguration agentConfiguration;
+    private final SocksAgentP2ATcpChannelHandler socksAgentP2ATcpChannelHandler;
 
-    public SocksAgentTcpProxyChannelInitializer(PrintExceptionHandler printExceptionHandler,
-                                                AgentConfiguration agentConfiguration) {
+    public SocksAgentProxyTcpChannelInitializer(PrintExceptionHandler printExceptionHandler,
+                                                AgentConfiguration agentConfiguration,
+                                                SocksAgentP2ATcpChannelHandler socksAgentP2ATcpChannelHandler) {
         this.printExceptionHandler = printExceptionHandler;
         this.agentConfiguration = agentConfiguration;
+        this.socksAgentP2ATcpChannelHandler = socksAgentP2ATcpChannelHandler;
     }
 
     @Override
@@ -33,7 +36,7 @@ class SocksAgentTcpProxyChannelInitializer extends ChannelInitializer<ServerChan
         }
         proxyChannelPipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
         proxyChannelPipeline.addLast(new ProxyMessageDecoder(agentConfiguration.getAgentPrivateKey()));
-        proxyChannelPipeline.addLast(socksProxyToAgentTcpChannelHandler);
+        proxyChannelPipeline.addLast(this.socksAgentP2ATcpChannelHandler);
         if (agentConfiguration.isProxyTcpCompressEnable()) {
             proxyChannelPipeline.addLast(new Lz4FrameEncoder());
         }
