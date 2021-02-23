@@ -2,7 +2,7 @@ package com.ppaass.common.message;
 
 import com.ppaass.common.cryptography.EncryptionType;
 
-abstract class Message<T extends MessageBodyType> {
+public abstract class Message<T extends MessageBodyType> {
     private final byte[] encryptionToken;
     private final EncryptionType encryptionType;
     private final MessageBody<T> body;

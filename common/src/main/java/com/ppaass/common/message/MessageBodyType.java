@@ -1,5 +1,5 @@
 package com.ppaass.common.message;
 
-interface MessageBodyType {
+public interface MessageBodyType {
     int value();
 }

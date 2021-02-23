@@ -1,6 +1,6 @@
 package com.ppaass.common.message;
 
-abstract class MessageBody<T extends MessageBodyType> {
+public abstract class MessageBody<T extends MessageBodyType> {
     private final String id;
     private final String userToken;
     private final String targetHost;
