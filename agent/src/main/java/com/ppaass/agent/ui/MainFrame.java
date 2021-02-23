@@ -1,7 +1,10 @@
 package com.ppaass.agent.ui;
 
+import org.springframework.stereotype.Service;
+
 import javax.swing.*;
 
+@Service
 public class MainFrame extends JFrame {
     private static final String TOKEN_LABEL_MESSAGE_KEY = "mainFrame.tokenLabel";
     private static final String AGENT_TCP_PORT_LABEL_MESSAGE_KEY = "mainFrame.agentTcpPortLabel";

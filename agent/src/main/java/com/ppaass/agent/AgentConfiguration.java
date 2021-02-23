@@ -10,6 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Locale;
@@ -90,6 +91,10 @@ public class AgentConfiguration {
     }
 
     public AgentConfiguration() {
+    }
+
+    @PostConstruct
+    void init() {
         var userDirectory = System.getProperty(USER_HOME_PROPERTY);
         var agentDynamicConfigurationFilePath = Path.of(userDirectory, USER_CONFIGURATION_FILE_NAME);
         var agentDynamicConfigurationFile = agentDynamicConfigurationFilePath.toFile();
@@ -97,8 +102,9 @@ public class AgentConfiguration {
             AgentDynamicConfiguration agentDynamicConfiguration =
                     null;
             try {
-                agentDynamicConfiguration = MessageSerializer.JSON_OBJECT_MAPPER.readValue(agentDynamicConfigurationFile,
-                        AgentDynamicConfiguration.class);
+                agentDynamicConfiguration =
+                        MessageSerializer.JSON_OBJECT_MAPPER.readValue(agentDynamicConfigurationFile,
+                                AgentDynamicConfiguration.class);
             } catch (IOException e) {
                 logger.error("Fail to read agent configuration because of exception.", e);
                 throw new PpaassException("Fail to read agent configuration because of exception.", e);
