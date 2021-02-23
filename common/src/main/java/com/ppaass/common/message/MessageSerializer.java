@@ -1,10 +1,9 @@
-package com.ppaass.common.serializer;
+package com.ppaass.common.message;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ppaass.common.cryptography.CryptographyUtil;
 import com.ppaass.common.cryptography.EncryptionType;
 import com.ppaass.common.exception.PpaassException;
-import com.ppaass.common.message.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
@@ -15,13 +14,13 @@ import org.slf4j.LoggerFactory;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
-public class Serializer {
+public class MessageSerializer {
     private static final byte[] MAGIC_CODE = "__PPAASS__".getBytes(StandardCharsets.UTF_8);
-    private static final Logger logger = LoggerFactory.getLogger(Serializer.class);
-    public static final Serializer INSTANCE = new Serializer();
+    private static final Logger logger = LoggerFactory.getLogger(MessageSerializer.class);
+    public static final MessageSerializer INSTANCE = new MessageSerializer();
     public static final ObjectMapper JSON_OBJECT_MAPPER = new ObjectMapper();
 
-    private Serializer() {
+    private MessageSerializer() {
     }
 
     private AgentMessageBodyType parseAgentMessageBodyType(byte b) {
