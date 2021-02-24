@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- OFF > FATAL > ERROR > WARN > INFO > DEBUG > TRACE > ALL -->
+<Configuration>
+    <Properties>
+        <Property name="LOG_PATTERN">
+            %d{yyyy-MM-dd HH:mm:ss:SSS} %p TraceId:%X{traceId} %t %c %x %m %n
+        </Property>
+    </Properties>
+    <Appenders>
+        <Console name="STDOUT"
+                 target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <LevelRangeFilter minLevel="FATAL"
+                              maxLevel="DEBUG"
+                              onMatch="ACCEPT"/>
+        </Console>
+        <RollingFile name="FILE_APPENDER"
+                     fileName="./log/ppaass-proxy.log"
+                     filePattern="./log/archive/ppaass-proxy.%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <LevelRangeFilter minLevel="FATAL"
+                              maxLevel="DEBUG"
+                              onMatch="ACCEPT"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <logger name="org.springframework"
+                additivity="false"
+                level="ERROR">
+            <appender-ref ref="FILE_APPENDER"/>
+        </logger>
+        <logger name="io.netty"
+                additivity="false"
+                level="info">
+            <appender-ref ref="FILE_APPENDER"/>
+        </logger>
+        <logger name="com.ppaass"
+                additivity="false"
+                level="info">
+            <appender-ref ref="FILE_APPENDER"/>
+        </logger>
+        <Root level="ERROR">
+            <appender-ref ref="FILE_APPENDER"/>
+        </Root>
+    </Loggers>
+</Configuration>
