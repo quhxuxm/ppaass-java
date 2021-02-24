@@ -10,4 +10,25 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>distribute</artifactId>
     <packaging>pom</packaging>
+    <build>
+        <finalName>ppaass</finalName>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptors>
+                        <descriptor>assamble/package-filter.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
