@@ -2,7 +2,7 @@ package com.ppaass.agent.handler;
 
 import com.ppaass.agent.ChannelProtocolCategory;
 import com.ppaass.agent.IAgentConst;
-import com.ppaass.agent.handler.http.HttpProtocolHandler;
+import com.ppaass.agent.handler.http.HttpAgentProtocolHandler;
 import com.ppaass.agent.handler.socks.SocksAgentProtocolHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
@@ -21,12 +21,12 @@ import org.springframework.stereotype.Service;
 class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
     private static final Logger logger = LoggerFactory.getLogger(DetectProtocolHandler.class);
     private final SocksAgentProtocolHandler socksAgentProtocolHandler;
-    private final HttpProtocolHandler httpProtocolHandler;
+    private final HttpAgentProtocolHandler httpAgentProtocolHandler;
 
     public DetectProtocolHandler(SocksAgentProtocolHandler socksAgentProtocolHandler,
-                                 HttpProtocolHandler httpProtocolHandler) {
+                                 HttpAgentProtocolHandler httpAgentProtocolHandler) {
         this.socksAgentProtocolHandler = socksAgentProtocolHandler;
-        this.httpProtocolHandler = httpProtocolHandler;
+        this.httpAgentProtocolHandler = httpAgentProtocolHandler;
     }
 
     @Override
@@ -73,7 +73,7 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
         agentChannelPipeline.addLast(HttpServerCodec.class.getName(), new HttpServerCodec());
         agentChannelPipeline.addLast(HttpObjectAggregator.class.getName(),
                 new HttpObjectAggregator(Integer.MAX_VALUE, true));
-        agentChannelPipeline.addLast(httpProtocolHandler);
+        agentChannelPipeline.addLast(httpAgentProtocolHandler);
         agentChannelPipeline.remove(this);
         agentChannelContext.fireChannelRead(messageBuf);
     }
