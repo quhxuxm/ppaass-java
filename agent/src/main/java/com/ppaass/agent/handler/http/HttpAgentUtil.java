@@ -100,7 +100,9 @@ class HttpAgentUtil {
                                          String targetHost, int targetPort,
                                          ChannelFutureListener writeCallback) {
         byte[] data = null;
-        if (input != null) {
+        if (input == null) {
+            data = new byte[]{};
+        } else {
             if (input instanceof HttpRequest) {
                 var tempChannel = new EmbeddedChannel(new HttpRequestEncoder());
                 tempChannel.writeOutbound(input);

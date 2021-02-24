@@ -24,10 +24,10 @@ import org.springframework.context.annotation.Configuration;
 class HttpAgentConfigure {
     @Bean
     public Bootstrap proxyBootstrapForHttp(EventLoopGroup proxyTcpLoopGroup,
-                                           HttpProxyToAgentHandler httpProxyToAgentHandler,
+                                           HttpAgentP2AHandler httpAgentP2AHandler,
                                            PrintExceptionHandler printExceptionHandler,
                                            AgentConfiguration agentConfiguration,
-                                           HttpProxyMessageBodyTypeHandler httpProxyMessageBodyTypeHandler) {
+                                           HttpAgentProxyMessageBodyTypeHandler httpAgentProxyMessageBodyTypeHandler) {
         Bootstrap result = new Bootstrap();
         result.group(proxyTcpLoopGroup);
         result.channel(NioSocketChannel.class);
@@ -35,7 +35,7 @@ class HttpAgentConfigure {
                 agentConfiguration.getProxyTcpConnectionTimeout());
         result.option(ChannelOption.SO_KEEPALIVE, true);
         result.option(ChannelOption.SO_REUSEADDR, true);
-        result.option(ChannelOption.AUTO_READ, true);
+        result.option(ChannelOption.AUTO_READ, false);
         result.option(ChannelOption.AUTO_CLOSE, false);
         result.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
         result.option(ChannelOption.TCP_NODELAY, true);
@@ -56,11 +56,11 @@ class HttpAgentConfigure {
                         4));
                 proxyChannelPipeline.addLast(new ProxyMessageDecoder(
                         agentConfiguration.getAgentPrivateKey()));
-                proxyChannelPipeline.addLast(httpProxyMessageBodyTypeHandler)
-                proxyChannelPipeline.addLast(new HttpProxyMessageConvertToOriginalDataDecoder());
+                proxyChannelPipeline.addLast(httpAgentProxyMessageBodyTypeHandler);
+                proxyChannelPipeline.addLast(new HttpAgentProxyMessageToOriginalDataDecoder());
                 proxyChannelPipeline.addLast(new HttpResponseDecoder());
                 proxyChannelPipeline.addLast(new HttpObjectAggregator(Integer.MAX_VALUE, true));
-                proxyChannelPipeline.addLast(httpProxyToAgentHandler);
+                proxyChannelPipeline.addLast(httpAgentP2AHandler);
                 if (agentConfiguration.isProxyTcpCompressEnable()) {
                     proxyChannelPipeline.addLast(new Lz4FrameEncoder());
                 }
@@ -75,10 +75,10 @@ class HttpAgentConfigure {
 
     @Bean
     public Bootstrap proxyBootstrapForHttps(EventLoopGroup proxyIoEventLoopGroup,
-                                            HttpProxyToAgentHandler httpProxyToAgentHandler,
+                                            HttpAgentP2AHandler httpAgentP2AHandler,
                                             PrintExceptionHandler printExceptionHandler,
                                             AgentConfiguration agentConfiguration,
-                                            HttpProxyMessageBodyTypeHandler httpProxyMessageBodyTypeHandler) {
+                                            HttpAgentProxyMessageBodyTypeHandler httpAgentProxyMessageBodyTypeHandler) {
         Bootstrap result = new Bootstrap();
         result.group(proxyIoEventLoopGroup);
         result.channel(NioSocketChannel.class);
@@ -86,7 +86,7 @@ class HttpAgentConfigure {
                 agentConfiguration.getProxyTcpConnectionTimeout());
         result.option(ChannelOption.SO_KEEPALIVE, true);
         result.option(ChannelOption.SO_REUSEADDR, true);
-        result.option(ChannelOption.AUTO_READ, true);
+        result.option(ChannelOption.AUTO_READ, false);
         result.option(ChannelOption.AUTO_CLOSE, false);
         result.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
         result.option(ChannelOption.TCP_NODELAY, true);
@@ -107,9 +107,9 @@ class HttpAgentConfigure {
                         4));
                 proxyChannelPipeline.addLast(new ProxyMessageDecoder(
                         agentConfiguration.getAgentPrivateKey()));
-                proxyChannelPipeline.addLast(httpProxyMessageBodyTypeHandler);
-                proxyChannelPipeline.addLast(new HttpProxyMessageConvertToOriginalDataDecoder());
-                proxyChannelPipeline.addLast(httpProxyToAgentHandler);
+                proxyChannelPipeline.addLast(httpAgentProxyMessageBodyTypeHandler);
+                proxyChannelPipeline.addLast(new HttpAgentProxyMessageToOriginalDataDecoder());
+                proxyChannelPipeline.addLast(httpAgentP2AHandler);
                 if (agentConfiguration.isProxyTcpCompressEnable()) {
                     proxyChannelPipeline.addLast(new Lz4FrameEncoder());
                 }

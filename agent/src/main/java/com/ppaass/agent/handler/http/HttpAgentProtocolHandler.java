@@ -1,8 +1,8 @@
 package com.ppaass.agent.handler.http;
 
 import com.ppaass.agent.AgentConfiguration;
+import com.ppaass.common.message.AgentMessageBodyType;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -10,6 +10,7 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpMethod;
+import io.netty.util.ReferenceCountUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -18,9 +19,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object> {
     private static final Logger logger = LoggerFactory.getLogger(HttpAgentProtocolHandler.class);
-    private AgentConfiguration agentConfiguration;
-    private Bootstrap proxyBootstrapForHttp;
-    private Bootstrap proxyBootstrapForHttps;
+    private final AgentConfiguration agentConfiguration;
+    private final Bootstrap proxyBootstrapForHttp;
+    private final Bootstrap proxyBootstrapForHttps;
 
     public HttpAgentProtocolHandler(AgentConfiguration agentConfiguration,
                                     Bootstrap proxyBootstrapForHttp,
@@ -28,6 +29,12 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
         this.agentConfiguration = agentConfiguration;
         this.proxyBootstrapForHttp = proxyBootstrapForHttp;
         this.proxyBootstrapForHttps = proxyBootstrapForHttps;
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext agentChannelContext) throws Exception {
+        super.channelActive(agentChannelContext);
+        agentChannelContext.read();
     }
 
     @Override
@@ -42,7 +49,7 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
             var connectionKeepAlive =
                     HttpHeaderValues.KEEP_ALIVE.contentEqualsIgnoreCase(connectionHeader);
             if (HttpMethod.CONNECT == fullHttpRequest.method()) {
-                //A https request to setup the connection
+                //A HTTPS request to setup the connection
                 var connectionInfo = HttpAgentUtil.INSTANCE.parseConnectionInfo(fullHttpRequest.uri());
                 if (connectionInfo == null) {
                     agentChannel.close();
@@ -51,57 +58,75 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
                 connectionInfo.setKeepAlive(connectionKeepAlive);
                 this.proxyBootstrapForHttps.connect(agentConfiguration.getProxyHost(),
                         agentConfiguration.getProxyPort())
-                        .addListener((ChannelFutureListener) proxyChannelFuture -> {
-                            if(!proxyChannelFuture.isSuccess()){
-                                agentChannel.close();
-                                return;
-                            }
-                            var proxyChannel = proxyChannelFuture.channel();
-                            connectionInfo.setAgentChannel( agentChannel);
-                            connectionInfo.setProxyChannel( proxyChannel);
-                            connectionInfo.setUserToken(agentConfiguration.getUserToken());
-                            connectionInfo.setHttpMessageCarriedOnConnectTime( null);
-                            proxyChannel.attr(HTTP_CONNECTION_INFO).setIfAbsent(connectionInfo)
-                            agentChannel.attr(HTTP_CONNECTION_INFO).setIfAbsent(connectionInfo)
-                            val bodyType = if (connectionInfo.isKeepAlive) {
-                                proxyChannel.config().setOption(ChannelOption.SO_KEEPALIVE, true)
-                                agentChannel.config().setOption(ChannelOption.SO_KEEPALIVE, true)
-                                AgentMessageBodyType.CONNECT_WITH_KEEP_ALIVE
-                            } else {
-                                proxyChannel.config().setOption(ChannelOption.SO_KEEPALIVE, false)
-                                agentChannel.config().setOption(ChannelOption.SO_KEEPALIVE, false)
-                                AgentMessageBodyType.CONNECT_WITHOUT_KEEP_ALIVE
-                            }
-                            writeAgentMessageToProxy(
-                                    bodyType = bodyType,
-                                    userToken = connectionInfo.userToken!!,
-                                    proxyChannel = proxyChannel,
-                                    input = null,
-                                    targetHost = connectionInfo.targetHost,
-                                    targetPort = connectionInfo.targetPort) {
-                                if (!it.isSuccess) {
-                                    logger.error {
-                                        "Fail to write http data to proxy, close the agent channel, body type = ${
-                                        bodyType
-                                    }, user token = ${
-                                        connectionInfo.userToken
-                                    }, target host = ${
-                                        connectionInfo.targetHost
-                                    }, target port = ${
-                                        connectionInfo.targetPort
-                                    }, proxy channel = ${
-                                        proxyChannel.id().asLongText()
-                                    }, agent channel = ${
-                                        agentChannel.id().asLongText()
-                                    }"
-                                }
-                                agentChannel.close()
-                            }
-                        }
-                        });
+                        .addListener(
+                                new HttpAgentProxyConnectListener(agentChannel, connectionInfo, agentConfiguration));
                 return;
             }
+            // A HTTP request
+            ReferenceCountUtil.retain(httpProxyInput, 1);
+            var connectionInfo = agentChannel.attr(IHttpAgentConstant.HTTP_CONNECTION_INFO).get();
+            if (connectionInfo != null) {
+                var proxyChannel = connectionInfo.getProxyChannel();
+                HttpAgentUtil.INSTANCE.writeAgentMessageToProxy(
+                        AgentMessageBodyType.TCP_DATA,
+                        connectionInfo.getUserToken(),
+                        connectionInfo.getProxyChannel(),
+                        httpProxyInput,
+                        connectionInfo.getTargetHost(),
+                        connectionInfo.getTargetPort(),
+                        proxyChannelWriteFuture -> {
+                            if (proxyChannelWriteFuture.isSuccess()) {
+                                agentChannel.read();
+                                return;
+                            }
+                            logger.error(
+                                    "Fail to write HTTP data to proxy because of exception, agent channel = {}, proxy channel = {}.",
+                                    agentChannel.id().asLongText(), proxyChannel.id().asLongText(),
+                                    proxyChannelWriteFuture.cause());
+                            agentChannel.close();
+                            proxyChannel.close();
+                        }
+                );
+                return;
+            }
+            //First time create HTTP connection
+            connectionInfo = HttpAgentUtil.INSTANCE.parseConnectionInfo(fullHttpRequest.uri());
+            if (connectionInfo == null) {
+                agentChannel.close();
+                return;
+            }
+            connectionInfo.setKeepAlive(connectionKeepAlive);
+            this.proxyBootstrapForHttp.connect(agentConfiguration.getProxyHost(),
+                    agentConfiguration.getProxyPort())
+                    .addListener(new HttpAgentProxyConnectListener(agentChannel, connectionInfo, agentConfiguration));
+            return;
         }
+        //A HTTPS request to send data
+        var connectionInfo = agentChannel.attr(IHttpAgentConstant.HTTP_CONNECTION_INFO).get();
+        if (connectionInfo == null) {
+            agentChannel.close();
+            return;
+        }
+        var proxyChannel = connectionInfo.getProxyChannel();
+        HttpAgentUtil.INSTANCE.writeAgentMessageToProxy(
+                AgentMessageBodyType.TCP_DATA,
+                connectionInfo.getUserToken(),
+                connectionInfo.getProxyChannel(),
+                httpProxyInput,
+                connectionInfo.getTargetHost(),
+                connectionInfo.getTargetPort(),
+                proxyChannelWriteFuture -> {
+                    if (proxyChannelWriteFuture.isSuccess()) {
+                        agentChannel.read();
+                        return;
+                    }
+                    logger.error(
+                            "Fail to write HTTPS data to proxy because of exception, agent channel = {}, proxy channel = {}.",
+                            agentChannel.id().asLongText(), proxyChannel.id().asLongText(),
+                            proxyChannelWriteFuture.cause());
+                    agentChannel.close();
+                    proxyChannel.close();
+                });
     }
 }
 

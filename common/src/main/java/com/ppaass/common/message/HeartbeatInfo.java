@@ -1,10 +1,18 @@
 package com.ppaass.common.message;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class HeartbeatInfo {
     private final String id;
     private final Long utcDateTime;
 
-    public HeartbeatInfo(String id, Long utcDateTime) {
+    @JsonCreator
+    public HeartbeatInfo(
+            @JsonProperty("id")
+                    String id,
+            @JsonProperty("utcDateTime")
+                    Long utcDateTime) {
         this.id = id;
         this.utcDateTime = utcDateTime;
     }
