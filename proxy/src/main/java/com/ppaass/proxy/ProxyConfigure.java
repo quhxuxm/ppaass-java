@@ -112,7 +112,7 @@ class ProxyConfigure {
 
     @Bean
     public Bootstrap targetUdpBootstrap(EventLoopGroup targetUdpLoopGroup,
-                                        TargetUdpChannelToProxyTcpChannelHandler targetUdpChannelToProxyTcpChannelHandler,
+                                        T2PUdpChannelHandler t2PUdpChannelHandler,
                                         PrintExceptionHandler printExceptionHandler) {
         Bootstrap result = new Bootstrap();
         result.group(targetUdpLoopGroup);
@@ -121,7 +121,7 @@ class ProxyConfigure {
         var channelInitializer = new ChannelInitializer<NioDatagramChannel>() {
             public void initChannel(NioDatagramChannel proxyUdpChannel) {
                 var proxyUdpChannelPipeline = proxyUdpChannel.pipeline();
-                proxyUdpChannelPipeline.addLast(targetUdpChannelToProxyTcpChannelHandler);
+                proxyUdpChannelPipeline.addLast(t2PUdpChannelHandler);
                 proxyUdpChannelPipeline.addLast(LAST_INBOUND_HANDLER, printExceptionHandler);
             }
         };
@@ -132,7 +132,7 @@ class ProxyConfigure {
     @Bean
     public ServerBootstrap proxyTcpServerBootstrap(EventLoopGroup proxyTcpMasterLoopGroup,
                                                    EventLoopGroup proxyTcpWorkerLoopGroup,
-                                                   ProxyTcpChannelHeartbeatHandler proxyTcpChannelHeartbeatHandler,
+                                                   P2ATcpChannelHeartbeatHandler p2ATcpChannelHeartbeatHandler,
                                                    P2TTcpChannelHandler p2TTcpChannelHandler,
                                                    PrintExceptionHandler printExceptionHandler) {
         ServerBootstrap result = new ServerBootstrap();
@@ -164,7 +164,7 @@ class ProxyConfigure {
                         new IdleStateHandler(proxyConfiguration.getProxyTcpChannelReadIdleSeconds(),
                                 proxyConfiguration.getProxyTcpChannelWriteIdleSeconds(),
                                 proxyConfiguration.getProxyTcpChannelAllIdleSeconds()));
-                proxyChannel.pipeline().addLast(proxyTcpChannelHeartbeatHandler);
+                proxyChannel.pipeline().addLast(p2ATcpChannelHeartbeatHandler);
                 proxyChannel.pipeline().addLast(new ChannelTrafficShapingHandler(
                         proxyConfiguration.getProxyTcpTrafficShapingWriteChannelLimit(),
                         proxyConfiguration.getProxyTcpTrafficShapingReadChannelLimit(),

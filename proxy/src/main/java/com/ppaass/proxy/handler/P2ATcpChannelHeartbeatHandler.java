@@ -17,11 +17,11 @@ import java.util.TimeZone;
 
 @Service
 @ChannelHandler.Sharable
-public class ProxyTcpChannelHeartbeatHandler extends ChannelInboundHandlerAdapter {
+public class P2ATcpChannelHeartbeatHandler extends ChannelInboundHandlerAdapter {
     private static final TimeZone UTC_TIME_ZONE = TimeZone.getTimeZone("UTC");
     private final ProxyConfiguration proxyConfiguration;
 
-    public ProxyTcpChannelHeartbeatHandler(ProxyConfiguration proxyConfiguration) {
+    public P2ATcpChannelHeartbeatHandler(ProxyConfiguration proxyConfiguration) {
         this.proxyConfiguration = proxyConfiguration;
     }
 

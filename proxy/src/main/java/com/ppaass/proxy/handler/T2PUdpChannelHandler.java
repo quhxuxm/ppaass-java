@@ -17,8 +17,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 @ChannelHandler.Sharable
-public class TargetUdpChannelToProxyTcpChannelHandler extends SimpleChannelInboundHandler<DatagramPacket> {
-    private static final Logger logger = LoggerFactory.getLogger(TargetUdpChannelToProxyTcpChannelHandler.class);
+public class T2PUdpChannelHandler extends SimpleChannelInboundHandler<DatagramPacket> {
+    private static final Logger logger = LoggerFactory.getLogger(T2PUdpChannelHandler.class);
 
     @Override
     protected void channelRead0(ChannelHandlerContext targetUdpChannelContext, DatagramPacket targetUdpMessage)
