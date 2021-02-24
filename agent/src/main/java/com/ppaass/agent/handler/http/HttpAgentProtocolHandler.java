@@ -59,7 +59,8 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
                 this.proxyBootstrapForHttps.connect(agentConfiguration.getProxyHost(),
                         agentConfiguration.getProxyPort())
                         .addListener(
-                                new HttpAgentProxyConnectListener(agentChannel, connectionInfo, agentConfiguration));
+                                new HttpAgentProxyConnectListener(agentChannel, connectionInfo, agentConfiguration,
+                                        null));
                 return;
             }
             // A HTTP request
@@ -98,7 +99,8 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
             connectionInfo.setKeepAlive(connectionKeepAlive);
             this.proxyBootstrapForHttp.connect(agentConfiguration.getProxyHost(),
                     agentConfiguration.getProxyPort())
-                    .addListener(new HttpAgentProxyConnectListener(agentChannel, connectionInfo, agentConfiguration));
+                    .addListener(new HttpAgentProxyConnectListener(agentChannel, connectionInfo, agentConfiguration,
+                            fullHttpRequest));
             return;
         }
         //A HTTPS request to send data

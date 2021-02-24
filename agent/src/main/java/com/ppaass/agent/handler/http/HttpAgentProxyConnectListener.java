@@ -15,13 +15,16 @@ class HttpAgentProxyConnectListener implements ChannelFutureListener {
     private final Channel agentChannel;
     private final HttpConnectionInfo connectionInfo;
     private final AgentConfiguration agentConfiguration;
+    private final Object messageCarriedOnConnectTime;
 
     public HttpAgentProxyConnectListener(Channel agentChannel,
                                          HttpConnectionInfo connectionInfo,
-                                         AgentConfiguration agentConfiguration) {
+                                         AgentConfiguration agentConfiguration,
+                                         Object messageCarriedOnConnectTime) {
         this.agentChannel = agentChannel;
         this.connectionInfo = connectionInfo;
         this.agentConfiguration = agentConfiguration;
+        this.messageCarriedOnConnectTime = messageCarriedOnConnectTime;
     }
 
     @Override
@@ -38,7 +41,7 @@ class HttpAgentProxyConnectListener implements ChannelFutureListener {
         connectionInfo.setAgentChannel(agentChannel);
         connectionInfo.setProxyChannel(proxyChannel);
         connectionInfo.setUserToken(agentConfiguration.getUserToken());
-        connectionInfo.setHttpMessageCarriedOnConnectTime(null);
+        connectionInfo.setHttpMessageCarriedOnConnectTime(this.messageCarriedOnConnectTime);
         proxyChannel.attr(IHttpAgentConstant.HTTP_CONNECTION_INFO).setIfAbsent(connectionInfo);
         agentChannel.attr(IHttpAgentConstant.HTTP_CONNECTION_INFO).setIfAbsent(connectionInfo);
         AgentMessageBodyType bodyType = null;
@@ -56,7 +59,6 @@ class HttpAgentProxyConnectListener implements ChannelFutureListener {
                         null, connectionInfo.getTargetHost(), connectionInfo.getTargetPort(),
                         proxyChannelWriteFuture -> {
                             if (proxyChannelWriteFuture.isSuccess()) {
-                                proxyChannel.read();
                                 return;
                             }
                             logger.error(

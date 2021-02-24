@@ -79,8 +79,13 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                                                 HttpObjectAggregator.class.getName());
                                     }
                                     agentChannel.read();
+                                    proxyChannel.read();
                                     return;
                                 }
+                                logger.error(
+                                        "Fail to write CONNECT_SUCCESS to client because of exception, agent channel = {}, proxy channel = {}.",
+                                        agentChannel.id().asLongText(), proxyChannel.id().asLongText(),
+                                        agentWriteChannelFuture.cause());
                                 proxyChannel.close();
                                 agentChannel.close();
                             });
@@ -96,6 +101,8 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                         connectionInfo.getTargetPort(),
                         proxyWriteChannelFuture -> {
                             if (proxyWriteChannelFuture.isSuccess()) {
+                                agentChannel.read();
+                                proxyChannel.read();
                                 return;
                             }
                             proxyChannel.close();
