@@ -7,6 +7,7 @@ import com.ppaass.common.message.AgentMessageBody;
 import com.ppaass.common.message.AgentMessageBodyType;
 import com.ppaass.common.message.MessageSerializer;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -24,17 +25,30 @@ class SocksAgentA2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf
         this.agentConfiguration = agentConfiguration;
     }
 
+    @Override
+    public void channelReadComplete(ChannelHandlerContext agentChannelContext) throws Exception {
+        super.channelReadComplete(agentChannelContext);
+        var agentChannel = agentChannelContext.channel();
+        var tcpConnectionInfo = agentChannel.attr(ISocksAgentConst.SOCKS_TCP_CONNECTION_INFO).get();
+        if (tcpConnectionInfo != null) {
+            var proxyChannel = tcpConnectionInfo.getProxyTcpChannel();
+            if (proxyChannel.isWritable()) {
+                agentChannel.read();
+            }
+        }
+    }
 
     @Override
     public void channelActive(ChannelHandlerContext agentChannelContext) throws Exception {
         super.channelActive(agentChannelContext);
-        agentChannelContext.read();
-    }
-
-    @Override
-    public void channelReadComplete(ChannelHandlerContext agentChannelContext) throws Exception {
-        super.channelReadComplete(agentChannelContext);
-        agentChannelContext.read();
+        var agentChannel = agentChannelContext.channel();
+        var tcpConnectionInfo = agentChannel.attr(ISocksAgentConst.SOCKS_TCP_CONNECTION_INFO).get();
+        if (tcpConnectionInfo != null) {
+            var proxyChannel = tcpConnectionInfo.getProxyTcpChannel();
+            if (proxyChannel.isWritable()) {
+                agentChannel.read();
+            }
+        }
     }
 
     @Override
@@ -61,6 +75,23 @@ class SocksAgentA2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf
                 MessageSerializer.INSTANCE.generateUuidInBytes(),
                 EncryptionType.choose(),
                 agentMessageBody);
-        proxyTcpChannel.writeAndFlush(agentMessage);
+        logger.debug(
+                "Forward client original message to proxy, agent channel = {}, proxy channel = {}",
+                agentChannel.id().asLongText(), proxyTcpChannel.id().asLongText());
+        proxyTcpChannel.writeAndFlush(agentMessage).addListener((ChannelFutureListener) proxyChannelFuture -> {
+            if (proxyChannelFuture.isSuccess()) {
+                logger.debug(
+                        "Success forward client original message to proxy, agent channel = {}, proxy channel = {}",
+                        agentChannel.id().asLongText(), proxyTcpChannel.id().asLongText());
+                agentChannel.read();
+                proxyTcpChannel.read();
+                return;
+            }
+            logger.error(
+                    "Fail forward client original message to proxy, agent channel = {}, proxy channel = {}",
+                    agentChannel.id().asLongText(), proxyTcpChannel.id().asLongText());
+            agentChannel.close();
+            proxyTcpChannel.close();
+        });
     }
 }

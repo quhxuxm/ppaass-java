@@ -2,10 +2,7 @@ package com.ppaass.agent.handler.socks;
 
 import com.ppaass.agent.AgentConfiguration;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
 import io.netty.handler.codec.socksx.SocksMessage;
 import io.netty.handler.codec.socksx.SocksVersion;
 import io.netty.handler.codec.socksx.v5.*;
@@ -58,16 +55,19 @@ public class SocksAgentProtocolHandler extends SimpleChannelInboundHandler<Socks
             agentChannel.close();
             return;
         }
-        logger.debug(
-                "Incoming request socks5, agent channel = {}."
-                , agentChannel.id().asLongText());
         var agentChannelPipeline = agentChannelContext.pipeline();
         if (socksRequest instanceof Socks5InitialRequest) {
             logger.debug(
                     "Socks5 initial request coming always NO_AUTH, agent channel = {}", agentChannel.id().asLongText());
             agentChannelPipeline.addFirst(new Socks5CommandRequestDecoder());
             agentChannelContext.writeAndFlush(
-                    new DefaultSocks5InitialResponse(Socks5AuthMethod.NO_AUTH));
+                    new DefaultSocks5InitialResponse(Socks5AuthMethod.NO_AUTH)).addListener((ChannelFutureListener) agentChannelFuture->{
+                        if(!agentChannelFuture.isSuccess()){
+                            agentChannel.close();
+                            return;
+                        }
+                agentChannelContext.read();
+            });
             return;
         }
         if (!(socksRequest instanceof Socks5CommandRequest)) {
@@ -75,19 +75,20 @@ public class SocksAgentProtocolHandler extends SimpleChannelInboundHandler<Socks
             agentChannel.close();
             return;
         }
+
         var socks5CommandRequest = (Socks5CommandRequest) socksRequest;
         if (socks5CommandRequest.type() == Socks5CommandType.CONNECT) {
+            logger.debug(
+                    "Socks5 connect request coming, agent channel = {}", agentChannel.id().asLongText());
             this.socksProxyTcpBootstrap
                     .connect(this.agentConfiguration.getProxyHost(), this.agentConfiguration.getProxyPort())
-                    .addListener(future -> {
-                        if (future.isSuccess()) {
-                            return;
-                        }
-                        agentChannel.close();
-                    });
+                    .addListener(new SocksAgentA2PConnectListener(agentChannel, socks5CommandRequest,
+                            agentConfiguration));
             return;
         }
         if (socks5CommandRequest.type() == Socks5CommandType.UDP_ASSOCIATE) {
+            logger.debug(
+                    "Socks5 udp associate request coming, agent channel = {}", agentChannel.id().asLongText());
             agentChannel.config().setOption(ChannelOption.SO_KEEPALIVE, true);
             this.socksProxyUdpBootstrap.bind(0).addListener(new SocksAgentProxyUdpChannelBindListener(agentChannel,
                     socksProxyTcpBootstrap, agentConfiguration, socks5CommandRequest));

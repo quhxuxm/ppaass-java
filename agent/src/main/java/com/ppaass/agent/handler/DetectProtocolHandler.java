@@ -77,10 +77,4 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
         agentChannelPipeline.remove(this);
         agentChannelContext.fireChannelRead(messageBuf);
     }
-
-    @Override
-    public void channelReadComplete(ChannelHandlerContext agentChannelContext) throws Exception {
-        super.channelReadComplete(agentChannelContext);
-        agentChannelContext.read();
-    }
 }
