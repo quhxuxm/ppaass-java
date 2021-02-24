@@ -30,6 +30,18 @@ public class SocksAgentProtocolHandler extends SimpleChannelInboundHandler<Socks
     }
 
     @Override
+    public void channelActive(ChannelHandlerContext agentChannelContext) throws Exception {
+        super.channelActive(agentChannelContext);
+        agentChannelContext.read();
+    }
+
+    @Override
+    public void channelReadComplete(ChannelHandlerContext agentChannelContext) throws Exception {
+        super.channelReadComplete(agentChannelContext);
+        agentChannelContext.read();
+    }
+
+    @Override
     protected void channelRead0(ChannelHandlerContext agentChannelContext, SocksMessage socksRequest) throws Exception {
         var agentChannel = agentChannelContext.channel();
         if (SocksVersion.UNKNOWN == socksRequest.version()) {

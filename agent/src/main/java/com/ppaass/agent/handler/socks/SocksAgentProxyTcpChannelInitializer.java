@@ -6,7 +6,7 @@ import com.ppaass.common.handler.PrintExceptionHandler;
 import com.ppaass.common.handler.ProxyMessageDecoder;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ServerChannel;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.compression.Lz4FrameDecoder;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
 @Service
-class SocksAgentProxyTcpChannelInitializer extends ChannelInitializer<ServerChannel> {
+class SocksAgentProxyTcpChannelInitializer extends ChannelInitializer<SocketChannel> {
     private final PrintExceptionHandler printExceptionHandler;
     private final AgentConfiguration agentConfiguration;
     private final SocksAgentP2ATcpChannelHandler socksAgentP2ATcpChannelHandler;
@@ -29,7 +29,7 @@ class SocksAgentProxyTcpChannelInitializer extends ChannelInitializer<ServerChan
     }
 
     @Override
-    protected void initChannel(ServerChannel proxyChannel) throws Exception {
+    protected void initChannel(SocketChannel proxyChannel) throws Exception {
         var proxyChannelPipeline = proxyChannel.pipeline();
         if (agentConfiguration.isProxyTcpCompressEnable()) {
             proxyChannelPipeline.addLast(new Lz4FrameDecoder());
