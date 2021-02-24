@@ -1,22 +1,19 @@
 package com.ppaass.common.message;
 
 public class HeartbeatInfo {
-    private String id;
-    private Long utcDateTime;
+    private final String id;
+    private final Long utcDateTime;
+
+    public HeartbeatInfo(String id, Long utcDateTime) {
+        this.id = id;
+        this.utcDateTime = utcDateTime;
+    }
 
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public Long getUtcDateTime() {
         return utcDateTime;
-    }
-
-    public void setUtcDateTime(Long utcDateTime) {
-        this.utcDateTime = utcDateTime;
     }
 }
