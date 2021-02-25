@@ -83,7 +83,7 @@ public class MainFrame extends JFrame {
             trayIcon.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
                     if (e.getButton() == MouseEvent.BUTTON1) {
-                        MainFrame.this.setVisible(MainFrame.this.isShowing());
+                        MainFrame.this.setVisible(!MainFrame.this.isShowing());
                         MainFrame.this.setExtendedState(NORMAL);
                         toFront();
                         return;
