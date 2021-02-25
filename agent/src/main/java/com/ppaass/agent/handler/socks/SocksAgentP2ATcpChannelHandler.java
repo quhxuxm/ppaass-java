@@ -37,6 +37,11 @@ class SocksAgentP2ATcpChannelHandler extends SimpleChannelInboundHandler<ProxyMe
         super.channelActive(proxyChannelContext);
         var proxyChannel = proxyChannelContext.channel();
         proxyChannel.read();
+        var tcpConnectionInfo = proxyChannel.attr(ISocksAgentConst.SOCKS_TCP_CONNECTION_INFO).get();
+        if (tcpConnectionInfo != null) {
+            var agentChannel = tcpConnectionInfo.getAgentTcpChannel();
+            agentChannel.read();
+        }
     }
 
     @Override
@@ -69,6 +74,7 @@ class SocksAgentP2ATcpChannelHandler extends SimpleChannelInboundHandler<ProxyMe
                                         SocksAgentProtocolHandler.class.getName(),
                                         this.socksAgentA2PTcpChannelHandler);
                                 agentTcpChannel.read();
+                                proxyChannel.read();
                                 return;
                             }
                             logger.error(
@@ -104,6 +110,7 @@ class SocksAgentP2ATcpChannelHandler extends SimpleChannelInboundHandler<ProxyMe
                                         "[HEARTBEAT TO CLIENT]: Success, agent channel = {},  proxy channel = {}",
                                         agentTcpChannel.id().asLongText(),
                                         proxyChannel.id().asLongText());
+                                agentTcpChannel.read();
                                 proxyChannel.read();
                                 return;
                             }
@@ -159,6 +166,7 @@ class SocksAgentP2ATcpChannelHandler extends SimpleChannelInboundHandler<ProxyMe
                                 logger.debug(
                                         "Forward proxy data to client success [OK_TCP], agent channel = {},  proxy channel = {}",
                                         agentTcpChannel.id().asLongText(), proxyChannel.id().asLongText());
+                                agentTcpChannel.read();
                                 proxyChannel.read();
                                 return;
                             }
@@ -205,6 +213,7 @@ class SocksAgentP2ATcpChannelHandler extends SimpleChannelInboundHandler<ProxyMe
                 var udpPackage = new DatagramPacket(socks5UdpResponseBuf, recipient, sender);
                 udpConnectionInfo.getAgentUdpChannel().writeAndFlush(udpPackage)
                         .addListener((ChannelFutureListener) agentChannelFuture -> {
+                            agentChannelFuture.channel().read();
                             proxyChannel.read();
                         });
             }

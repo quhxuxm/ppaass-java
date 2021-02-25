@@ -26,28 +26,14 @@ class SocksAgentA2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf
     }
 
     @Override
-    public void channelReadComplete(ChannelHandlerContext agentChannelContext) throws Exception {
-        super.channelReadComplete(agentChannelContext);
-        var agentChannel = agentChannelContext.channel();
-        var tcpConnectionInfo = agentChannel.attr(ISocksAgentConst.SOCKS_TCP_CONNECTION_INFO).get();
-        if (tcpConnectionInfo != null) {
-            var proxyChannel = tcpConnectionInfo.getProxyTcpChannel();
-            if (proxyChannel.isWritable()) {
-                agentChannel.read();
-            }
-        }
-    }
-
-    @Override
     public void channelActive(ChannelHandlerContext agentChannelContext) throws Exception {
         super.channelActive(agentChannelContext);
         var agentChannel = agentChannelContext.channel();
+        agentChannel.read();
         var tcpConnectionInfo = agentChannel.attr(ISocksAgentConst.SOCKS_TCP_CONNECTION_INFO).get();
         if (tcpConnectionInfo != null) {
             var proxyChannel = tcpConnectionInfo.getProxyTcpChannel();
-            if (proxyChannel.isWritable()) {
-                agentChannel.read();
-            }
+            proxyChannel.read();
         }
     }
 
