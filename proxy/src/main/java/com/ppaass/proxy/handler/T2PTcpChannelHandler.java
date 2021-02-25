@@ -39,7 +39,7 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
             targetChannel.close();
             return;
         }
-        var proxyTcpChannel = agentTcpConnectionInfo.getProxyTcpChannel();
+        var proxyChannel = agentTcpConnectionInfo.getProxyTcpChannel();
         var originalDataByteArray = new byte[targetOriginalMessageBuf.readableBytes()];
         targetOriginalMessageBuf.readBytes(originalDataByteArray);
         var proxyMessageBody =
@@ -54,19 +54,19 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
                 MessageSerializer.INSTANCE.generateUuidInBytes(),
                 EncryptionType.choose(),
                 proxyMessageBody);
-        proxyTcpChannel.writeAndFlush(proxyMessage)
+        proxyChannel.writeAndFlush(proxyMessage)
                 .addListener((ChannelFutureListener) proxyChannelFuture -> {
                     if (proxyChannelFuture.isSuccess()) {
                         targetChannel.read();
-                        proxyTcpChannel.read();
+                        proxyChannel.read();
                         return;
                     }
                     logger.error(
                             "Fail to write proxy message to agent because of exception, proxy channel = {}, target channel = {}",
-                            proxyTcpChannel.id().asLongText(), targetChannel.id().asLongText(),
+                            proxyChannel.id().asLongText(), targetChannel.id().asLongText(),
                             proxyChannelFuture.cause());
                     targetChannel.close();
-                    proxyTcpChannel.close();
+                    proxyChannel.close();
                 });
     }
 }

@@ -125,6 +125,8 @@ public class P2TTcpChannelHandler extends SimpleChannelInboundHandler<AgentMessa
                             );
                             targetChannel.attr(IProxyConstant.TCP_CONNECTION_INFO).setIfAbsent(agentConnectionInfo);
                             proxyChannel.attr(IProxyConstant.TCP_CONNECTION_INFO).setIfAbsent(agentConnectionInfo);
+                            proxyChannel.config().setOption(ChannelOption.SO_KEEPALIVE,
+                                    agentConnectionInfo.isTargetTcpConnectionKeepAlive());
                             targetChannel.config()
                                     .setOption(ChannelOption.SO_KEEPALIVE,
                                             agentConnectionInfo.isTargetTcpConnectionKeepAlive());
