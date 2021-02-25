@@ -12,7 +12,7 @@ cd /ppaass/sourcecode/ppaass
 git pull
 mvn clean package
 # ps -ef | grep gradle | grep -v grep | awk '{print $2}' | xargs kill -9
-cp /ppaass/sourcecode/ppaass/distribution/target/ppaass-1.0-SNAPSHOT.zip /home/build
+cp /ppaass/sourcecode/ppaass/distribution/target/ppaass-1.0-SNAPSHOT.zip /ppaass/build
 cd /ppaass/build
 chmod 777 ppaass-1.0-SNAPSHOT.zip
 unzip ppaass-1.0-SNAPSHOT.zip
