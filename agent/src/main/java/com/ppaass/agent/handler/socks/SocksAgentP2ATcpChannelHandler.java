@@ -74,6 +74,7 @@ class SocksAgentP2ATcpChannelHandler extends SimpleChannelInboundHandler<ProxyMe
                                         SocksAgentProtocolHandler.class.getName(),
                                         this.socksAgentA2PTcpChannelHandler);
                                 agentTcpChannel.read();
+                                proxyChannel.read();
                                 return;
                             }
                             logger.error(
