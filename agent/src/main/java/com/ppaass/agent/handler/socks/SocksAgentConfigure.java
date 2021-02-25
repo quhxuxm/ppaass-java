@@ -47,6 +47,7 @@ class SocksAgentConfigure {
         result.group(socksProxyUdpLoopGroup)
                 .channel(NioDatagramChannel.class)
                 .option(ChannelOption.SO_BROADCAST, true)
+                .option(ChannelOption.AUTO_READ, false)
                 .handler(proxyChannelInitializer);
         return result;
     }

@@ -79,7 +79,11 @@ public class P2TTcpChannelHandler extends SimpleChannelInboundHandler<AgentMessa
                     targetUdpChannel.attr(IProxyConstant.UDP_CONNECTION_INFO).setIfAbsent(udpConnectionInfo);
                 }
                 logger.debug("Receive udp package from agent: {}", udpPackage);
-                udpConnectionInfo.getTargetUdpChannel().writeAndFlush(udpPackage);
+                var targetUdpChannel= udpConnectionInfo.getTargetUdpChannel();
+                targetUdpChannel.writeAndFlush(udpPackage).addListener(future -> {
+                    targetUdpChannel.read();
+                    proxyChannel.read();
+                });
             }
             case CONNECT_WITH_KEEP_ALIVE, CONNECT_WITHOUT_KEEP_ALIVE -> {
                 this.targetTcpBootstrap

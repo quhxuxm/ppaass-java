@@ -7,6 +7,7 @@ import com.ppaass.common.message.AgentMessage;
 import com.ppaass.common.message.AgentMessageBody;
 import com.ppaass.common.message.AgentMessageBodyType;
 import com.ppaass.common.message.MessageSerializer;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -19,6 +20,18 @@ class SocksAgentA2PUdpChannelHandler extends SimpleChannelInboundHandler<SocksAg
 
     SocksAgentA2PUdpChannelHandler(AgentConfiguration agentConfiguration) {
         this.agentConfiguration = agentConfiguration;
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext agentUdpChannelContext) throws Exception {
+        super.channelActive(agentUdpChannelContext);
+        agentUdpChannelContext.read();
+    }
+
+    @Override
+    public void channelReadComplete(ChannelHandlerContext agentUdpChannelContext) throws Exception {
+        super.channelReadComplete(agentUdpChannelContext);
+        agentUdpChannelContext.read();
     }
 
     @Override
@@ -47,6 +60,10 @@ class SocksAgentA2PUdpChannelHandler extends SimpleChannelInboundHandler<SocksAg
                         EncryptionType.choose(),
                         agentMessageBody);
         var proxyTcpChannelForUdpTransfer = udpConnectionInfo.getProxyTcpChannel();
-        proxyTcpChannelForUdpTransfer.writeAndFlush(agentMessage);
+        proxyTcpChannelForUdpTransfer.writeAndFlush(agentMessage)
+                .addListener((ChannelFutureListener) proxyChannelFuture -> {
+                    agentUdpChannelContext.channel().read();
+                    proxyTcpChannelForUdpTransfer.read();
+                });
     }
 }

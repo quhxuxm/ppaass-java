@@ -222,7 +222,10 @@ class SocksAgentP2ATcpChannelHandler extends SimpleChannelInboundHandler<ProxyMe
                 socks5UdpResponseBuf.writeShort(udpConnectionInfo.getClientRecipientPort());
                 socks5UdpResponseBuf.writeBytes(data);
                 var udpPackage = new DatagramPacket(socks5UdpResponseBuf, recipient, sender);
-                udpConnectionInfo.getAgentUdpChannel().writeAndFlush(udpPackage);
+                udpConnectionInfo.getAgentUdpChannel().writeAndFlush(udpPackage)
+                        .addListener((ChannelFutureListener) agentChannelFuture -> {
+                            proxyChannel.read();
+                        });
             }
         }
     }
