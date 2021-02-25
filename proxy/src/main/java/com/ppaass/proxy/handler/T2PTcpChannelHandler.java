@@ -23,7 +23,8 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
     @Override
     public void channelActive(ChannelHandlerContext targetChannelContext) throws Exception {
         super.channelActive(targetChannelContext);
-        targetChannelContext.read();
+        var targetChannel = targetChannelContext.channel();
+        targetChannel.read();
     }
 
     @Override
@@ -57,8 +58,13 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
                 .addListener((ChannelFutureListener) proxyChannelFuture -> {
                     if (proxyChannelFuture.isSuccess()) {
                         targetChannel.read();
+                        proxyTcpChannel.read();
                         return;
                     }
+                    logger.error(
+                            "Fail to write proxy message to agent because of exception, proxy channel = {}, target channel = {}",
+                            proxyTcpChannel.id().asLongText(), targetChannel.id().asLongText(),
+                            proxyChannelFuture.cause());
                     targetChannel.close();
                     proxyTcpChannel.close();
                 });

@@ -43,6 +43,9 @@ public class P2TTcpChannelHandler extends SimpleChannelInboundHandler<AgentMessa
                 var agentTcpConnectionInfo =
                         proxyChannel.attr(IProxyConstant.TCP_CONNECTION_INFO).get();
                 if (agentTcpConnectionInfo == null) {
+                    logger.error(
+                            "Fail to transfer data from proxy to target because of no agent connection information attached, proxy channel = {}.",
+                            proxyChannel.id().asLongText());
                     proxyChannel.close();
                     return;
                 }
@@ -52,8 +55,13 @@ public class P2TTcpChannelHandler extends SimpleChannelInboundHandler<AgentMessa
                         .addListener((ChannelFutureListener) targetChannelFuture -> {
                             if (targetChannelFuture.isSuccess()) {
                                 proxyChannel.read();
+                                targetTcpChannel.read();
                                 return;
                             }
+                            logger.error(
+                                    "Fail to write agent message to target because of exception, proxy channel = {}, target channel = {}",
+                                    proxyChannel.id().asLongText(), targetTcpChannel.id().asLongText(),
+                                    targetChannelFuture.cause());
                             targetTcpChannel.close();
                             proxyChannel.close();
                         });
@@ -79,7 +87,7 @@ public class P2TTcpChannelHandler extends SimpleChannelInboundHandler<AgentMessa
                     targetUdpChannel.attr(IProxyConstant.UDP_CONNECTION_INFO).setIfAbsent(udpConnectionInfo);
                 }
                 logger.debug("Receive udp package from agent: {}", udpPackage);
-                var targetUdpChannel= udpConnectionInfo.getTargetUdpChannel();
+                var targetUdpChannel = udpConnectionInfo.getTargetUdpChannel();
                 targetUdpChannel.writeAndFlush(udpPackage).addListener(future -> {
                     targetUdpChannel.read();
                     proxyChannel.read();
@@ -140,12 +148,19 @@ public class P2TTcpChannelHandler extends SimpleChannelInboundHandler<AgentMessa
                                             targetChannel.read();
                                             return;
                                         }
+                                        logger.error(
+                                                "Fail to write connect result message to agent because of exception, proxy channel = {}, target channel = {}",
+                                                proxyChannel.id().asLongText(), targetChannel.id().asLongText(),
+                                                proxyChannelFuture.cause());
                                         targetChannel.close();
                                         proxyChannel.close();
                                     });
                         });
             }
             default -> {
+                logger.error(
+                        "Fail to transfer data from proxy to target because of it is not a validate body type, proxy channel = {}.",
+                        proxyChannel.id().asLongText());
                 var agentTcpConnectionInfo =
                         proxyChannel.attr(IProxyConstant.TCP_CONNECTION_INFO).get();
                 if (agentTcpConnectionInfo != null) {
