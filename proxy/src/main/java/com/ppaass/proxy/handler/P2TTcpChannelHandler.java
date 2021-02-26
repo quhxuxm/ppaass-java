@@ -40,17 +40,13 @@ public class P2TTcpChannelHandler extends SimpleChannelInboundHandler<AgentMessa
         var proxyChannel = proxyChannelContext.channel();
         var connectionInfo =
                 proxyChannel.attr(IProxyConstant.TCP_CONNECTION_INFO).get();
-        if (connectionInfo == null) {
-            logger.error(
-                    "Fail to transfer data from proxy to target because of no agent connection information attached, proxy channel = {}.",
-                    proxyChannel.id().asLongText());
-            proxyChannel.close();
-            return;
+        if (connectionInfo != null) {
+            var targetTcpChannel = connectionInfo.getTargetTcpChannel();
+            if (targetTcpChannel.isWritable()) {
+                proxyChannel.read();
+            }
         }
-        var targetTcpChannel = connectionInfo.getTargetTcpChannel();
-        if (targetTcpChannel.isWritable()) {
-            proxyChannel.read();
-        }
+
     }
 
     @Override
