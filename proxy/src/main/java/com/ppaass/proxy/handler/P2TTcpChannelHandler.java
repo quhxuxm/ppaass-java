@@ -35,21 +35,40 @@ public class P2TTcpChannelHandler extends SimpleChannelInboundHandler<AgentMessa
     }
 
     @Override
+    public void channelReadComplete(ChannelHandlerContext proxyChannelContext) throws Exception {
+        super.channelReadComplete(proxyChannelContext);
+        var proxyChannel = proxyChannelContext.channel();
+        var connectionInfo =
+                proxyChannel.attr(IProxyConstant.TCP_CONNECTION_INFO).get();
+        if (connectionInfo == null) {
+            logger.error(
+                    "Fail to transfer data from proxy to target because of no agent connection information attached, proxy channel = {}.",
+                    proxyChannel.id().asLongText());
+            proxyChannel.close();
+            return;
+        }
+        var targetTcpChannel = connectionInfo.getTargetTcpChannel();
+        if (targetTcpChannel.isWritable()) {
+            proxyChannel.read();
+        }
+    }
+
+    @Override
     protected void channelRead0(ChannelHandlerContext proxyChannelContext, AgentMessage agentMessage) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
         var agentMessageBodyType = agentMessage.getBody().getBodyType();
         switch (agentMessageBodyType) {
             case TCP_DATA -> {
-                var agentTcpConnectionInfo =
+                var connectionInfo =
                         proxyChannel.attr(IProxyConstant.TCP_CONNECTION_INFO).get();
-                if (agentTcpConnectionInfo == null) {
+                if (connectionInfo == null) {
                     logger.error(
                             "Fail to transfer data from proxy to target because of no agent connection information attached, proxy channel = {}.",
                             proxyChannel.id().asLongText());
                     proxyChannel.close();
                     return;
                 }
-                var targetTcpChannel = agentTcpConnectionInfo.getTargetTcpChannel();
+                var targetTcpChannel = connectionInfo.getTargetTcpChannel();
                 targetTcpChannel.writeAndFlush(
                         Unpooled.wrappedBuffer(agentMessage.getBody().getData()))
                         .addListener((ChannelFutureListener) targetChannelFuture -> {
@@ -114,7 +133,7 @@ public class P2TTcpChannelHandler extends SimpleChannelInboundHandler<AgentMessa
                                 return;
                             }
                             var targetChannel = targetChannelFuture.channel();
-                            var agentConnectionInfo = new TcpConnectionInfo(
+                            var connectionInfo = new TcpConnectionInfo(
                                     agentMessage.getBody().getTargetHost(),
                                     agentMessage.getBody().getTargetPort(),
                                     agentMessage.getBody().getUserToken(),
@@ -123,19 +142,19 @@ public class P2TTcpChannelHandler extends SimpleChannelInboundHandler<AgentMessa
                                     agentMessage.getBody().getBodyType() ==
                                             AgentMessageBodyType.CONNECT_WITH_KEEP_ALIVE
                             );
-                            targetChannel.attr(IProxyConstant.TCP_CONNECTION_INFO).setIfAbsent(agentConnectionInfo);
-                            proxyChannel.attr(IProxyConstant.TCP_CONNECTION_INFO).setIfAbsent(agentConnectionInfo);
+                            targetChannel.attr(IProxyConstant.TCP_CONNECTION_INFO).setIfAbsent(connectionInfo);
+                            proxyChannel.attr(IProxyConstant.TCP_CONNECTION_INFO).setIfAbsent(connectionInfo);
                             proxyChannel.config().setOption(ChannelOption.SO_KEEPALIVE,
-                                    agentConnectionInfo.isTargetTcpConnectionKeepAlive());
+                                    connectionInfo.isTargetTcpConnectionKeepAlive());
                             targetChannel.config()
                                     .setOption(ChannelOption.SO_KEEPALIVE,
-                                            agentConnectionInfo.isTargetTcpConnectionKeepAlive());
+                                            connectionInfo.isTargetTcpConnectionKeepAlive());
                             var proxyMessageBody =
                                     new ProxyMessageBody(
                                             MessageSerializer.INSTANCE.generateUuid(),
-                                            agentConnectionInfo.getUserToken(),
-                                            agentConnectionInfo.getTargetHost(),
-                                            agentConnectionInfo.getTargetPort(),
+                                            connectionInfo.getUserToken(),
+                                            connectionInfo.getTargetHost(),
+                                            connectionInfo.getTargetPort(),
                                             ProxyMessageBodyType.CONNECT_SUCCESS,
                                             new byte[]{});
                             var proxyMessage =

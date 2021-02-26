@@ -28,26 +28,44 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext targetChannelContext, ByteBuf targetOriginalMessageBuf)
-            throws Exception {
+    public void channelReadComplete(ChannelHandlerContext targetChannelContext) throws Exception {
+        super.channelReadComplete(targetChannelContext);
         var targetChannel = targetChannelContext.channel();
-        var agentTcpConnectionInfo = targetChannel.attr(IProxyConstant.TCP_CONNECTION_INFO).get();
-        if (agentTcpConnectionInfo == null) {
+        var connectionInfo = targetChannel.attr(IProxyConstant.TCP_CONNECTION_INFO).get();
+        if (connectionInfo == null) {
             logger.error(
                     "Fail to transfer data from target to proxy because of no agent connection information attached, target channel = {}.",
                     targetChannel.id().asLongText());
             targetChannel.close();
             return;
         }
-        var proxyChannel = agentTcpConnectionInfo.getProxyTcpChannel();
+        var proxyChannel = connectionInfo.getProxyTcpChannel();
+        if (proxyChannel.isWritable()) {
+            targetChannel.read();
+        }
+    }
+
+    @Override
+    protected void channelRead0(ChannelHandlerContext targetChannelContext, ByteBuf targetOriginalMessageBuf)
+            throws Exception {
+        var targetChannel = targetChannelContext.channel();
+        var connectionInfo = targetChannel.attr(IProxyConstant.TCP_CONNECTION_INFO).get();
+        if (connectionInfo == null) {
+            logger.error(
+                    "Fail to transfer data from target to proxy because of no agent connection information attached, target channel = {}.",
+                    targetChannel.id().asLongText());
+            targetChannel.close();
+            return;
+        }
+        var proxyChannel = connectionInfo.getProxyTcpChannel();
         var originalDataByteArray = new byte[targetOriginalMessageBuf.readableBytes()];
         targetOriginalMessageBuf.readBytes(originalDataByteArray);
         var proxyMessageBody =
                 new ProxyMessageBody(
                         MessageSerializer.INSTANCE.generateUuid(),
-                        agentTcpConnectionInfo.getUserToken(),
-                        agentTcpConnectionInfo.getTargetHost(),
-                        agentTcpConnectionInfo.getTargetPort(),
+                        connectionInfo.getUserToken(),
+                        connectionInfo.getTargetHost(),
+                        connectionInfo.getTargetPort(),
                         ProxyMessageBodyType.OK_TCP,
                         originalDataByteArray);
         var proxyMessage = new ProxyMessage(
