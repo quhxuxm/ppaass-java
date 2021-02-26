@@ -3,9 +3,9 @@ MAINTAINER hao.qu@igt.com
 
 ENV ENV_NAME ppaass
 # Set proxy server
-RUN echo "http_proxy=10.175.4.220:10080" >> /etc/enviorment
-RUN echo "socks_proxy=10.175.4.220:10080" >> /etc/enviorment
-RUN echo "proxy=10.175.4.220:10080" >> /etc/yum.conf
+# RUN echo "http_proxy=10.175.4.220:10080" >> /etc/enviorment
+# RUN echo "socks_proxy=10.175.4.220:10080" >> /etc/enviorment
+# RUN echo "proxy=10.175.4.220:10080" >> /etc/yum.conf
 
 RUN apt update -y
 RUN apt upgrade -y

@@ -11,3 +11,4 @@ buildNumber.properties
 .mvn/wrapper/maven-wrapper.jar
 .idea
 *.iml
+distribution/**/**/ppaass-1.0-SNAPSHOT.zip
