@@ -55,7 +55,7 @@ public class P2TTcpChannelHandler extends SimpleChannelInboundHandler<AgentMessa
                         .addListener((ChannelFutureListener) targetChannelFuture -> {
                             if (targetChannelFuture.isSuccess()) {
                                 proxyChannel.read();
-                                targetTcpChannel.read();
+                                //targetTcpChannel.read();
                                 return;
                             }
                             logger.error(
@@ -89,7 +89,7 @@ public class P2TTcpChannelHandler extends SimpleChannelInboundHandler<AgentMessa
                 logger.debug("Receive udp package from agent: {}", udpPackage);
                 var targetUdpChannel = udpConnectionInfo.getTargetUdpChannel();
                 targetUdpChannel.writeAndFlush(udpPackage).addListener(future -> {
-                    targetUdpChannel.read();
+                    //targetUdpChannel.read();
                     proxyChannel.read();
                 });
             }

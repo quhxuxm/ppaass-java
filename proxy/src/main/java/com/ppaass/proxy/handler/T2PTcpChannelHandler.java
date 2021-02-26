@@ -58,7 +58,7 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
                 .addListener((ChannelFutureListener) proxyChannelFuture -> {
                     if (proxyChannelFuture.isSuccess()) {
                         targetChannel.read();
-                        proxyChannel.read();
+                        //proxyChannel.read();
                         return;
                     }
                     logger.error(
