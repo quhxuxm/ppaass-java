@@ -16,6 +16,20 @@ class HttpAgentP2AHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
+    public void channelReadComplete(ChannelHandlerContext proxyChannelContext) throws Exception {
+        super.channelReadComplete(proxyChannelContext);
+        var proxyChannel = proxyChannelContext.channel();
+        proxyChannel.read();
+        var connectionInfo = proxyChannel.attr(IHttpAgentConstant.HTTP_CONNECTION_INFO).get();
+        if (connectionInfo != null) {
+            var agentChannel = connectionInfo.getAgentChannel();
+            if (agentChannel.isWritable()) {
+                proxyChannel.read();
+            }
+        }
+    }
+
+    @Override
     public void channelRead(ChannelHandlerContext proxyChannelContext, Object msg) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
         var connectionInfo = proxyChannel.attr(IHttpAgentConstant.HTTP_CONNECTION_INFO).get();

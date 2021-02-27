@@ -45,6 +45,20 @@ class SocksAgentP2ATcpChannelHandler extends SimpleChannelInboundHandler<ProxyMe
     }
 
     @Override
+    public void channelReadComplete(ChannelHandlerContext proxyChannelContext) throws Exception {
+        super.channelReadComplete(proxyChannelContext);
+        var proxyChannel = proxyChannelContext.channel();
+        proxyChannel.read();
+        var tcpConnectionInfo = proxyChannel.attr(ISocksAgentConst.SOCKS_TCP_CONNECTION_INFO).get();
+        if (tcpConnectionInfo != null) {
+            var agentChannel = tcpConnectionInfo.getAgentTcpChannel();
+            if (agentChannel.isWritable()) {
+                proxyChannel.read();
+            }
+        }
+    }
+
+    @Override
     protected void channelRead0(ChannelHandlerContext proxyChannelContext, ProxyMessage proxyMessage) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
         var tcpConnectionInfo = proxyChannel.attr(ISocksAgentConst.SOCKS_TCP_CONNECTION_INFO).get();

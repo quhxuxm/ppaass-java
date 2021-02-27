@@ -38,6 +38,19 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
     }
 
     @Override
+    public void channelReadComplete(ChannelHandlerContext agentChannelContext) throws Exception {
+        super.channelReadComplete(agentChannelContext);
+        var agentChannel = agentChannelContext.channel();
+        var connectionInfo = agentChannel.attr(IHttpAgentConstant.HTTP_CONNECTION_INFO).get();
+        if (connectionInfo != null) {
+            var proxyChannel = connectionInfo.getProxyChannel();
+            if (proxyChannel.isWritable()) {
+                agentChannel.read();
+            }
+        }
+    }
+
+    @Override
     protected void channelRead0(ChannelHandlerContext agentChannelContext, Object httpProxyInput) throws Exception {
         var agentChannel = agentChannelContext.channel();
         if (httpProxyInput instanceof FullHttpRequest) {
