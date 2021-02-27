@@ -46,7 +46,8 @@ class HttpAgentUtil {
             return new HttpConnectionInfo(
                     targetHost,
                     port,
-                    false
+                    false,
+                    uri
             );
         }
         if (uri.startsWith(HTTPS_SCHEMA)) {
@@ -63,7 +64,8 @@ class HttpAgentUtil {
             return new HttpConnectionInfo(
                     targetHost,
                     port,
-                    true
+                    true,
+                    uri
             );
         }
         //For CONNECT method, only HTTPS will do this method.
@@ -91,7 +93,8 @@ class HttpAgentUtil {
         return new HttpConnectionInfo(
                 hostName,
                 port,
-                true
+                true,
+                uri
         );
     }
 

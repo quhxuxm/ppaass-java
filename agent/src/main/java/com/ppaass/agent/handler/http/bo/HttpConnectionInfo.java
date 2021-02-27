@@ -11,12 +11,14 @@ public class HttpConnectionInfo {
     private Channel agentChannel;
     private boolean isKeepAlive;
     private Object httpMessageCarriedOnConnectTime;
+    private String uri;
 
-    public HttpConnectionInfo(String targetHost, int targetPort, boolean isHttps) {
+    public HttpConnectionInfo(String targetHost, int targetPort, boolean isHttps, String uri) {
         this.targetHost = targetHost;
         this.targetPort = targetPort;
         this.isHttps = isHttps;
         this.isKeepAlive = true;
+        this.uri = uri;
     }
 
     public String getTargetHost() {
@@ -69,5 +71,9 @@ public class HttpConnectionInfo {
 
     public void setHttpMessageCarriedOnConnectTime(Object httpMessageCarriedOnConnectTime) {
         this.httpMessageCarriedOnConnectTime = httpMessageCarriedOnConnectTime;
+    }
+
+    public String getUri() {
+        return uri;
     }
 }
