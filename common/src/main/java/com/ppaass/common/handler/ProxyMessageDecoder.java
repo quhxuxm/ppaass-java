@@ -19,6 +19,5 @@ public class ProxyMessageDecoder extends ByteToMessageDecoder {
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         var message = MessageSerializer.INSTANCE.decodeProxyMessage(in, this.agentPrivateKey);
         out.add(message);
-        ReferenceCountUtil.release(in);
     }
 }
