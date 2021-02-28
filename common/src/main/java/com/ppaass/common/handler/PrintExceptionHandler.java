@@ -13,7 +13,7 @@ public class PrintExceptionHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         logger.error(
-                "Exception in the channel pipeline, channel = {}", ctx.channel().id());
+                "Exception in the channel pipeline, channel = {}", ctx.channel().id(), cause);
         ctx.fireExceptionCaught(cause);
     }
 }
