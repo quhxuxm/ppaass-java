@@ -117,23 +117,6 @@ class SocksAgentP2ATcpChannelHandler extends SimpleChannelInboundHandler<ProxyMe
                         "[HEARTBEAT FROM PROXY]: agent channel = {}, proxy channel = {}, heartbeat id = {}, heartbeat time = {}",
                         agentTcpChannel.id().asLongText(), proxyChannel.id().asLongText(), heartbeat.getId(),
                         heartbeat.getUtcDateTime());
-                agentTcpChannel.writeAndFlush(Unpooled.EMPTY_BUFFER)
-                        .addListener((ChannelFutureListener) agentChannelFuture -> {
-                            if (agentChannelFuture.isSuccess()) {
-                                logger.debug(
-                                        "[HEARTBEAT TO CLIENT]: Success, agent channel = {},  proxy channel = {}",
-                                        agentTcpChannel.id().asLongText(),
-                                        proxyChannel.id().asLongText());
-                                proxyChannel.read();
-                                return;
-                            }
-                            logger.error(
-                                    "[HEARTBEAT TO CLIENT]: Fail, close it, agent channel = {},  proxy channel = {}",
-                                    agentTcpChannel.id().asLongText(),
-                                    proxyChannel.id().asLongText());
-                            agentTcpChannel.close();
-                            proxyChannel.close();
-                        });
             }
             case CONNECT_FAIL -> {
                 logger.debug("Receive CONNECT_FAIL from proxy, proxy channel = {}", proxyChannel.id().asLongText());

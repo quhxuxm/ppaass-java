@@ -4,7 +4,6 @@ import com.ppaass.common.message.AgentMessageBodyType;
 import com.ppaass.common.message.HeartbeatInfo;
 import com.ppaass.common.message.MessageSerializer;
 import com.ppaass.common.message.ProxyMessage;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -36,23 +35,6 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                         "[HEARTBEAT FROM PROXY]: agent channel = {}, proxy channel = {}, heartbeat id = {}, heartbeat time = {}",
                         agentChannel.id().asLongText(), proxyChannel.id().asLongText(), heartbeat.getId(),
                         heartbeat.getUtcDateTime());
-                agentChannel.writeAndFlush(Unpooled.EMPTY_BUFFER)
-                        .addListener((ChannelFutureListener) agentChannelFuture -> {
-                            if (agentChannelFuture.isSuccess()) {
-                                logger.debug(
-                                        "[HEARTBEAT TO CLIENT]: Success, agent channel = {},  proxy channel = {}",
-                                        agentChannel.id().asLongText(),
-                                        proxyChannel.id().asLongText());
-                                proxyChannel.read();
-                                return;
-                            }
-                            logger.error(
-                                    "[HEARTBEAT TO CLIENT]: Fail, close it, agent channel = {},  proxy channel = {}",
-                                    agentChannel.id().asLongText(),
-                                    proxyChannel.id().asLongText());
-                            agentChannel.close();
-                            proxyChannel.close();
-                        });
             }
             case CONNECT_FAIL -> {
                 logger.error(
