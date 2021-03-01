@@ -55,15 +55,13 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
         var agentChannel = agentChannelContext.channel();
         if (httpProxyInput instanceof FullHttpRequest) {
             var fullHttpRequest = (FullHttpRequest) httpProxyInput;
-            var connectionHeader = fullHttpRequest.headers().get(HttpHeaderNames.PROXY_CONNECTION);
-            if (connectionHeader == null) {
-                connectionHeader = fullHttpRequest.headers().get(HttpHeaderNames.CONNECTION);
-            }
+            var connectionHeader = fullHttpRequest.headers().get(HttpHeaderNames.CONNECTION);
             var connectionKeepAlive =
                     HttpHeaderValues.KEEP_ALIVE.contentEqualsIgnoreCase(connectionHeader);
             if (HttpMethod.CONNECT == fullHttpRequest.method()) {
                 //A HTTPS request to setup the connection
-                logger.debug("A https CONNECT request send to uri: {}, agent channel = {}", fullHttpRequest.uri(), agentChannel.id().asLongText());
+                logger.debug("A https CONNECT request send to uri: {}, agent channel = {}", fullHttpRequest.uri(),
+                        agentChannel.id().asLongText());
                 var connectionInfo = HttpAgentUtil.INSTANCE.parseConnectionInfo(fullHttpRequest.uri());
                 if (connectionInfo == null) {
                     agentChannel.close();
@@ -82,7 +80,8 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
             var connectionInfo = agentChannel.attr(IHttpAgentConstant.HTTP_CONNECTION_INFO).get();
             if (connectionInfo != null) {
                 var proxyChannel = connectionInfo.getProxyChannel();
-                logger.debug("HTTP DATA send to uri: {}, agent channel = {}", fullHttpRequest.uri(), agentChannel.id().asLongText());
+                logger.debug("HTTP DATA send to uri: {}, agent channel = {}", fullHttpRequest.uri(),
+                        agentChannel.id().asLongText());
                 HttpAgentUtil.INSTANCE.writeAgentMessageToProxy(
                         AgentMessageBodyType.TCP_DATA,
                         connectionInfo.getUserToken(),
@@ -112,7 +111,8 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
                 return;
             }
             connectionInfo.setKeepAlive(connectionKeepAlive);
-            logger.debug("A http FIRST request send to uri: {}, agent channel = {}", fullHttpRequest.uri(), agentChannel.id().asLongText());
+            logger.debug("A http FIRST request send to uri: {}, agent channel = {}", fullHttpRequest.uri(),
+                    agentChannel.id().asLongText());
             this.proxyBootstrapForHttp.connect(agentConfiguration.getProxyHost(),
                     agentConfiguration.getProxyPort())
                     .addListener(new HttpAgentProxyConnectListener(agentChannel, connectionInfo, agentConfiguration,
@@ -126,7 +126,8 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
             return;
         }
         var proxyChannel = connectionInfo.getProxyChannel();
-        logger.debug("HTTPS DATA send to uri: {}, agent channel = {}", connectionInfo.getUri(), agentChannel.id().asLongText());
+        logger.debug("HTTPS DATA send to uri: {}, agent channel = {}", connectionInfo.getUri(),
+                agentChannel.id().asLongText());
         HttpAgentUtil.INSTANCE.writeAgentMessageToProxy(
                 AgentMessageBodyType.TCP_DATA,
                 connectionInfo.getUserToken(),
