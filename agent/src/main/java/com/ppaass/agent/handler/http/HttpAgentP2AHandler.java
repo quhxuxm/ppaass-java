@@ -39,7 +39,7 @@ class HttpAgentP2AHandler extends ChannelInboundHandlerAdapter {
         var proxyChannel = proxyChannelContext.channel();
         var connectionInfo = proxyChannel.attr(IHttpAgentConstant.HTTP_CONNECTION_INFO).get();
         if (connectionInfo == null) {
-            PpaassLogger.INSTANCE.error(this.getClass(),
+            PpaassLogger.INSTANCE.error(HttpAgentP2AHandler.class,
                     () -> "Close proxy channel because of connection info not exist, proxy channel = {}",
                     () -> new Object[]{proxyChannel.id().asLongText()});
             proxyChannel.close();
@@ -51,7 +51,7 @@ class HttpAgentP2AHandler extends ChannelInboundHandlerAdapter {
                 proxyChannel.read();
                 return;
             }
-            PpaassLogger.INSTANCE.trace(this.getClass(),
+            PpaassLogger.INSTANCE.trace(HttpAgentP2AHandler.class,
                     () -> "Receive proxy data, agent channel = {}, proxy channel = {}, proxy data: \n{}\n",
                     () -> new Object[]{
                             agentChannel.id().asLongText(), proxyChannel.id().asLongText(),

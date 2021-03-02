@@ -24,7 +24,7 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
         var proxyChannel = proxyChannelContext.channel();
         var connectionInfo = proxyChannel.attr(IHttpAgentConstant.HTTP_CONNECTION_INFO).get();
         if (connectionInfo == null) {
-            PpaassLogger.INSTANCE.error(this.getClass(),
+            PpaassLogger.INSTANCE.error(HttpAgentProxyMessageBodyTypeHandler.class,
                     () -> "Close proxy channel because of connection info not exist, proxy channel = {}",
                     () -> new Object[]{
                             proxyChannel.id().asLongText()
@@ -37,7 +37,7 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
             case HEARTBEAT -> {
                 var originalData = proxyMessage.getBody().getData();
                 var heartbeat = MessageSerializer.JSON_OBJECT_MAPPER.readValue(originalData, HeartbeatInfo.class);
-                PpaassLogger.INSTANCE.trace(this.getClass(),
+                PpaassLogger.INSTANCE.trace(HttpAgentProxyMessageBodyTypeHandler.class,
                         () -> "[HEARTBEAT FROM PROXY]: agent channel = {}, proxy channel = {}, heartbeat id = {}, heartbeat time = {}",
                         () -> new Object[]{
                                 agentChannel.id().asLongText(), proxyChannel.id().asLongText(), heartbeat.getId(),
@@ -45,7 +45,7 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                         });
             }
             case CONNECT_FAIL -> {
-                PpaassLogger.INSTANCE.error(this.getClass(),
+                PpaassLogger.INSTANCE.error(HttpAgentProxyMessageBodyTypeHandler.class,
                         () -> "Connect fail for uri: [{}], close it, agent channel = {}, proxy channel = {}",
                         () -> new Object[]{
                                 connectionInfo.getUri(), agentChannel.id().asLongText(), proxyChannel.id().asLongText()
@@ -74,7 +74,7 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                                     proxyChannel.read();
                                     return;
                                 }
-                                PpaassLogger.INSTANCE.trace(this.getClass(),
+                                PpaassLogger.INSTANCE.trace(HttpAgentProxyMessageBodyTypeHandler.class,
                                         () -> "Fail to write CONNECT_SUCCESS to client because of exception, uri=[{}] agent channel = {}, proxy channel = {}.",
                                         () -> new Object[]{
                                                 connectionInfo.getUri(), agentChannel.id().asLongText(),
@@ -100,7 +100,7 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                                 proxyChannel.read();
                                 return;
                             }
-                            PpaassLogger.INSTANCE.trace(this.getClass(),
+                            PpaassLogger.INSTANCE.trace(HttpAgentProxyMessageBodyTypeHandler.class,
                                     () -> "Fail to write HTTP DATA to from agent to proxy because of exception, uri=[{}] agent channel = {}, proxy channel = {}.",
                                     () -> new Object[]{
                                             connectionInfo.getUri(), agentChannel.id().asLongText(),
@@ -116,7 +116,7 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                 proxyChannelContext.fireChannelRead(proxyMessage);
             }
             case OK_UDP -> {
-                PpaassLogger.INSTANCE.trace(this.getClass(),
+                PpaassLogger.INSTANCE.trace(HttpAgentProxyMessageBodyTypeHandler.class,
                         () -> "No OK_UDP proxy message body type for HTTP agent, close it, agent channel = {}, proxy channel = {}",
                         () -> new Object[]{
                                 agentChannel.id().asLongText(), proxyChannel.id().asLongText()

@@ -20,7 +20,7 @@ class HttpAgentOriginalProxyDataDecoder extends MessageToMessageDecoder<ProxyMes
         var proxyChannel = proxyChannelContext.channel();
         var connectionInfo = proxyChannel.attr(IHttpAgentConstant.HTTP_CONNECTION_INFO).get();
         if (connectionInfo == null) {
-            PpaassLogger.INSTANCE.error(this.getClass(),
+            PpaassLogger.INSTANCE.error(HttpAgentOriginalProxyDataDecoder.class,
                     () -> "Close proxy channel because of connection info not exist, proxy channel = {}",
                     () -> new Object[]{proxyChannel.id().asLongText()});
             proxyChannel.close();
@@ -28,7 +28,7 @@ class HttpAgentOriginalProxyDataDecoder extends MessageToMessageDecoder<ProxyMes
         }
         var agentChannel = connectionInfo.getAgentChannel();
         var originalDataByteBuffer = Unpooled.wrappedBuffer(proxyMessage.getBody().getData());
-        PpaassLogger.INSTANCE.trace(this.getClass(),
+        PpaassLogger.INSTANCE.trace(HttpAgentOriginalProxyDataDecoder.class,
                 () -> "Receive original proxy data, agent channel = {}, proxy channel = {}, original proxy data: \n{}\n",
                 () -> new Object[]{
                         agentChannel.id().asLongText(), proxyChannel.id().asLongText(),
