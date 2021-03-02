@@ -71,7 +71,7 @@ class SocksAgentA2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf
                 });
         proxyTcpChannel.writeAndFlush(agentMessage).addListener((ChannelFutureListener) proxyChannelFuture -> {
             if (proxyChannelFuture.isSuccess()) {
-                PpaassLogger.INSTANCE.error(SocksAgentA2PConnectListener.class,
+                PpaassLogger.INSTANCE.debug(SocksAgentA2PConnectListener.class,
                         () -> "Success forward client original message to proxy, agent channel = {}, proxy channel = {}",
                         () -> new Object[]{
                                 agentChannel.id().asLongText(), proxyTcpChannel.id().asLongText()
