@@ -122,11 +122,12 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
                                             proxyChannel.id().asLongText(),
                                             proxyChannelWriteFuture.cause()
                                     });
-                            var failResponse =
-                                    new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
-                                            HttpResponseStatus.INTERNAL_SERVER_ERROR);
-                            agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
-                            proxyChannel.close();
+                            proxyChannel.close().addListener(future -> {
+                                var failResponse =
+                                        new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                                                HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                                agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
+                            });
                         }
                 );
                 return;
@@ -199,10 +200,12 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
                                     agentChannel.id().asLongText(), proxyChannel.id().asLongText(),
                                     proxyChannelWriteFuture.cause()
                             });
-                    var failResponse =
-                            new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
-                    agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
-                    proxyChannel.close();
+                    proxyChannel.close().addListener(future -> {
+                        var failResponse =
+                                new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                                        HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                        agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
+                    });
                 });
     }
 }

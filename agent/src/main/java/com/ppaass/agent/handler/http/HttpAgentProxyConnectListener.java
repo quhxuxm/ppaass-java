@@ -74,11 +74,12 @@ class HttpAgentProxyConnectListener implements ChannelFutureListener {
                                             agentChannel.id().asLongText(), proxyChannel.id().asLongText(),
                                             proxyChannelWriteFuture.cause()
                                     });
-                            var failResponse =
-                                    new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
-                                            HttpResponseStatus.INTERNAL_SERVER_ERROR);
-                            agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
-                            proxyChannel.close();
+                            proxyChannel.close().addListener(future -> {
+                                var failResponse =
+                                        new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                                                HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                                agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
+                            });
                         });
     }
 }

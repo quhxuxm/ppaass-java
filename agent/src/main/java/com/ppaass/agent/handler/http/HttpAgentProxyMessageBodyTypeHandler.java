@@ -50,8 +50,11 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                         () -> new Object[]{
                                 connectionInfo.getUri(), agentChannel.id().asLongText(), proxyChannel.id().asLongText()
                         });
-                proxyChannel.close();
-                agentChannel.close();
+                proxyChannel.close().addListener(future -> {
+                    var failResponse =
+                            new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                    agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
+                });
             }
             case CONNECT_SUCCESS -> {
                 if (connectionInfo.isHttps()) {
@@ -81,11 +84,12 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                                                 proxyChannel.id().asLongText(),
                                                 agentWriteChannelFuture.cause()
                                         });
-                                var failResponse =
-                                        new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
-                                                HttpResponseStatus.INTERNAL_SERVER_ERROR);
-                                agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
-                                proxyChannel.close();
+                                proxyChannel.close().addListener(future -> {
+                                    var failResponse =
+                                            new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                                                    HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                                    agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
+                                });
                             });
                     return;
                 }
@@ -110,8 +114,12 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                                             proxyChannel.id().asLongText(),
                                             proxyWriteChannelFuture.cause()
                                     });
-                            proxyChannel.close();
-                            agentChannel.close();
+                            proxyChannel.close().addListener(future -> {
+                                var failResponse =
+                                        new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                                                HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                                agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
+                            });
                         }
                 );
             }
@@ -124,8 +132,11 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                         () -> new Object[]{
                                 agentChannel.id().asLongText(), proxyChannel.id().asLongText()
                         });
-                proxyChannel.close();
-                agentChannel.close();
+                proxyChannel.close().addListener(future -> {
+                    var failResponse =
+                            new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                    agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
+                });
             }
         }
     }
