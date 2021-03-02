@@ -3,6 +3,7 @@ package com.ppaass.agent.handler.socks;
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.handler.socks.bo.SocksAgentTcpConnectionInfo;
 import com.ppaass.common.cryptography.EncryptionType;
+import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.common.message.AgentMessage;
 import com.ppaass.common.message.AgentMessageBody;
 import com.ppaass.common.message.AgentMessageBodyType;
@@ -13,11 +14,12 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.handler.codec.socksx.v5.DefaultSocks5CommandResponse;
 import io.netty.handler.codec.socksx.v5.Socks5CommandRequest;
 import io.netty.handler.codec.socksx.v5.Socks5CommandStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SocksAgentA2PConnectListener implements ChannelFutureListener {
-    private static final Logger logger = LoggerFactory.getLogger(SocksAgentA2PConnectListener.class);
+    static {
+        PpaassLogger.INSTANCE.register(SocksAgentA2PConnectListener.class);
+    }
+
     private final Channel agentChannel;
     private final Socks5CommandRequest socks5CommandRequest;
     private final AgentConfiguration agentConfiguration;
@@ -33,13 +35,17 @@ public class SocksAgentA2PConnectListener implements ChannelFutureListener {
     @Override
     public void operationComplete(ChannelFuture proxyChannelFuture) throws Exception {
         if (!proxyChannelFuture.isSuccess()) {
-            logger.error("Fail connect to proxy, agent channel = {}", agentChannel.id().asLongText());
+            PpaassLogger.INSTANCE.error(SocksAgentA2PConnectListener.class,
+                    () -> "Fail connect to proxy, agent channel = {}",
+                    () -> new Object[]{agentChannel.id().asLongText()});
             agentChannel.writeAndFlush(new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE,
                     socks5CommandRequest.dstAddrType()))
                     .addListener(ChannelFutureListener.CLOSE);
             return;
         }
-        logger.debug("Success connect to proxy, agent channel = {}", agentChannel.id().asLongText());
+        PpaassLogger.INSTANCE.debug(SocksAgentA2PConnectListener.class,
+                () -> "Success connect to proxy, agent channel = {}",
+                () -> new Object[]{agentChannel.id().asLongText()});
         var proxyChannel = proxyChannelFuture.channel();
         var tcpConnectionInfo = new SocksAgentTcpConnectionInfo(
                 socks5CommandRequest.dstAddr(),
@@ -68,25 +74,25 @@ public class SocksAgentA2PConnectListener implements ChannelFutureListener {
         try {
             agentChannelPipeline.remove(SocksAgentProtocolHandler.class.getName());
         } catch (Exception e) {
-            logger.debug(
-                    "Fail to remove SocksV5Handler from proxy channel pipeline, proxy channel = {}",
-                    proxyChannel.id().asLongText());
+            PpaassLogger.INSTANCE.debug(SocksAgentA2PConnectListener.class,
+                    () -> "Fail to remove SocksV5Handler from proxy channel pipeline, proxy channel = {}",
+                    () -> new Object[]{proxyChannel.id().asLongText()});
         }
-        logger.debug(
-                "Send CONNECT_WITH_KEEP_ALIVE from agent to proxy [BEGIN] , agent channel = {}, proxy channel = {}",
-                agentChannel.id().asLongText(), proxyChannel.id().asLongText());
+        PpaassLogger.INSTANCE.trace(SocksAgentA2PConnectListener.class,
+                () -> "Send CONNECT_WITH_KEEP_ALIVE from agent to proxy [BEGIN] , agent channel = {}, proxy channel = {}",
+                () -> new Object[]{proxyChannel.id().asLongText()});
         proxyChannel.writeAndFlush(agentMessage)
                 .addListener((ChannelFutureListener) proxyWriteChannelFuture -> {
                     if (proxyWriteChannelFuture.isSuccess()) {
-                        logger.debug(
-                                "Send CONNECT_WITH_KEEP_ALIVE from agent to proxy [SUCCESS], agent channel = {}, proxy channel = {}",
-                                agentChannel.id().asLongText(), proxyChannel.id().asLongText());
+                        PpaassLogger.INSTANCE.trace(SocksAgentA2PConnectListener.class,
+                                () -> "Send CONNECT_WITH_KEEP_ALIVE from agent to proxy [SUCCESS], agent channel = {}, proxy channel = {}",
+                                () -> new Object[]{agentChannel.id().asLongText(), proxyChannel.id().asLongText()});
                         proxyChannel.read();
                         return;
                     }
-                    logger.debug(
-                            "Send CONNECT_WITH_KEEP_ALIVE from agent to proxy [FAIL], agent channel = {}, proxy channel = {}",
-                            agentChannel.id().asLongText(), proxyChannel.id().asLongText());
+                    PpaassLogger.INSTANCE.debug(SocksAgentA2PConnectListener.class,
+                            () -> "Send CONNECT_WITH_KEEP_ALIVE from agent to proxy [FAIL], agent channel = {}, proxy channel = {}",
+                            () -> new Object[]{agentChannel.id().asLongText(), proxyChannel.id().asLongText()});
                     agentChannel.writeAndFlush(
                             new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE,
                                     tcpConnectionInfo.getTargetAddressType()))

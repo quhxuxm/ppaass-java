@@ -2,20 +2,22 @@ package com.ppaass.agent.handler.http;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.handler.http.bo.HttpConnectionInfo;
+import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.common.message.AgentMessageBodyType;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelOption;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 class HttpAgentProxyConnectListener implements ChannelFutureListener {
-    private static final Logger logger = LoggerFactory.getLogger(HttpAgentProxyConnectListener.class);
     private final Channel agentChannel;
     private final HttpConnectionInfo connectionInfo;
     private final AgentConfiguration agentConfiguration;
     private final Object messageCarriedOnConnectTime;
+
+    static {
+        PpaassLogger.INSTANCE.register(HttpAgentProxyConnectListener.class);
+    }
 
     public HttpAgentProxyConnectListener(Channel agentChannel,
                                          HttpConnectionInfo connectionInfo,
@@ -30,10 +32,12 @@ class HttpAgentProxyConnectListener implements ChannelFutureListener {
     @Override
     public void operationComplete(ChannelFuture proxyChannelConnectFuture) throws Exception {
         if (!proxyChannelConnectFuture.isSuccess()) {
-            logger.error(
-                    "Fail to create HTTP/HTTPS connection to proxy because of exception, agent channel = {}, proxy channel = {}.",
-                    agentChannel.id().asLongText(), proxyChannelConnectFuture.channel().id().asLongText(),
-                    proxyChannelConnectFuture.cause());
+            PpaassLogger.INSTANCE.error(HttpAgentProxyConnectListener.class,
+                    () -> "Fail to create HTTP/HTTPS connection to proxy because of exception, agent channel = {}, proxy channel = {}.",
+                    () -> new Object[]{
+                            agentChannel.id().asLongText(), proxyChannelConnectFuture.channel().id().asLongText(),
+                            proxyChannelConnectFuture.cause()
+                    });
             agentChannel.close();
             return;
         }
@@ -61,10 +65,12 @@ class HttpAgentProxyConnectListener implements ChannelFutureListener {
                             if (proxyChannelWriteFuture.isSuccess()) {
                                 return;
                             }
-                            logger.error(
-                                    "Fail to write HTTP/HTTPS connection data to proxy because of exception, agent channel = {}, proxy channel = {}.",
-                                    agentChannel.id().asLongText(), proxyChannel.id().asLongText(),
-                                    proxyChannelWriteFuture.cause());
+                            PpaassLogger.INSTANCE.error(HttpAgentProxyConnectListener.class,
+                                    () -> "Fail to write HTTP/HTTPS connection data to proxy because of exception, agent channel = {}, proxy channel = {}.",
+                                    () -> new Object[]{
+                                            agentChannel.id().asLongText(), proxyChannel.id().asLongText(),
+                                            proxyChannelWriteFuture.cause()
+                                    });
                             agentChannel.close();
                             proxyChannel.close();
                         });

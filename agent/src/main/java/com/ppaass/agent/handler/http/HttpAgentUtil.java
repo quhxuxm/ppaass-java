@@ -2,6 +2,7 @@ package com.ppaass.agent.handler.http;
 
 import com.ppaass.agent.handler.http.bo.HttpConnectionInfo;
 import com.ppaass.common.cryptography.EncryptionType;
+import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.common.message.AgentMessage;
 import com.ppaass.common.message.AgentMessageBody;
 import com.ppaass.common.message.AgentMessageBodyType;
@@ -13,12 +14,13 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpRequestEncoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 
 class HttpAgentUtil {
-    private static final Logger logger = LoggerFactory.getLogger(HttpAgentUtil.class);
+    static {
+        PpaassLogger.INSTANCE.register(HttpAgentUtil.class);
+    }
+
     private static final String HTTP_SCHEMA = "http://";
     private static final String HTTPS_SCHEMA = "https://";
     private static final String SCHEMA_AND_HOST_SEP = "://";
@@ -87,7 +89,9 @@ class HttpAgentUtil {
             try {
                 port = Integer.parseInt(hostNameAndPortParts[1]);
             } catch (NumberFormatException e) {
-                logger.warn("Fail to parse port from request uri, uri = {}", uri);
+                PpaassLogger.INSTANCE.error(HttpAgentUtil.class,
+                        () -> "Fail to parse port from request uri, uri = {}",
+                        () -> new Object[]{uri});
             }
         }
         return new HttpConnectionInfo(
