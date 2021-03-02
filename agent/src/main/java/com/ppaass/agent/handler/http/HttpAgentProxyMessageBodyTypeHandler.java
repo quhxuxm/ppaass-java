@@ -1,5 +1,6 @@
 package com.ppaass.agent.handler.http;
 
+import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.common.message.AgentMessageBodyType;
 import com.ppaass.common.message.HeartbeatInfo;
 import com.ppaass.common.message.MessageSerializer;
@@ -9,22 +10,25 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
 @Service
 class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMessage> {
-    private static final Logger logger = LoggerFactory.getLogger(HttpAgentProxyMessageBodyTypeHandler.class);
+    static {
+        PpaassLogger.INSTANCE.register(HttpAgentProxyMessageBodyTypeHandler.class);
+    }
 
     @Override
     protected void channelRead0(ChannelHandlerContext proxyChannelContext, ProxyMessage proxyMessage) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
         var connectionInfo = proxyChannel.attr(IHttpAgentConstant.HTTP_CONNECTION_INFO).get();
         if (connectionInfo == null) {
-            logger.error("Close proxy channel because of connection info not exist, proxy channel = {}",
-                    proxyChannel.id().asLongText());
+            PpaassLogger.INSTANCE.error(this.getClass(),
+                    () -> "Close proxy channel because of connection info not exist, proxy channel = {}",
+                    () -> new Object[]{
+                            proxyChannel.id().asLongText()
+                    });
             proxyChannel.close();
             return;
         }
@@ -33,15 +37,19 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
             case HEARTBEAT -> {
                 var originalData = proxyMessage.getBody().getData();
                 var heartbeat = MessageSerializer.JSON_OBJECT_MAPPER.readValue(originalData, HeartbeatInfo.class);
-                logger.trace(
-                        "[HEARTBEAT FROM PROXY]: agent channel = {}, proxy channel = {}, heartbeat id = {}, heartbeat time = {}",
-                        agentChannel.id().asLongText(), proxyChannel.id().asLongText(), heartbeat.getId(),
-                        heartbeat.getUtcDateTime());
+                PpaassLogger.INSTANCE.trace(this.getClass(),
+                        () -> "[HEARTBEAT FROM PROXY]: agent channel = {}, proxy channel = {}, heartbeat id = {}, heartbeat time = {}",
+                        () -> new Object[]{
+                                agentChannel.id().asLongText(), proxyChannel.id().asLongText(), heartbeat.getId(),
+                                heartbeat.getUtcDateTime()
+                        });
             }
             case CONNECT_FAIL -> {
-                logger.error(
-                        "Connect fail for uri: [{}], close it, agent channel = {}, proxy channel = {}",
-                        connectionInfo.getUri(), agentChannel.id().asLongText(), proxyChannel.id().asLongText());
+                PpaassLogger.INSTANCE.error(this.getClass(),
+                        () -> "Connect fail for uri: [{}], close it, agent channel = {}, proxy channel = {}",
+                        () -> new Object[]{
+                                connectionInfo.getUri(), agentChannel.id().asLongText(), proxyChannel.id().asLongText()
+                        });
                 proxyChannel.close();
                 agentChannel.close();
             }
@@ -66,11 +74,13 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                                     proxyChannel.read();
                                     return;
                                 }
-                                logger.error(
-                                        "Fail to write CONNECT_SUCCESS to client because of exception, uri=[{}] agent channel = {}, proxy channel = {}.",
-                                        connectionInfo.getUri(), agentChannel.id().asLongText(),
-                                        proxyChannel.id().asLongText(),
-                                        agentWriteChannelFuture.cause());
+                                PpaassLogger.INSTANCE.trace(this.getClass(),
+                                        () -> "Fail to write CONNECT_SUCCESS to client because of exception, uri=[{}] agent channel = {}, proxy channel = {}.",
+                                        () -> new Object[]{
+                                                connectionInfo.getUri(), agentChannel.id().asLongText(),
+                                                proxyChannel.id().asLongText(),
+                                                agentWriteChannelFuture.cause()
+                                        });
                                 proxyChannel.close();
                                 agentChannel.close();
                             });
@@ -90,11 +100,13 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                                 proxyChannel.read();
                                 return;
                             }
-                            logger.error(
-                                    "Fail to write HTTP DATA to from agent to proxy because of exception, uri=[{}] agent channel = {}, proxy channel = {}.",
-                                    connectionInfo.getUri(), agentChannel.id().asLongText(),
-                                    proxyChannel.id().asLongText(),
-                                    proxyWriteChannelFuture.cause());
+                            PpaassLogger.INSTANCE.trace(this.getClass(),
+                                    () -> "Fail to write HTTP DATA to from agent to proxy because of exception, uri=[{}] agent channel = {}, proxy channel = {}.",
+                                    () -> new Object[]{
+                                            connectionInfo.getUri(), agentChannel.id().asLongText(),
+                                            proxyChannel.id().asLongText(),
+                                            proxyWriteChannelFuture.cause()
+                                    });
                             proxyChannel.close();
                             agentChannel.close();
                         }
@@ -104,9 +116,11 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                 proxyChannelContext.fireChannelRead(proxyMessage);
             }
             case OK_UDP -> {
-                logger.error(
-                        "No OK_UDP proxy message body type for HTTP agent, close it, agent channel = {}, proxy channel = {}",
-                        agentChannel.id().asLongText(), proxyChannel.id().asLongText());
+                PpaassLogger.INSTANCE.trace(this.getClass(),
+                        () -> "No OK_UDP proxy message body type for HTTP agent, close it, agent channel = {}, proxy channel = {}",
+                        () -> new Object[]{
+                                agentChannel.id().asLongText(), proxyChannel.id().asLongText()
+                        });
                 proxyChannel.close();
                 agentChannel.close();
             }

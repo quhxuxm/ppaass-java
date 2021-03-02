@@ -1,5 +1,6 @@
 package com.ppaass.agent.handler.http;
 
+import com.ppaass.common.log.PpaassLogger;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -9,6 +10,10 @@ import org.springframework.stereotype.Service;
 @ChannelHandler.Sharable
 @Service
 class HttpAgentP2AHandler extends ChannelInboundHandlerAdapter {
+    static {
+        PpaassLogger.INSTANCE.register(HttpAgentP2AHandler.class);
+    }
+
     @Override
     public void channelActive(ChannelHandlerContext proxyChannelContext) throws Exception {
         super.channelActive(proxyChannelContext);
@@ -34,6 +39,9 @@ class HttpAgentP2AHandler extends ChannelInboundHandlerAdapter {
         var proxyChannel = proxyChannelContext.channel();
         var connectionInfo = proxyChannel.attr(IHttpAgentConstant.HTTP_CONNECTION_INFO).get();
         if (connectionInfo == null) {
+            PpaassLogger.INSTANCE.error(this.getClass(),
+                    () -> "Close proxy channel because of connection info not exist, proxy channel = {}",
+                    () -> new Object[]{proxyChannel.id().asLongText()});
             proxyChannel.close();
             return;
         }
@@ -43,6 +51,12 @@ class HttpAgentP2AHandler extends ChannelInboundHandlerAdapter {
                 proxyChannel.read();
                 return;
             }
+            PpaassLogger.INSTANCE.trace(this.getClass(),
+                    () -> "Receive proxy data, agent channel = {}, proxy channel = {}, proxy data: \n{}\n",
+                    () -> new Object[]{
+                            agentChannel.id().asLongText(), proxyChannel.id().asLongText(),
+                            msg
+                    });
             proxyChannel.close();
             agentChannel.close();
         });

@@ -57,7 +57,7 @@ class HttpAgentConfigure {
                 proxyChannelPipeline.addLast(new ProxyMessageDecoder(
                         agentConfiguration.getAgentPrivateKey()));
                 proxyChannelPipeline.addLast(httpAgentProxyMessageBodyTypeHandler);
-                proxyChannelPipeline.addLast(new HttpAgentProxyMessageToOriginalDataDecoder());
+                proxyChannelPipeline.addLast(new HttpAgentOriginalProxyDataDecoder());
                 proxyChannelPipeline.addLast(new HttpResponseDecoder());
                 proxyChannelPipeline.addLast(new HttpObjectAggregator(Integer.MAX_VALUE, true));
                 proxyChannelPipeline.addLast(httpAgentP2AHandler);
@@ -108,7 +108,7 @@ class HttpAgentConfigure {
                 proxyChannelPipeline.addLast(new ProxyMessageDecoder(
                         agentConfiguration.getAgentPrivateKey()));
                 proxyChannelPipeline.addLast(httpAgentProxyMessageBodyTypeHandler);
-                proxyChannelPipeline.addLast(new HttpAgentProxyMessageToOriginalDataDecoder());
+                proxyChannelPipeline.addLast(new HttpAgentOriginalProxyDataDecoder());
                 proxyChannelPipeline.addLast(httpAgentP2AHandler);
                 if (agentConfiguration.isProxyTcpCompressEnable()) {
                     proxyChannelPipeline.addLast(new Lz4FrameEncoder());
