@@ -1,8 +1,11 @@
 package com.ppaass.agent.handler.http;
 
 import com.ppaass.agent.AgentConfiguration;
+import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.common.message.AgentMessageBodyType;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -11,14 +14,15 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.util.ReferenceCountUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
 @Service
 public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object> {
-    private static final Logger logger = LoggerFactory.getLogger(HttpAgentProtocolHandler.class);
+    static {
+        PpaassLogger.INSTANCE.register(HttpAgentProtocolHandler.class);
+    }
+
     private final AgentConfiguration agentConfiguration;
     private final Bootstrap proxyBootstrapForHttp;
     private final Bootstrap proxyBootstrapForHttps;
@@ -60,8 +64,12 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
                     HttpHeaderValues.KEEP_ALIVE.contentEqualsIgnoreCase(connectionHeader);
             if (HttpMethod.CONNECT == fullHttpRequest.method()) {
                 //A HTTPS request to setup the connection
-                logger.debug("A https CONNECT request send to uri: [{}], agent channel = {}", fullHttpRequest.uri(),
-                        agentChannel.id().asLongText());
+                PpaassLogger.INSTANCE
+                        .debug(this.getClass(), () -> "A https CONNECT request send to uri: [{}], agent channel = {}",
+                                () -> new Object[]{
+                                        fullHttpRequest.uri(),
+                                        agentChannel.id().asLongText()
+                                });
                 var connectionInfo = HttpAgentUtil.INSTANCE.parseConnectionInfo(fullHttpRequest.uri());
                 if (connectionInfo == null) {
                     agentChannel.close();
@@ -80,8 +88,13 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
             var connectionInfo = agentChannel.attr(IHttpAgentConstant.HTTP_CONNECTION_INFO).get();
             if (connectionInfo != null) {
                 var proxyChannel = connectionInfo.getProxyChannel();
-                logger.debug("HTTP DATA send to uri: [{}], agent channel = {}", fullHttpRequest.uri(),
-                        agentChannel.id().asLongText());
+                PpaassLogger.INSTANCE.trace(this.getClass(),
+                        () -> "HTTP DATA send to uri: [{}], agent channel = {}, http data: \n{}\n",
+                        () -> new Object[]{
+                                fullHttpRequest.uri(),
+                                agentChannel.id().asLongText(),
+                                ByteBufUtil.prettyHexDump(fullHttpRequest.content())
+                        });
                 HttpAgentUtil.INSTANCE.writeAgentMessageToProxy(
                         AgentMessageBodyType.TCP_DATA,
                         connectionInfo.getUserToken(),
@@ -94,11 +107,13 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
                                 agentChannel.read();
                                 return;
                             }
-                            logger.error(
-                                    "Fail to write HTTP data to uri:[{}] because of exception, agent channel = {}, proxy channel = {}.",
-                                    fullHttpRequest.uri(), agentChannel.id().asLongText(),
-                                    proxyChannel.id().asLongText(),
-                                    proxyChannelWriteFuture.cause());
+                            PpaassLogger.INSTANCE.error(this.getClass(),
+                                    () -> "Fail to write HTTP data to uri:[{}] because of exception, agent channel = {}, proxy channel = {}.",
+                                    () -> new Object[]{
+                                            fullHttpRequest.uri(), agentChannel.id().asLongText(),
+                                            proxyChannel.id().asLongText(),
+                                            proxyChannelWriteFuture.cause()
+                                    });
                             agentChannel.close();
                             proxyChannel.close();
                         }
@@ -108,15 +123,22 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
             //First time create HTTP connection
             connectionInfo = HttpAgentUtil.INSTANCE.parseConnectionInfo(fullHttpRequest.uri());
             if (connectionInfo == null) {
-                logger.error(
-                        "Close HTTP agent channel because of connection info not existing for agent channel, agent channel = {}",
-                        agentChannel.id().asLongText());
+                PpaassLogger.INSTANCE.error(this.getClass(),
+                        () -> "Close HTTP agent channel because of connection info not existing for agent channel, agent channel = {}",
+                        () -> new Object[]{
+                                agentChannel.id().asLongText()
+                        });
                 agentChannel.close();
                 return;
             }
             connectionInfo.setKeepAlive(connectionKeepAlive);
-            logger.debug("A http FIRST request send to uri: [{}], agent channel = {}", fullHttpRequest.uri(),
-                    agentChannel.id().asLongText());
+            PpaassLogger.INSTANCE.trace(this.getClass(),
+                    () -> "A http FIRST request send to uri: [{}], agent channel = {}, http data:\n{}\n",
+                    () -> new Object[]{
+                            fullHttpRequest.uri(),
+                            agentChannel.id().asLongText(),
+                            ByteBufUtil.prettyHexDump(fullHttpRequest.content())
+                    });
             this.proxyBootstrapForHttp.connect(agentConfiguration.getProxyHost(),
                     agentConfiguration.getProxyPort())
                     .addListener(new HttpAgentProxyConnectListener(agentChannel, connectionInfo, agentConfiguration,
@@ -126,15 +148,22 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
         //A HTTPS request to send data
         var connectionInfo = agentChannel.attr(IHttpAgentConstant.HTTP_CONNECTION_INFO).get();
         if (connectionInfo == null) {
-            logger.error(
-                    "Close HTTPS agent channel because of connection info not existing for agent channel, agent channel = {}",
-                    agentChannel.id().asLongText());
+            PpaassLogger.INSTANCE.error(this.getClass(),
+                    () -> "Close HTTPS agent channel because of connection info not existing for agent channel, agent channel = {}",
+                    () -> new Object[]{
+                            agentChannel.id().asLongText()
+                    });
             agentChannel.close();
             return;
         }
         var proxyChannel = connectionInfo.getProxyChannel();
-        logger.debug("HTTPS DATA send to uri: [{}], agent channel = {}", connectionInfo.getUri(),
-                agentChannel.id().asLongText());
+        PpaassLogger.INSTANCE.trace(this.getClass(),
+                () -> "HTTPS DATA send to uri: [{}], agent channel = {}",
+                () -> new Object[]{
+                        connectionInfo.getUri(),
+                        agentChannel.id().asLongText(),
+                        ByteBufUtil.prettyHexDump((ByteBuf) httpProxyInput)
+                });
         HttpAgentUtil.INSTANCE.writeAgentMessageToProxy(
                 AgentMessageBodyType.TCP_DATA,
                 connectionInfo.getUserToken(),
@@ -147,11 +176,13 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
                         agentChannel.read();
                         return;
                     }
-                    logger.error(
-                            "Fail to write HTTPS data to uri:[{}] because of exception, agent channel = {}, proxy channel = {}.",
-                            connectionInfo.getUri(),
-                            agentChannel.id().asLongText(), proxyChannel.id().asLongText(),
-                            proxyChannelWriteFuture.cause());
+                    PpaassLogger.INSTANCE.error(this.getClass(),
+                            () -> "Fail to write HTTPS data to uri:[{}] because of exception, agent channel = {}, proxy channel = {}.",
+                            () -> new Object[]{
+                                    connectionInfo.getUri(),
+                                    agentChannel.id().asLongText(), proxyChannel.id().asLongText(),
+                                    proxyChannelWriteFuture.cause()
+                            });
                     agentChannel.close();
                     proxyChannel.close();
                 });

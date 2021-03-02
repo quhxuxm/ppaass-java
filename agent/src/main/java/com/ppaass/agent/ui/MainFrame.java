@@ -303,7 +303,7 @@ public class MainFrame extends JFrame {
         adjustLoggerDialog.setContentPane(contentPanel);
         var adjustLogLevelPanel = new JPanel();
         var adjustLogLevelPanelScrollPane = new JScrollPane(adjustLogLevelPanel);
-        adjustLogLevelPanelScrollPane.setPreferredSize(new Dimension(PANEL_WIDTH, 200));
+        adjustLogLevelPanelScrollPane.setPreferredSize(new Dimension(PANEL_WIDTH, 500));
         adjustLogLevelPanelScrollPane.setVerticalScrollBarPolicy(
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         adjustLogLevelPanelScrollPane.setHorizontalScrollBarPolicy(
