@@ -1,18 +1,20 @@
 package com.ppaass.agent.handler.socks;
 
 import com.ppaass.agent.handler.socks.bo.SocksAgentUdpRequestMessage;
+import com.ppaass.common.log.PpaassLogger;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.socksx.v5.Socks5AddressDecoder;
 import io.netty.handler.codec.socksx.v5.Socks5AddressType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 class SocksAgentUdpMessageDecoder extends MessageToMessageDecoder<DatagramPacket> {
-    private static final Logger logger = LoggerFactory.getLogger(SocksAgentUdpMessageDecoder.class);
+    static {
+        PpaassLogger.INSTANCE.register(SocksAgentUdpMessageDecoder.class);
+    }
 
     @Override
     protected void decode(ChannelHandlerContext agentUdpChannelContext, DatagramPacket udpMessage, List<Object> out)
@@ -35,8 +37,12 @@ class SocksAgentUdpMessageDecoder extends MessageToMessageDecoder<DatagramPacket
                 targetPort,
                 data
         );
-        logger.debug(
-                "Decode socks5 udp message:\n{}\n", socks5UdpMessage);
+        PpaassLogger.INSTANCE.debug(SocksAgentUdpMessageDecoder.class,
+                () -> "Decode socks5 udp message, agent channel = {}, proxy channel = {}, udp message:\n{}\n",
+                () -> new Object[]{
+                        agentUdpChannelContext.channel().id().asLongText(),
+                        ByteBufUtil.prettyHexDump(udpMessageContent)
+                });
         out.add(socks5UdpMessage);
     }
 }
