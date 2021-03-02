@@ -11,7 +11,7 @@
                  target="SYSTEM_OUT">
             <PatternLayout pattern="${LOG_PATTERN}"/>
             <LevelRangeFilter minLevel="FATAL"
-                              maxLevel="DEBUG"
+                              maxLevel="TRACE"
                               onMatch="ACCEPT"/>
         </Console>
         <RollingFile name="FILE_APPENDER"
@@ -19,7 +19,7 @@
                      filePattern="./log/archive/ppaass-agent.%d{yyyy-MM-dd}.log">
             <PatternLayout pattern="${LOG_PATTERN}"/>
             <LevelRangeFilter minLevel="FATAL"
-                              maxLevel="DEBUG"
+                              maxLevel="TRACE"
                               onMatch="ACCEPT"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
