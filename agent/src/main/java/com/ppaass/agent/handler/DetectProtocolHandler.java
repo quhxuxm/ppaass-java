@@ -4,6 +4,7 @@ import com.ppaass.agent.ChannelProtocolCategory;
 import com.ppaass.agent.IAgentConst;
 import com.ppaass.agent.handler.http.HttpAgentProtocolHandler;
 import com.ppaass.agent.handler.socks.SocksAgentProtocolHandler;
+import com.ppaass.common.log.PpaassLogger;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -12,14 +13,15 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.socksx.SocksPortUnificationServerHandler;
 import io.netty.handler.codec.socksx.SocksVersion;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
 @Service
 class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
-    private static final Logger logger = LoggerFactory.getLogger(DetectProtocolHandler.class);
+    static {
+        PpaassLogger.INSTANCE.register(DetectProtocolHandler.class);
+    }
+
     private final SocksAgentProtocolHandler socksAgentProtocolHandler;
     private final HttpAgentProtocolHandler httpAgentProtocolHandler;
 
@@ -40,16 +42,21 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
         var agentChannel = agentChannelContext.channel();
         var channelProtocolType = agentChannel.attr(IAgentConst.CHANNEL_PROTOCOL_CATEGORY).get();
         if (channelProtocolType != null) {
-            logger.debug("Incoming request protocol is: {}, agent channel = {}", channelProtocolType,
-                    agentChannel.id().asLongText());
+            PpaassLogger.INSTANCE
+                    .debug(DetectProtocolHandler.class, () -> "Incoming request protocol is: {}, agent channel = {}",
+                            () -> new Object[]{channelProtocolType,
+                                    agentChannel.id().asLongText()});
             agentChannelContext.fireChannelRead(msg);
             return;
         }
         var messageBuf = (ByteBuf) msg;
         var readerIndex = messageBuf.readerIndex();
         if (messageBuf.writerIndex() == readerIndex) {
-            logger.debug("Incoming request reader index is the same as writer index, agent channel = {}",
-                    agentChannel.id().asLongText());
+            PpaassLogger.INSTANCE
+                    .debug(DetectProtocolHandler.class,
+                            () -> "Incoming request reader index is the same as writer index, agent channel = {}",
+                            () -> new Object[]{
+                                    agentChannel.id().asLongText()});
             agentChannel.close();
             return;
         }
@@ -57,8 +64,11 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
         var agentChannelPipeline = agentChannelContext.pipeline();
         if (SocksVersion.SOCKS4a.byteValue() == protocolVersionByte ||
                 SocksVersion.SOCKS5.byteValue() == protocolVersionByte) {
-            logger.debug("Incoming request is a socks request, agent channel = {}",
-                    agentChannel.id().asLongText());
+            PpaassLogger.INSTANCE
+                    .debug(DetectProtocolHandler.class,
+                            () -> "Incoming request is a socks request, agent channel = {}",
+                            () -> new Object[]{
+                                    agentChannel.id().asLongText()});
             agentChannel.attr(IAgentConst.CHANNEL_PROTOCOL_CATEGORY)
                     .setIfAbsent(ChannelProtocolCategory.SOCKS);
             agentChannelPipeline
@@ -70,8 +80,11 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
             agentChannelContext.fireChannelRead(messageBuf);
             return;
         }
-        logger.debug("Incoming request is a http request, agent channel = {}",
-                agentChannel.id().asLongText());
+        PpaassLogger.INSTANCE
+                .debug(DetectProtocolHandler.class,
+                        () -> "Incoming request is a http request, agent channel = {}",
+                        () -> new Object[]{
+                                agentChannel.id().asLongText()});
         agentChannel.attr(IAgentConst.CHANNEL_PROTOCOL_CATEGORY)
                 .setIfAbsent(ChannelProtocolCategory.HTTP);
         agentChannelPipeline.addLast(HttpServerCodec.class.getName(), new HttpServerCodec());
