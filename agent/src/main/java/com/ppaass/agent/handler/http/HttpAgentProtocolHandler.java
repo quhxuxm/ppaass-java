@@ -64,6 +64,18 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
                     HttpHeaderValues.KEEP_ALIVE.contentEqualsIgnoreCase(connectionHeader);
             if (HttpMethod.CONNECT == fullHttpRequest.method()) {
                 //A HTTPS request to setup the connection
+                var connectionInfo = HttpAgentUtil.INSTANCE.parseConnectionInfo(fullHttpRequest.uri());
+                if (connectionInfo == null) {
+                    PpaassLogger.INSTANCE
+                            .error(HttpAgentProtocolHandler.class,
+                                    () -> "Close agent channel because of fail to parse uri:[{}] on CONNECT, agent channel = {}",
+                                    () -> new Object[]{
+                                            fullHttpRequest.uri(),
+                                            agentChannel.id().asLongText()
+                                    });
+                    agentChannel.close();
+                    return;
+                }
                 PpaassLogger.INSTANCE
                         .debug(HttpAgentProtocolHandler.class,
                                 () -> "A https CONNECT request send to uri: [{}], agent channel = {}",
@@ -71,11 +83,6 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
                                         fullHttpRequest.uri(),
                                         agentChannel.id().asLongText()
                                 });
-                var connectionInfo = HttpAgentUtil.INSTANCE.parseConnectionInfo(fullHttpRequest.uri());
-                if (connectionInfo == null) {
-                    agentChannel.close();
-                    return;
-                }
                 connectionInfo.setKeepAlive(connectionKeepAlive);
                 this.proxyBootstrapForHttps.connect(agentConfiguration.getProxyHost(),
                         agentConfiguration.getProxyPort())
@@ -125,8 +132,9 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
             connectionInfo = HttpAgentUtil.INSTANCE.parseConnectionInfo(fullHttpRequest.uri());
             if (connectionInfo == null) {
                 PpaassLogger.INSTANCE.error(HttpAgentProtocolHandler.class,
-                        () -> "Close HTTP agent channel because of connection info not existing for agent channel, agent channel = {}",
+                        () -> "Close HTTP agent channel because of fail to parse uri:[{}], agent channel = {}",
                         () -> new Object[]{
+                                fullHttpRequest.uri(),
                                 agentChannel.id().asLongText()
                         });
                 agentChannel.close();
