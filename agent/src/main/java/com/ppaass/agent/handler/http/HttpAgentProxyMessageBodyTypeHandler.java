@@ -81,8 +81,11 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                                                 proxyChannel.id().asLongText(),
                                                 agentWriteChannelFuture.cause()
                                         });
+                                var failResponse =
+                                        new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                                                HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                                agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
                                 proxyChannel.close();
-                                agentChannel.close();
                             });
                     return;
                 }

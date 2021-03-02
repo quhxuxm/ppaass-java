@@ -8,6 +8,9 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelOption;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 
 class HttpAgentProxyConnectListener implements ChannelFutureListener {
     private final Channel agentChannel;
@@ -71,7 +74,10 @@ class HttpAgentProxyConnectListener implements ChannelFutureListener {
                                             agentChannel.id().asLongText(), proxyChannel.id().asLongText(),
                                             proxyChannelWriteFuture.cause()
                                     });
-                            agentChannel.close();
+                            var failResponse =
+                                    new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                                            HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                            agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
                             proxyChannel.close();
                         });
     }

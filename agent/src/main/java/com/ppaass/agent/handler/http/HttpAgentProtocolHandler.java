@@ -6,13 +6,11 @@ import com.ppaass.common.message.AgentMessageBodyType;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpHeaderValues;
-import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.*;
 import io.netty.util.ReferenceCountUtil;
 import org.springframework.stereotype.Service;
 
@@ -73,7 +71,9 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
                                             fullHttpRequest.uri(),
                                             agentChannel.id().asLongText()
                                     });
-                    agentChannel.close();
+                    var failResponse =
+                            new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
+                    agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
                     return;
                 }
                 PpaassLogger.INSTANCE
@@ -122,7 +122,10 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
                                             proxyChannel.id().asLongText(),
                                             proxyChannelWriteFuture.cause()
                                     });
-                            agentChannel.close();
+                            var failResponse =
+                                    new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                                            HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                            agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
                             proxyChannel.close();
                         }
                 );
@@ -137,7 +140,9 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
                                 fullHttpRequest.uri(),
                                 agentChannel.id().asLongText()
                         });
-                agentChannel.close();
+                var failResponse =
+                        new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
+                agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
                 return;
             }
             connectionInfo.setKeepAlive(connectionKeepAlive);
@@ -162,7 +167,9 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
                     () -> new Object[]{
                             agentChannel.id().asLongText()
                     });
-            agentChannel.close();
+            var failResponse =
+                    new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
+            agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
             return;
         }
         var proxyChannel = connectionInfo.getProxyChannel();
@@ -192,7 +199,9 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
                                     agentChannel.id().asLongText(), proxyChannel.id().asLongText(),
                                     proxyChannelWriteFuture.cause()
                             });
-                    agentChannel.close();
+                    var failResponse =
+                            new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                    agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
                     proxyChannel.close();
                 });
     }

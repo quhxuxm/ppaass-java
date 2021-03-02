@@ -7,6 +7,9 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
@@ -65,8 +68,10 @@ class HttpAgentP2AHandler extends ChannelInboundHandlerAdapter {
                                 messageToPrint
                         };
                     });
+            var failResponse =
+                    new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+            agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
             proxyChannel.close();
-            agentChannel.close();
         });
     }
 }
