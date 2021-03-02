@@ -60,7 +60,7 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
                     HttpHeaderValues.KEEP_ALIVE.contentEqualsIgnoreCase(connectionHeader);
             if (HttpMethod.CONNECT == fullHttpRequest.method()) {
                 //A HTTPS request to setup the connection
-                logger.debug("A https CONNECT request send to uri: {}, agent channel = {}", fullHttpRequest.uri(),
+                logger.debug("A https CONNECT request send to uri: [{}], agent channel = {}", fullHttpRequest.uri(),
                         agentChannel.id().asLongText());
                 var connectionInfo = HttpAgentUtil.INSTANCE.parseConnectionInfo(fullHttpRequest.uri());
                 if (connectionInfo == null) {
@@ -80,7 +80,7 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
             var connectionInfo = agentChannel.attr(IHttpAgentConstant.HTTP_CONNECTION_INFO).get();
             if (connectionInfo != null) {
                 var proxyChannel = connectionInfo.getProxyChannel();
-                logger.debug("HTTP DATA send to uri: {}, agent channel = {}", fullHttpRequest.uri(),
+                logger.debug("HTTP DATA send to uri: [{}], agent channel = {}", fullHttpRequest.uri(),
                         agentChannel.id().asLongText());
                 HttpAgentUtil.INSTANCE.writeAgentMessageToProxy(
                         AgentMessageBodyType.TCP_DATA,
@@ -95,8 +95,9 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
                                 return;
                             }
                             logger.error(
-                                    "Fail to write HTTP data to proxy because of exception, agent channel = {}, proxy channel = {}.",
-                                    agentChannel.id().asLongText(), proxyChannel.id().asLongText(),
+                                    "Fail to write HTTP data to uri:[{}] because of exception, agent channel = {}, proxy channel = {}.",
+                                    fullHttpRequest.uri(), agentChannel.id().asLongText(),
+                                    proxyChannel.id().asLongText(),
                                     proxyChannelWriteFuture.cause());
                             agentChannel.close();
                             proxyChannel.close();
@@ -107,11 +108,14 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
             //First time create HTTP connection
             connectionInfo = HttpAgentUtil.INSTANCE.parseConnectionInfo(fullHttpRequest.uri());
             if (connectionInfo == null) {
+                logger.error(
+                        "Close HTTP agent channel because of connection info not existing for agent channel, agent channel = {}",
+                        agentChannel.id().asLongText());
                 agentChannel.close();
                 return;
             }
             connectionInfo.setKeepAlive(connectionKeepAlive);
-            logger.debug("A http FIRST request send to uri: {}, agent channel = {}", fullHttpRequest.uri(),
+            logger.debug("A http FIRST request send to uri: [{}], agent channel = {}", fullHttpRequest.uri(),
                     agentChannel.id().asLongText());
             this.proxyBootstrapForHttp.connect(agentConfiguration.getProxyHost(),
                     agentConfiguration.getProxyPort())
@@ -122,11 +126,14 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
         //A HTTPS request to send data
         var connectionInfo = agentChannel.attr(IHttpAgentConstant.HTTP_CONNECTION_INFO).get();
         if (connectionInfo == null) {
+            logger.error(
+                    "Close HTTPS agent channel because of connection info not existing for agent channel, agent channel = {}",
+                    agentChannel.id().asLongText());
             agentChannel.close();
             return;
         }
         var proxyChannel = connectionInfo.getProxyChannel();
-        logger.debug("HTTPS DATA send to uri: {}, agent channel = {}", connectionInfo.getUri(),
+        logger.debug("HTTPS DATA send to uri: [{}], agent channel = {}", connectionInfo.getUri(),
                 agentChannel.id().asLongText());
         HttpAgentUtil.INSTANCE.writeAgentMessageToProxy(
                 AgentMessageBodyType.TCP_DATA,
@@ -141,7 +148,8 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
                         return;
                     }
                     logger.error(
-                            "Fail to write HTTPS data to proxy because of exception, agent channel = {}, proxy channel = {}.",
+                            "Fail to write HTTPS data to uri:[{}] because of exception, agent channel = {}, proxy channel = {}.",
+                            connectionInfo.getUri(),
                             agentChannel.id().asLongText(), proxyChannel.id().asLongText(),
                             proxyChannelWriteFuture.cause());
                     agentChannel.close();

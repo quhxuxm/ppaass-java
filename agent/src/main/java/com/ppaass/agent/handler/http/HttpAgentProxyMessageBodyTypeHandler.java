@@ -23,6 +23,8 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
         var proxyChannel = proxyChannelContext.channel();
         var connectionInfo = proxyChannel.attr(IHttpAgentConstant.HTTP_CONNECTION_INFO).get();
         if (connectionInfo == null) {
+            logger.error("Close proxy channel because of connection info not exist, proxy channel = {}",
+                    proxyChannel.id().asLongText());
             proxyChannel.close();
             return;
         }
@@ -38,8 +40,8 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
             }
             case CONNECT_FAIL -> {
                 logger.error(
-                        "Connect fail, close it, agent channel = {}, proxy channel = {}",
-                        agentChannel.id().asLongText(), proxyChannel.id().asLongText());
+                        "Connect fail for uri: [{}], close it, agent channel = {}, proxy channel = {}",
+                        connectionInfo.getUri(), agentChannel.id().asLongText(), proxyChannel.id().asLongText());
                 proxyChannel.close();
                 agentChannel.close();
             }
@@ -65,8 +67,9 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                                     return;
                                 }
                                 logger.error(
-                                        "Fail to write CONNECT_SUCCESS to client because of exception, agent channel = {}, proxy channel = {}.",
-                                        agentChannel.id().asLongText(), proxyChannel.id().asLongText(),
+                                        "Fail to write CONNECT_SUCCESS to client because of exception, uri=[{}] agent channel = {}, proxy channel = {}.",
+                                        connectionInfo.getUri(), agentChannel.id().asLongText(),
+                                        proxyChannel.id().asLongText(),
                                         agentWriteChannelFuture.cause());
                                 proxyChannel.close();
                                 agentChannel.close();
@@ -87,6 +90,11 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                                 proxyChannel.read();
                                 return;
                             }
+                            logger.error(
+                                    "Fail to write HTTP DATA to from agent to proxy because of exception, uri=[{}] agent channel = {}, proxy channel = {}.",
+                                    connectionInfo.getUri(), agentChannel.id().asLongText(),
+                                    proxyChannel.id().asLongText(),
+                                    proxyWriteChannelFuture.cause());
                             proxyChannel.close();
                             agentChannel.close();
                         }
