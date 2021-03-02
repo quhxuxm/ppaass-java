@@ -64,7 +64,7 @@ class SocksAgentA2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf
                 MessageSerializer.INSTANCE.generateUuidInBytes(),
                 EncryptionType.choose(),
                 agentMessageBody);
-        PpaassLogger.INSTANCE.error(SocksAgentA2PConnectListener.class,
+        PpaassLogger.INSTANCE.debug(SocksAgentA2PConnectListener.class,
                 () -> "Forward client original message to proxy, agent channel = {}, proxy channel = {}",
                 () -> new Object[]{
                         agentChannel.id().asLongText(), proxyTcpChannel.id().asLongText()
@@ -81,9 +81,10 @@ class SocksAgentA2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf
                 return;
             }
             PpaassLogger.INSTANCE.error(SocksAgentA2PConnectListener.class,
-                    () -> "Fail forward client original message to proxy, agent channel = {}, proxy channel = {}",
+                    () -> "Fail forward client original message to proxy because of exception, agent channel = {}, proxy channel = {}",
                     () -> new Object[]{
-                            agentChannel.id().asLongText(), proxyTcpChannel.id().asLongText()
+                            agentChannel.id().asLongText(), proxyTcpChannel.id().asLongText(),
+                            proxyChannelFuture.cause()
                     });
             agentChannel.close();
             proxyTcpChannel.close();
