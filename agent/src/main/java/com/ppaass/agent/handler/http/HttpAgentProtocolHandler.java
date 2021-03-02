@@ -159,7 +159,7 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
         }
         var proxyChannel = connectionInfo.getProxyChannel();
         PpaassLogger.INSTANCE.trace(HttpAgentProtocolHandler.class,
-                () -> "HTTPS DATA send to uri: [{}], agent channel = {}",
+                () -> "HTTPS DATA send to uri: [{}], agent channel = {}, https data:\n{}\n",
                 () -> new Object[]{
                         connectionInfo.getUri(),
                         agentChannel.id().asLongText(),
