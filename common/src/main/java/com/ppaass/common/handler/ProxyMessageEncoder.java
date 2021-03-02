@@ -22,7 +22,7 @@ public class ProxyMessageEncoder extends MessageToByteEncoder<ProxyMessage> {
     protected void encode(ChannelHandlerContext ctx, ProxyMessage msg, ByteBuf out) throws Exception {
         MessageSerializer.INSTANCE.encodeMessage(msg, this.agentPublicKey, out);
         PpaassLogger.INSTANCE
-                .trace(ProxyMessageDecoder.class, () -> "Encode proxy message, channel = {}, proxy message = {}",
+                .trace(ProxyMessageEncoder.class, () -> "Encode proxy message, channel = {}, proxy message = {}",
                         () -> new Object[]{
                                 ctx.channel().id().asLongText(),
                                 msg

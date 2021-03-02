@@ -1,6 +1,8 @@
 package com.ppaass.agent.handler.http;
 
 import com.ppaass.common.log.PpaassLogger;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -53,9 +55,15 @@ class HttpAgentP2AHandler extends ChannelInboundHandlerAdapter {
             }
             PpaassLogger.INSTANCE.trace(HttpAgentP2AHandler.class,
                     () -> "Receive proxy data, agent channel = {}, proxy channel = {}, proxy data: \n{}\n",
-                    () -> new Object[]{
-                            agentChannel.id().asLongText(), proxyChannel.id().asLongText(),
-                            msg
+                    () -> {
+                        var messageToPrint = msg;
+                        if (messageToPrint instanceof ByteBuf) {
+                            messageToPrint = ByteBufUtil.prettyHexDump((ByteBuf) msg);
+                        }
+                        return new Object[]{
+                                agentChannel.id().asLongText(), proxyChannel.id().asLongText(),
+                                messageToPrint
+                        };
                     });
             proxyChannel.close();
             agentChannel.close();
