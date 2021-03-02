@@ -1,21 +1,26 @@
 package com.ppaass.common.log;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class PpaassLogger {
     public static PpaassLogger INSTANCE = new PpaassLogger();
+    private static final Map<Class<?>, Logger> loggers = new HashMap<>();
 
     private PpaassLogger() {
     }
 
     public void register(Class<?> clazz) {
-        LoggerFactory.getLogger(clazz);
+        var logger = LoggerFactory.getLogger(clazz);
+        loggers.put(clazz, logger);
     }
 
     public <T> void info(Class<T> targetClass, Supplier<String> logSupplier, Supplier<Object[]> argumentsSupplier) {
-        var logger = LoggerFactory.getLogger(targetClass);
+        var logger = loggers.get(targetClass);
         if (logger.isInfoEnabled()) {
             logger.info(logSupplier.get(), argumentsSupplier.get());
         }
