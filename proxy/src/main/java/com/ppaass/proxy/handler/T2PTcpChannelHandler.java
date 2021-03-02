@@ -1,6 +1,7 @@
 package com.ppaass.proxy.handler;
 
 import com.ppaass.common.cryptography.EncryptionType;
+import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.common.message.MessageSerializer;
 import com.ppaass.common.message.ProxyMessage;
 import com.ppaass.common.message.ProxyMessageBody;
@@ -11,14 +12,14 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 @ChannelHandler.Sharable
 public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
-    private static final Logger logger = LoggerFactory.getLogger(T2PTcpChannelHandler.class);
+    static {
+        PpaassLogger.INSTANCE.register(T2PTcpChannelHandler.class);
+    }
 
     @Override
     public void channelActive(ChannelHandlerContext targetChannelContext) throws Exception {
@@ -46,9 +47,11 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
         var targetChannel = targetChannelContext.channel();
         var connectionInfo = targetChannel.attr(IProxyConstant.TCP_CONNECTION_INFO).get();
         if (connectionInfo == null) {
-            logger.error(
-                    "Fail to transfer data from target to proxy because of no agent connection information attached, target channel = {}.",
-                    targetChannel.id().asLongText());
+            PpaassLogger.INSTANCE.error(T2PTcpChannelHandler.class,
+                    () -> "Fail to transfer data from target to proxy because of no agent connection information attached, target channel = {}.",
+                    () -> new Object[]{
+                            targetChannel.id().asLongText()
+                    });
             targetChannel.close();
             return;
         }
@@ -74,10 +77,12 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
                         //proxyChannel.read();
                         return;
                     }
-                    logger.error(
-                            "Fail to write proxy message to agent because of exception, proxy channel = {}, target channel = {}",
-                            proxyChannel.id().asLongText(), targetChannel.id().asLongText(),
-                            proxyChannelFuture.cause());
+                    PpaassLogger.INSTANCE.error(T2PTcpChannelHandler.class,
+                            () -> "Fail to write proxy message to agent because of exception, proxy channel = {}, target channel = {}",
+                            () -> new Object[]{
+                                    proxyChannel.id().asLongText(), targetChannel.id().asLongText(),
+                                    proxyChannelFuture.cause()
+                            });
                     targetChannel.close();
                     proxyChannel.close();
                 });

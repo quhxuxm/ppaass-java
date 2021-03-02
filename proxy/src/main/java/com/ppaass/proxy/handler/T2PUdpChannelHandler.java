@@ -1,6 +1,7 @@
 package com.ppaass.proxy.handler;
 
 import com.ppaass.common.cryptography.EncryptionType;
+import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.common.message.MessageSerializer;
 import com.ppaass.common.message.ProxyMessage;
 import com.ppaass.common.message.ProxyMessageBody;
@@ -11,14 +12,14 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 @ChannelHandler.Sharable
 public class T2PUdpChannelHandler extends SimpleChannelInboundHandler<DatagramPacket> {
-    private static final Logger logger = LoggerFactory.getLogger(T2PUdpChannelHandler.class);
+    static {
+        PpaassLogger.INSTANCE.register(T2PUdpChannelHandler.class);
+    }
 
     @Override
     protected void channelRead0(ChannelHandlerContext targetUdpChannelContext, DatagramPacket targetUdpMessage)
@@ -41,10 +42,12 @@ public class T2PUdpChannelHandler extends SimpleChannelInboundHandler<DatagramPa
                         MessageSerializer.INSTANCE.generateUuidInBytes(),
                         EncryptionType.choose(),
                         proxyMessageBody);
-        logger.debug(
-                "Receive udp package from target: {}, data:\n{}\n\nproxy message: \n{}\n",
-                targetUdpMessage,
-                ByteBufUtil.prettyHexDump(targetUdpMessageContent), proxyMessage);
+        PpaassLogger.INSTANCE.error(T2PUdpChannelHandler.class,
+                () -> "Receive udp package from target: {}, data:\n{}\n\nproxy message: \n{}\n",
+                () -> new Object[]{
+                        targetUdpMessage,
+                        ByteBufUtil.prettyHexDump(targetUdpMessageContent), proxyMessage
+                });
         udpConnectionInfo.getProxyTcpChannel().writeAndFlush(proxyMessage);
     }
 }

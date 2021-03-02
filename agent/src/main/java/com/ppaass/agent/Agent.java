@@ -2,6 +2,7 @@ package com.ppaass.agent;
 
 import com.ppaass.agent.handler.AgentChannelInitializer;
 import com.ppaass.common.exception.PpaassException;
+import com.ppaass.common.log.PpaassLogger;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -10,13 +11,14 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class Agent {
-    private static final Logger logger = LoggerFactory.getLogger(Agent.class);
+    static {
+        PpaassLogger.INSTANCE.register(Agent.class);
+    }
+
     private Channel serverSocketChannel;
     private EventLoopGroup masterThreadGroup;
     private EventLoopGroup workerThreadGroup;
@@ -59,7 +61,8 @@ public class Agent {
         try {
             channelFuture = newServerBootstrap.bind(agentTcpPort).sync();
         } catch (InterruptedException e) {
-            logger.error("Fail to start ppaass because of exception", e);
+            PpaassLogger.INSTANCE
+                    .error(Agent.class, () -> "Fail to start ppaass because of exception", () -> new Object[]{e});
             throw new PpaassException("Fail to start ppaass because of exception", e);
         }
         this.serverSocketChannel = channelFuture.channel();
@@ -72,7 +75,8 @@ public class Agent {
             try {
                 this.serverSocketChannel.close().sync();
             } catch (InterruptedException e) {
-                logger.error("Fail to stop ppaass because of exception", e);
+                PpaassLogger.INSTANCE
+                        .error(Agent.class, () -> "Fail to stop ppaass because of exception", () -> new Object[]{e});
             }
         }
         if (this.masterThreadGroup != null) {
