@@ -20,13 +20,11 @@ RUN rm -rf /ppaass/sourcecode
 # Build
 RUN mkdir /ppaass/sourcecode
 RUN mkdir /ppaass/build
+RUN mkdir /ppaass/build/proxy
 # ps -ef | grep gradle | grep -v grep | awk '{print $2}' | xargs kill -9
-COPY ppaass-1.0-SNAPSHOT.zip /ppaass/build/ppaass-1.0-SNAPSHOT.zip
-RUN chmod 777 /ppaass/build/ppaass-1.0-SNAPSHOT.zip
-WORKDIR /ppaass/build/
-RUN unzip ppaass-1.0-SNAPSHOT.zip
+COPY proxy-1.0-SNAPSHOT.jar /ppaass/build/proxy/proxy-1.0-SNAPSHOT.jar
+COPY start.sh /ppaass/build/proxy/start.sh
 WORKDIR /ppaass/build/proxy
-RUN chmod 777 *.sh
+RUN chmod 777 proxy-1.0-SNAPSHOT.jar
+RUN chmod 777 start.sh
 CMD ./start.sh
-
-
