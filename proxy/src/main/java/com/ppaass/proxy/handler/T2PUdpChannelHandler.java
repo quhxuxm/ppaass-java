@@ -42,7 +42,7 @@ public class T2PUdpChannelHandler extends SimpleChannelInboundHandler<DatagramPa
                         MessageSerializer.INSTANCE.generateUuidInBytes(),
                         EncryptionType.choose(),
                         proxyMessageBody);
-        PpaassLogger.INSTANCE.error(T2PUdpChannelHandler.class,
+        PpaassLogger.INSTANCE.debug(T2PUdpChannelHandler.class,
                 () -> "Receive udp package from target: {}, data:\n{}\n\nproxy message: \n{}\n",
                 () -> new Object[]{
                         targetUdpMessage,

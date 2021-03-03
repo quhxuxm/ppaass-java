@@ -126,7 +126,21 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
             case OK_TCP -> {
                 proxyChannelContext.fireChannelRead(proxyMessage);
             }
-            case OK_UDP -> {
+            case FAIL_TCP -> {
+                PpaassLogger.INSTANCE.trace(HttpAgentProxyMessageBodyTypeHandler.class,
+                        () -> "FAIL_TCP happen close connection, agent channel = {}, proxy channel = {}.",
+                        () -> new Object[]{
+                                connectionInfo.getUri(), agentChannel.id().asLongText(),
+                                proxyChannel.id().asLongText()
+                        });
+                proxyChannel.close().addListener(future -> {
+                    var failResponse =
+                            new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                                    HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                    agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
+                });
+            }
+            case OK_UDP, FAIL_UDP -> {
                 PpaassLogger.INSTANCE.trace(HttpAgentProxyMessageBodyTypeHandler.class,
                         () -> "No OK_UDP proxy message body type for HTTP agent, close it, agent channel = {}, proxy channel = {}",
                         () -> new Object[]{

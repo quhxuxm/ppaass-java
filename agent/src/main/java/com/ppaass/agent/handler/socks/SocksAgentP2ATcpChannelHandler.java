@@ -176,6 +176,28 @@ class SocksAgentP2ATcpChannelHandler extends SimpleChannelInboundHandler<ProxyMe
                             proxyChannel.close();
                         });
             }
+            case FAIL_TCP, FAIL_UDP -> {
+                if (tcpConnectionInfo == null) {
+                    PpaassLogger.INSTANCE.debug(SocksAgentP2ATcpChannelHandler.class,
+                            () -> "No tcp connection information in proxy channel [{}], close it, proxy channel = {}",
+                            () -> new Object[]{
+                                    proxyMessage.getBody().getBodyType(),
+                                    proxyChannel.id().asLongText()
+                            });
+                    proxyChannel.close();
+                    return;
+                }
+                var agentTcpChannel = tcpConnectionInfo.getAgentTcpChannel();
+                PpaassLogger.INSTANCE.debug(SocksAgentP2ATcpChannelHandler.class,
+                        () -> "{} happen close connection, agent channel = {}, proxy channel = {}",
+                        () -> new Object[]{
+                                proxyMessage.getBody().getBodyType(),
+                                agentTcpChannel.id().asLongText(),
+                                proxyChannel.id().asLongText()
+                        });
+                proxyChannel.close();
+                agentTcpChannel.close();
+            }
             case OK_TCP -> {
                 var tcpDataByteBuf = Unpooled.wrappedBuffer(proxyMessage.getBody().getData());
                 PpaassLogger.INSTANCE.trace(SocksAgentP2ATcpChannelHandler.class,

@@ -82,8 +82,13 @@ public class P2TTcpChannelHandler extends SimpleChannelInboundHandler<AgentMessa
                                             proxyChannel.id().asLongText(), targetTcpChannel.id().asLongText(),
                                             targetChannelFuture.cause()
                                     });
-                            targetTcpChannel.close();
-                            proxyChannel.close();
+                            var failProxyMessageBody = new ProxyMessageBody(MessageSerializer.INSTANCE.generateUuid(),
+                                    agentMessage.getBody().getUserToken(), agentMessage.getBody().getTargetHost(),
+                                    agentMessage.getBody().getTargetPort(),ProxyMessageBodyType.FAIL_TCP, new byte[]{} );
+                            var failProxyMessage=new ProxyMessage(MessageSerializer.INSTANCE.generateUuidInBytes(), EncryptionType.choose(), failProxyMessageBody);
+                            targetTcpChannel.close().addListener(future -> {
+                                proxyChannel.writeAndFlush(failProxyMessage).addListener(ChannelFutureListener.CLOSE);
+                            });
                         });
             }
             case UDP_DATA -> {
