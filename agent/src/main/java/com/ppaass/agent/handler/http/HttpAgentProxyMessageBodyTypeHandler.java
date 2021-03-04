@@ -60,7 +60,8 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                 if (connectionInfo.isHttps()) {
                     //HTTPS
                     var okResponse =
-                            new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+                            new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
+                                    IHttpAgentConstant.CONNECTION_ESTABLISHED);
                     agentChannel.writeAndFlush(okResponse)
                             .addListener((ChannelFutureListener) agentWriteChannelFuture -> {
                                 if (agentWriteChannelFuture.isSuccess()) {
