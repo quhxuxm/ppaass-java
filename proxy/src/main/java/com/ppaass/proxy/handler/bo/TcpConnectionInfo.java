@@ -9,7 +9,8 @@ public class TcpConnectionInfo {
     private final Channel proxyTcpChannel;
     private final Channel targetTcpChannel;
     private final boolean targetTcpConnectionKeepAlive;
-    private int heartBeatFailureTimes;
+    private int heartbeatFailureTimes;
+    private boolean heartbeatPending;
 
     public TcpConnectionInfo(String targetHost, int targetPort, String userToken, Channel proxyTcpChannel,
                              Channel targetTcpChannel, boolean targetTcpConnectionKeepAlive) {
@@ -19,7 +20,8 @@ public class TcpConnectionInfo {
         this.proxyTcpChannel = proxyTcpChannel;
         this.targetTcpChannel = targetTcpChannel;
         this.targetTcpConnectionKeepAlive = targetTcpConnectionKeepAlive;
-        this.heartBeatFailureTimes = 0;
+        this.heartbeatFailureTimes = 0;
+        this.heartbeatPending = false;
     }
 
     public String getTargetHost() {
@@ -46,11 +48,19 @@ public class TcpConnectionInfo {
         return targetTcpConnectionKeepAlive;
     }
 
-    public int getHeartBeatFailureTimes() {
-        return heartBeatFailureTimes;
+    public int getHeartbeatFailureTimes() {
+        return heartbeatFailureTimes;
     }
 
-    public void setHeartBeatFailureTimes(int heartBeatFailureTimes) {
-        this.heartBeatFailureTimes = heartBeatFailureTimes;
+    public void setHeartbeatFailureTimes(int heartbeatFailureTimes) {
+        this.heartbeatFailureTimes = heartbeatFailureTimes;
+    }
+
+    public boolean isHeartbeatPending() {
+        return heartbeatPending;
+    }
+
+    public void setHeartbeatPending(boolean heartbeatPending) {
+        this.heartbeatPending = heartbeatPending;
     }
 }

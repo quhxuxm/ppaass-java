@@ -54,6 +54,15 @@ public class P2ATcpChannelHeartbeatHandler extends ChannelInboundHandlerAdapter 
         if (tcpConnectionInfo == null) {
             return;
         }
+        if (tcpConnectionInfo.isHeartbeatPending()) {
+            PpaassLogger.INSTANCE.trace(P2ATcpChannelHeartbeatHandler.class,
+                    () -> "Heartbeat to agent is in pending status, skip this heartbeat, proxy channel = {}, target channel = {}",
+                    () -> new Object[]{
+                            proxyChannel.id().asLongText(),
+                            tcpConnectionInfo.getTargetTcpChannel().id().asLongText()
+                    });
+            return;
+        }
         var messageBody = new ProxyMessageBody(
                 MessageSerializer.INSTANCE.generateUuid(),
                 tcpConnectionInfo.getUserToken(),
@@ -68,9 +77,11 @@ public class P2ATcpChannelHeartbeatHandler extends ChannelInboundHandlerAdapter 
                         EncryptionType.choose(),
                         messageBody
                 );
+        tcpConnectionInfo.setHeartbeatPending(true);
         proxyChannel.writeAndFlush(heartbeatMessage).addListener((ChannelFutureListener) proxyChannelFuture -> {
+            tcpConnectionInfo.setHeartbeatPending(false);
             if (proxyChannelFuture.isSuccess()) {
-                tcpConnectionInfo.setHeartBeatFailureTimes(0);
+                tcpConnectionInfo.setHeartbeatFailureTimes(0);
                 PpaassLogger.INSTANCE.debug(P2ATcpChannelHeartbeatHandler.class,
                         () -> "Heartbeat success with agent, proxy channel = {}, target channel = {}",
                         () -> new Object[]{
@@ -79,24 +90,25 @@ public class P2ATcpChannelHeartbeatHandler extends ChannelInboundHandlerAdapter 
                         });
                 return;
             }
-            if (tcpConnectionInfo.getHeartBeatFailureTimes() >= proxyConfiguration.getProxyTcpChannelHeartbeatRetry()) {
+            if (tcpConnectionInfo.getHeartbeatFailureTimes() >= proxyConfiguration.getProxyTcpChannelHeartbeatRetry()) {
                 PpaassLogger.INSTANCE.error(P2ATcpChannelHeartbeatHandler.class,
                         () -> "Heartbeat fail with agent, close it, time = {}, proxy channel = {}, target channel = {}",
                         () -> new Object[]{
-                                tcpConnectionInfo.getHeartBeatFailureTimes(), proxyChannel.id().asLongText(),
+                                tcpConnectionInfo.getHeartbeatFailureTimes(), proxyChannel.id().asLongText(),
                                 tcpConnectionInfo.getTargetTcpChannel().id().asLongText()
                         });
-                proxyChannel.close();
-                tcpConnectionInfo.getTargetTcpChannel().close();
+                tcpConnectionInfo.getTargetTcpChannel().close().addListener(future -> {
+                    proxyChannel.close();
+                });
                 return;
             }
             PpaassLogger.INSTANCE.error(P2ATcpChannelHeartbeatHandler.class,
                     () -> "Heartbeat fail with agent, time = {}, proxy channel = {}, target channel = {}",
                     () -> new Object[]{
-                            tcpConnectionInfo.getHeartBeatFailureTimes(), proxyChannel.id().asLongText(),
+                            tcpConnectionInfo.getHeartbeatFailureTimes(), proxyChannel.id().asLongText(),
                             tcpConnectionInfo.getTargetTcpChannel().id().asLongText()
                     });
-            tcpConnectionInfo.setHeartBeatFailureTimes(tcpConnectionInfo.getHeartBeatFailureTimes() + 1);
+            tcpConnectionInfo.setHeartbeatFailureTimes(tcpConnectionInfo.getHeartbeatFailureTimes() + 1);
         });
     }
 }

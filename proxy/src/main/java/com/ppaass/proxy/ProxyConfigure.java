@@ -161,8 +161,8 @@ class ProxyConfigure {
             public void initChannel(SocketChannel proxyChannel) {
                 //Inbound
                 proxyChannel.pipeline().addLast(
-                        new IdleStateHandler(proxyConfiguration.getProxyTcpChannelReadIdleSeconds(),
-                                proxyConfiguration.getProxyTcpChannelWriteIdleSeconds(),
+                        new IdleStateHandler(0,
+                               0,
                                 proxyConfiguration.getProxyTcpChannelAllIdleSeconds()));
                 proxyChannel.pipeline().addLast(p2ATcpChannelHeartbeatHandler);
                 proxyChannel.pipeline().addLast(new ChannelTrafficShapingHandler(
