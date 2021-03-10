@@ -22,7 +22,7 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
         PpaassLogger.INSTANCE.register(T2PTcpChannelHandler.class);
     }
 
-    private ProxyConfiguration proxyConfiguration;
+    private final ProxyConfiguration proxyConfiguration;
 
     public T2PTcpChannelHandler(ProxyConfiguration proxyConfiguration) {
         this.proxyConfiguration = proxyConfiguration;
@@ -70,6 +70,14 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
             } else {
                 originalDataByteArray = new byte[targetOriginalMessageBuf.readableBytes()];
             }
+            int finalPackageSize = originalDataByteArray.length;
+            PpaassLogger.INSTANCE
+                    .trace(T2PTcpChannelHandler.class,
+                            () -> "Incoming package size is {}, use {} as the package size, " +
+                                    "target channel = {}, proxy channel = {}",
+                            () -> new Object[]{targetOriginalMessageBuf.readableBytes(),
+                                    finalPackageSize, targetChannel.id().asLongText(),
+                                    proxyChannel.id().asLongText()});
             targetOriginalMessageBuf.readBytes(originalDataByteArray);
             var proxyMessageBody =
                     new ProxyMessageBody(
