@@ -7,6 +7,7 @@ import com.ppaass.common.message.ProxyMessage;
 import com.ppaass.common.message.ProxyMessageBody;
 import com.ppaass.common.message.ProxyMessageBodyType;
 import com.ppaass.proxy.IProxyConstant;
+import com.ppaass.proxy.ProxyConfiguration;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
@@ -19,6 +20,12 @@ import org.springframework.stereotype.Service;
 public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
     static {
         PpaassLogger.INSTANCE.register(T2PTcpChannelHandler.class);
+    }
+
+    private ProxyConfiguration proxyConfiguration;
+
+    public T2PTcpChannelHandler(ProxyConfiguration proxyConfiguration) {
+        this.proxyConfiguration = proxyConfiguration;
     }
 
     @Override
@@ -56,35 +63,42 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
             return;
         }
         var proxyChannel = connectionInfo.getProxyTcpChannel();
-        var originalDataByteArray = new byte[targetOriginalMessageBuf.readableBytes()];
-        targetOriginalMessageBuf.readBytes(originalDataByteArray);
-        var proxyMessageBody =
-                new ProxyMessageBody(
-                        MessageSerializer.INSTANCE.generateUuid(),
-                        connectionInfo.getUserToken(),
-                        connectionInfo.getTargetHost(),
-                        connectionInfo.getTargetPort(),
-                        ProxyMessageBodyType.OK_TCP,
-                        originalDataByteArray);
-        var proxyMessage = new ProxyMessage(
-                MessageSerializer.INSTANCE.generateUuidInBytes(),
-                EncryptionType.choose(),
-                proxyMessageBody);
-        proxyChannel.writeAndFlush(proxyMessage)
-                .addListener((ChannelFutureListener) proxyChannelFuture -> {
-                    if (proxyChannelFuture.isSuccess()) {
-                        targetChannel.read();
-                        //proxyChannel.read();
-                        return;
-                    }
-                    PpaassLogger.INSTANCE.error(T2PTcpChannelHandler.class,
-                            () -> "Fail to write proxy message to agent because of exception, proxy channel = {}, target channel = {}",
-                            () -> new Object[]{
-                                    proxyChannel.id().asLongText(), targetChannel.id().asLongText(),
-                                    proxyChannelFuture.cause()
-                            });
-                    targetChannel.close();
-                    proxyChannel.close();
-                });
+        while (targetOriginalMessageBuf.isReadable()) {
+            byte[] originalDataByteArray = null;
+            if (targetOriginalMessageBuf.readableBytes() > this.proxyConfiguration.getTargetPackageSize()) {
+                originalDataByteArray = new byte[this.proxyConfiguration.getTargetPackageSize()];
+            } else {
+                originalDataByteArray = new byte[targetOriginalMessageBuf.readableBytes()];
+            }
+            targetOriginalMessageBuf.readBytes(originalDataByteArray);
+            var proxyMessageBody =
+                    new ProxyMessageBody(
+                            MessageSerializer.INSTANCE.generateUuid(),
+                            connectionInfo.getUserToken(),
+                            connectionInfo.getTargetHost(),
+                            connectionInfo.getTargetPort(),
+                            ProxyMessageBodyType.OK_TCP,
+                            originalDataByteArray);
+            var proxyMessage = new ProxyMessage(
+                    MessageSerializer.INSTANCE.generateUuidInBytes(),
+                    EncryptionType.choose(),
+                    proxyMessageBody);
+            proxyChannel.writeAndFlush(proxyMessage)
+                    .addListener((ChannelFutureListener) proxyChannelFuture -> {
+                        if (proxyChannelFuture.isSuccess()) {
+                            targetChannel.read();
+                            //proxyChannel.read();
+                            return;
+                        }
+                        PpaassLogger.INSTANCE.error(T2PTcpChannelHandler.class,
+                                () -> "Fail to write proxy message to agent because of exception, proxy channel = {}, target channel = {}",
+                                () -> new Object[]{
+                                        proxyChannel.id().asLongText(), targetChannel.id().asLongText(),
+                                        proxyChannelFuture.cause()
+                                });
+                        targetChannel.close();
+                        proxyChannel.close();
+                    });
+        }
     }
 }

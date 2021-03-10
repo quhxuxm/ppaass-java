@@ -54,6 +54,7 @@ public class ProxyConfiguration {
     private int targetTcpChannelReadIdleSeconds;
     private int targetTcpChannelWriteIdleSeconds;
     private int targetTcpChannelAllIdleSeconds;
+    private int targetPackageSize;
     private Resource proxyPrivateKeyFile;
     private Resource agentPublicKeyFile;
     private byte[] proxyPrivateKey;
@@ -405,6 +406,14 @@ public class ProxyConfiguration {
 
     public byte[] getProxyPrivateKey() {
         return proxyPrivateKey;
+    }
+
+    public void setTargetPackageSize(int targetPackageSize) {
+        this.targetPackageSize = targetPackageSize;
+    }
+
+    public int getTargetPackageSize() {
+        return targetPackageSize;
     }
 
     @PostConstruct
