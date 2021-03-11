@@ -15,6 +15,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.CountDownLatch;
+
 @Service
 @ChannelHandler.Sharable
 public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
@@ -63,20 +65,27 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
             return;
         }
         var proxyChannel = connectionInfo.getProxyTcpChannel();
+        int packageNumber;
+        if (targetOriginalMessageBuf.readableBytes() % this.proxyConfiguration.getTargetPackageSize() == 0) {
+            packageNumber = targetOriginalMessageBuf.readableBytes() / this.proxyConfiguration.getTargetPackageSize();
+        } else {
+            packageNumber =
+                    targetOriginalMessageBuf.readableBytes() / this.proxyConfiguration.getTargetPackageSize() + 1;
+        }
+        var packageCountdownLatch = new CountDownLatch(packageNumber);
         while (targetOriginalMessageBuf.isReadable()) {
-            byte[] originalDataByteArray = null;
+            final byte[] originalDataByteArray;
             if (targetOriginalMessageBuf.readableBytes() > this.proxyConfiguration.getTargetPackageSize()) {
                 originalDataByteArray = new byte[this.proxyConfiguration.getTargetPackageSize()];
             } else {
                 originalDataByteArray = new byte[targetOriginalMessageBuf.readableBytes()];
             }
-            int finalPackageSize = originalDataByteArray.length;
             PpaassLogger.INSTANCE
                     .trace(T2PTcpChannelHandler.class,
                             () -> "Incoming package size is {}, use {} as the package size, " +
                                     "target channel = {}, proxy channel = {}",
                             () -> new Object[]{targetOriginalMessageBuf.readableBytes(),
-                                    finalPackageSize, targetChannel.id().asLongText(),
+                                    originalDataByteArray.length, targetChannel.id().asLongText(),
                                     proxyChannel.id().asLongText()});
             targetOriginalMessageBuf.readBytes(originalDataByteArray);
             var proxyMessageBody =
@@ -95,6 +104,7 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
                     .addListener((ChannelFutureListener) proxyChannelFuture -> {
                         if (proxyChannelFuture.isSuccess()) {
                             //proxyChannel.read();
+                            packageCountdownLatch.countDown();
                             return;
                         }
                         PpaassLogger.INSTANCE.error(T2PTcpChannelHandler.class,
@@ -107,6 +117,7 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
                         proxyChannel.close();
                     });
         }
+        packageCountdownLatch.await();
         targetChannel.read();
     }
 }
