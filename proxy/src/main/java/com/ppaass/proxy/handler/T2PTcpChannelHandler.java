@@ -91,10 +91,9 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
                     MessageSerializer.INSTANCE.generateUuidInBytes(),
                     EncryptionType.choose(),
                     proxyMessageBody);
-            proxyChannel.writeAndFlush(proxyMessage)
+            proxyChannel.writeAndFlush(proxyMessage).sync()
                     .addListener((ChannelFutureListener) proxyChannelFuture -> {
                         if (proxyChannelFuture.isSuccess()) {
-                            targetChannel.read();
                             //proxyChannel.read();
                             return;
                         }
@@ -108,5 +107,6 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
                         proxyChannel.close();
                     });
         }
+        targetChannel.read();
     }
 }
