@@ -81,6 +81,7 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
                 .addListener((ChannelFutureListener) proxyChannelFuture -> {
                     if (proxyChannelFuture.isSuccess()) {
                         proxyChannel.read();
+                        targetChannel.read();
                         return;
                     }
                     PpaassLogger.INSTANCE.error(T2PTcpChannelHandler.class,
