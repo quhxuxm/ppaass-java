@@ -80,7 +80,6 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
         proxyChannel.writeAndFlush(proxyMessage)
                 .addListener((ChannelFutureListener) proxyChannelFuture -> {
                     if (proxyChannelFuture.isSuccess()) {
-                        proxyChannel.read();
                         targetChannel.read();
                         return;
                     }
