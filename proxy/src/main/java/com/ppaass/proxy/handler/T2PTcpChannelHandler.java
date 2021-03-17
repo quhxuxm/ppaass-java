@@ -15,8 +15,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.CountDownLatch;
-
 @Service
 @ChannelHandler.Sharable
 public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
@@ -65,14 +63,6 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
             return;
         }
         var proxyChannel = connectionInfo.getProxyTcpChannel();
-        int packageNumber;
-        if (targetOriginalMessageBuf.readableBytes() % this.proxyConfiguration.getTargetPackageSize() == 0) {
-            packageNumber = targetOriginalMessageBuf.readableBytes() / this.proxyConfiguration.getTargetPackageSize();
-        } else {
-            packageNumber =
-                    targetOriginalMessageBuf.readableBytes() / this.proxyConfiguration.getTargetPackageSize() + 1;
-        }
-        var packageCountdownLatch = new CountDownLatch(packageNumber);
         while (targetOriginalMessageBuf.isReadable()) {
             final byte[] originalDataByteArray;
             if (targetOriginalMessageBuf.readableBytes() > this.proxyConfiguration.getTargetPackageSize()) {
@@ -100,11 +90,10 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
                     MessageSerializer.INSTANCE.generateUuidInBytes(),
                     EncryptionType.choose(),
                     proxyMessageBody);
-            proxyChannel.writeAndFlush(proxyMessage).sync()
+            proxyChannel.writeAndFlush(proxyMessage)
                     .addListener((ChannelFutureListener) proxyChannelFuture -> {
                         if (proxyChannelFuture.isSuccess()) {
                             //proxyChannel.read();
-                            packageCountdownLatch.countDown();
                             return;
                         }
                         PpaassLogger.INSTANCE.error(T2PTcpChannelHandler.class,
@@ -117,7 +106,6 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
                         proxyChannel.close();
                     });
         }
-        packageCountdownLatch.await();
         targetChannel.read();
     }
 }
