@@ -63,49 +63,34 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
             return;
         }
         var proxyChannel = connectionInfo.getProxyTcpChannel();
-        while (targetOriginalMessageBuf.isReadable()) {
-            final byte[] originalDataByteArray;
-            if (targetOriginalMessageBuf.readableBytes() > this.proxyConfiguration.getTargetPackageSize()) {
-                originalDataByteArray = new byte[this.proxyConfiguration.getTargetPackageSize()];
-            } else {
-                originalDataByteArray = new byte[targetOriginalMessageBuf.readableBytes()];
-            }
-            PpaassLogger.INSTANCE
-                    .trace(T2PTcpChannelHandler.class,
-                            () -> "Incoming package size is {}, use {} as the package size, " +
-                                    "target channel = {}, proxy channel = {}",
-                            () -> new Object[]{targetOriginalMessageBuf.readableBytes(),
-                                    originalDataByteArray.length, targetChannel.id().asLongText(),
-                                    proxyChannel.id().asLongText()});
-            targetOriginalMessageBuf.readBytes(originalDataByteArray);
-            var proxyMessageBody =
-                    new ProxyMessageBody(
-                            MessageSerializer.INSTANCE.generateUuid(),
-                            connectionInfo.getUserToken(),
-                            connectionInfo.getTargetHost(),
-                            connectionInfo.getTargetPort(),
-                            ProxyMessageBodyType.OK_TCP,
-                            originalDataByteArray);
-            var proxyMessage = new ProxyMessage(
-                    MessageSerializer.INSTANCE.generateUuidInBytes(),
-                    EncryptionType.choose(),
-                    proxyMessageBody);
-            proxyChannel.writeAndFlush(proxyMessage)
-                    .addListener((ChannelFutureListener) proxyChannelFuture -> {
-                        if (proxyChannelFuture.isSuccess()) {
-                            //proxyChannel.read();
-                            return;
-                        }
-                        PpaassLogger.INSTANCE.error(T2PTcpChannelHandler.class,
-                                () -> "Fail to write proxy message to agent because of exception, proxy channel = {}, target channel = {}",
-                                () -> new Object[]{
-                                        proxyChannel.id().asLongText(), targetChannel.id().asLongText(),
-                                        proxyChannelFuture.cause()
-                                });
-                        targetChannel.close();
-                        proxyChannel.close();
-                    });
-        }
-        targetChannel.read();
+        final byte[] originalDataByteArray = new byte[targetOriginalMessageBuf.readableBytes()];
+        targetOriginalMessageBuf.readBytes(originalDataByteArray);
+        var proxyMessageBody =
+                new ProxyMessageBody(
+                        MessageSerializer.INSTANCE.generateUuid(),
+                        connectionInfo.getUserToken(),
+                        connectionInfo.getTargetHost(),
+                        connectionInfo.getTargetPort(),
+                        ProxyMessageBodyType.OK_TCP,
+                        originalDataByteArray);
+        var proxyMessage = new ProxyMessage(
+                MessageSerializer.INSTANCE.generateUuidInBytes(),
+                EncryptionType.choose(),
+                proxyMessageBody);
+        proxyChannel.writeAndFlush(proxyMessage)
+                .addListener((ChannelFutureListener) proxyChannelFuture -> {
+                    if (proxyChannelFuture.isSuccess()) {
+                        proxyChannel.read();
+                        return;
+                    }
+                    PpaassLogger.INSTANCE.error(T2PTcpChannelHandler.class,
+                            () -> "Fail to write proxy message to agent because of exception, proxy channel = {}, target channel = {}",
+                            () -> new Object[]{
+                                    proxyChannel.id().asLongText(), targetChannel.id().asLongText(),
+                                    proxyChannelFuture.cause()
+                            });
+                    targetChannel.close();
+                    proxyChannel.close();
+                });
     }
 }
