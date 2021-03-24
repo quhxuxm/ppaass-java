@@ -22,10 +22,7 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
         PpaassLogger.INSTANCE.register(T2PTcpChannelHandler.class);
     }
 
-    private final ProxyConfiguration proxyConfiguration;
-
     public T2PTcpChannelHandler(ProxyConfiguration proxyConfiguration) {
-        this.proxyConfiguration = proxyConfiguration;
     }
 
     @Override
