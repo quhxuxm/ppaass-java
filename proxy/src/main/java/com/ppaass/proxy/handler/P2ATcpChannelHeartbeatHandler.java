@@ -24,10 +24,8 @@ public class P2ATcpChannelHeartbeatHandler extends ChannelInboundHandlerAdapter 
     }
 
     private static final TimeZone UTC_TIME_ZONE = TimeZone.getTimeZone("UTC");
-    private final ProxyConfiguration proxyConfiguration;
 
     public P2ATcpChannelHeartbeatHandler(ProxyConfiguration proxyConfiguration) {
-        this.proxyConfiguration = proxyConfiguration;
     }
 
     @Override
@@ -81,7 +79,6 @@ public class P2ATcpChannelHeartbeatHandler extends ChannelInboundHandlerAdapter 
         proxyChannel.writeAndFlush(heartbeatMessage).addListener((ChannelFutureListener) proxyChannelFuture -> {
             tcpConnectionInfo.setHeartbeatPending(false);
             if (proxyChannelFuture.isSuccess()) {
-                tcpConnectionInfo.setHeartbeatFailureTimes(0);
                 PpaassLogger.INSTANCE.debug(P2ATcpChannelHeartbeatHandler.class,
                         () -> "Heartbeat success with agent, proxy channel = {}, target channel = {}",
                         () -> new Object[]{
@@ -90,25 +87,14 @@ public class P2ATcpChannelHeartbeatHandler extends ChannelInboundHandlerAdapter 
                         });
                 return;
             }
-            if (tcpConnectionInfo.getHeartbeatFailureTimes() >= proxyConfiguration.getProxyTcpChannelHeartbeatRetry()) {
-                PpaassLogger.INSTANCE.error(P2ATcpChannelHeartbeatHandler.class,
-                        () -> "Heartbeat fail with agent, close it, time = {}, proxy channel = {}, target channel = {}",
-                        () -> new Object[]{
-                                tcpConnectionInfo.getHeartbeatFailureTimes(), proxyChannel.id().asLongText(),
-                                tcpConnectionInfo.getTargetTcpChannel().id().asLongText()
-                        });
-                tcpConnectionInfo.getTargetTcpChannel().close().addListener(future -> {
-                    proxyChannel.close();
-                });
-                return;
-            }
             PpaassLogger.INSTANCE.error(P2ATcpChannelHeartbeatHandler.class,
-                    () -> "Heartbeat fail with agent, time = {}, proxy channel = {}, target channel = {}",
-                    () -> new Object[]{
-                            tcpConnectionInfo.getHeartbeatFailureTimes(), proxyChannel.id().asLongText(),
+                    () -> "Heartbeat fail with agent, close it, proxy channel = {}, target channel = {}",
+                    () -> new Object[]{proxyChannel.id().asLongText(),
                             tcpConnectionInfo.getTargetTcpChannel().id().asLongText()
                     });
-            tcpConnectionInfo.setHeartbeatFailureTimes(tcpConnectionInfo.getHeartbeatFailureTimes() + 1);
+            tcpConnectionInfo.getTargetTcpChannel().close().addListener(future -> {
+                proxyChannel.close();
+            });
         });
     }
 }
