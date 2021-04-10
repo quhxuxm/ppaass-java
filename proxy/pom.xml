@@ -80,4 +80,68 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>docker</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <configuration>
+                            <images>
+                                <image>
+                                    <alias>ppaass-proxy</alias>
+                                    <name>${DOCKER_REGISTRY_URL}/${DOCKER_REGISTRY_PROJECT}/ppaass-proxy:${project.version}</name>
+                                    <build>
+                                        <from>openjdk:14</from>
+                                        <env>
+                                            <SERVICE>ppaass-proxy</SERVICE>
+                                        </env>
+                                        <workdir>/home</workdir>
+                                        <assembly>
+                                            <targetDir>/home</targetDir>
+                                            <inline>
+                                                <fileSets>
+                                                    <fileSet>
+                                                        <outputDirectory>.</outputDirectory>
+                                                        <directory>${project.build.directory}</directory>
+                                                        <includes>
+                                                            <include>*.jar</include>
+                                                        </includes>
+                                                    </fileSet>
+                                                </fileSets>
+                                            </inline>
+                                            <!-- descriptorRef value is one of artifact-with-dependencies, artifact, project, rootWar -->
+                                            <descriptorRef>artifact</descriptorRef>
+                                        </assembly>
+                                        <cmd>
+                                            <!-- <shell>exec $JAVA_HOME/bin/java -jar ${app.domain}/${project.build.finalName}.jar</shell> -->
+                                            <shell>java -jar -server -Dio.netty.recycler.maxCapacity=16 -Dio.netty.noResourceLeakDetection=true -XX:+UseG1GC -XX:+UseCompressedOops -XX:+UseCompressedClassPointers -XX:+SegmentedCodeCache  -XX:+ExplicitGCInvokesConcurrent -Xms256m -Xmx256m -XX:MaxDirectMemorySize=256m  proxy-*.jar --spring.config.location=classpath:application.properties,optional:./application.properties</shell>
+                                        </cmd>
+                                    </build>
+                                </image>
+                            </images>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>build-image</id>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
+                                <phase>package</phase>
+                            </execution>
+                            <execution>
+                                <id>push-image</id>
+                                <goals>
+                                    <goal>push</goal>
+                                </goals>
+                                <phase>package</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

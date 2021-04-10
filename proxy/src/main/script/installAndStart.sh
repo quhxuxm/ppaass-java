@@ -1,4 +1,15 @@
-# wget https://github.com/quhxuxm/ppaass/raw/master/distribute/target/ppaass-1.0-SNAPSHOT.zip
+#Prepare base env
+sudo apt update
+sudo apt upgrade -y
+sudo mkdir /opt/java
+sudo apt install maven -y
+sudo apt install unzip -y
+wget https://download.java.net/java/GA/jdk15.0.2/0d1cfde4252546c6931946de8db48ee2/7/GPL/openjdk-15.0.2_linux-x64_bin.tar.gz
+sudo tar -zxf openjdk-15.0.2_linux-x64_bin.tar.gz -C /opt/java/
+sudo update-alternatives --install /usr/bin/java java /opt/java/jdk-15.0.2/bin/java 100
+sudo update-alternatives --config java
+
+# Start install ppaass
 ps -ef | grep proxy-1.0-SNAPSHOT.jar | grep -v grep | awk '{print $2}' | xargs kill
 rm -rf /tmp/build
 rm -rf /tmp/sourcecode
