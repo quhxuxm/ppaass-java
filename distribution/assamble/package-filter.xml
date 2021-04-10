@@ -36,7 +36,13 @@
             <includes>
                 <include>*.bat</include>
                 <include>*.sh</include>
-                <include>Dockerfile</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>../proxy/src/main/script/config</directory>
+            <outputDirectory>proxy/config</outputDirectory>
+            <includes>
+                <include>*.*</include>
             </includes>
         </fileSet>
     </fileSets>
