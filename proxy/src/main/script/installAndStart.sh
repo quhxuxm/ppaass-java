@@ -1,6 +1,7 @@
 #Prepare base env
 sudo apt update
 sudo apt upgrade -y
+iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
 sudo mkdir /opt/java
 sudo apt install maven -y
 sudo apt install unzip -y
