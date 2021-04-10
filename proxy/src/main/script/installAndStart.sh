@@ -1,7 +1,7 @@
 #Prepare base env
 sudo apt update
 sudo apt upgrade -y
-iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
+sudo iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
 sudo mkdir /opt/java
 sudo apt install maven -y
 sudo apt install unzip -y
@@ -11,12 +11,12 @@ sudo update-alternatives --install /usr/bin/java java /opt/java/jdk-15.0.2/bin/j
 sudo update-alternatives --config java
 
 # Start install ppaass
-ps -ef | grep proxy-1.0-SNAPSHOT.jar | grep -v grep | awk '{print $2}' | xargs kill
-rm -rf /tmp/build
-rm -rf /tmp/sourcecode
+sudo ps -ef | grep proxy-1.0-SNAPSHOT.jar | grep -v grep | awk '{print $2}' | xargs kill
+sudo rm -rf /tmp/build
+sudo rm -rf /tmp/sourcecode
 # Build
-mkdir /tmp/sourcecode
-mkdir /tmp/build
+sudo mkdir /tmp/sourcecode
+sudo mkdir /tmp/build
 cd /tmp/sourcecode
 git clone https://github.com/quhxuxm/ppaass.git ppaass
 cd /tmp/sourcecode/ppaass
