@@ -10,6 +10,14 @@
 # sudo update-alternatives --install /usr/bin/java java /opt/java/jdk-15.0.2/bin/java 100
 # sudo update-alternatives --config java
 
+#Create swap file
+#sudo fallocate -l 4G /swapfile
+#sudo chmod 600 /swapfile
+#sudo mkswap /swapfile
+#sudo swapon --show
+#sudo free -h
+#echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
 # Start install ppaass
 sudo ps -ef | grep proxy-1.0-SNAPSHOT.jar | grep -v grep | awk '{print $2}' | xargs kill
 sudo rm -rf /tmp/build
