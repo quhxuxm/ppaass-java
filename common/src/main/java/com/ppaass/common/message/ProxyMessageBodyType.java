@@ -10,10 +10,6 @@ public enum ProxyMessageBodyType implements MessageBodyType {
      */
     OK_UDP(1),
     /**
-     * Heartbeat
-     */
-    HEARTBEAT(2),
-    /**
      * Connection fail
      */
     CONNECT_FAIL(3),

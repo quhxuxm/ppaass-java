@@ -2,8 +2,6 @@ package com.ppaass.agent.handler.socks;
 
 import com.ppaass.agent.IAgentConst;
 import com.ppaass.common.log.PpaassLogger;
-import com.ppaass.common.message.HeartbeatInfo;
-import com.ppaass.common.message.MessageSerializer;
 import com.ppaass.common.message.ProxyMessage;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
@@ -110,36 +108,6 @@ class SocksAgentP2ATcpChannelHandler extends SimpleChannelInboundHandler<ProxyMe
                                     });
                             agentTcpChannel.close();
                             proxyChannel.close();
-                        });
-            }
-            case HEARTBEAT -> {
-                PpaassLogger.INSTANCE.debug(SocksAgentP2ATcpChannelHandler.class,
-                        () -> "Receive HEARTBEAT from proxy, proxy channel = {}",
-                        () -> new Object[]{
-                                proxyChannel.id().asLongText()
-                        });
-                if (tcpConnectionInfo == null) {
-                    PpaassLogger.INSTANCE.error(SocksAgentP2ATcpChannelHandler.class,
-                            () -> "No tcp connection information in proxy channel [HEARTBEAT], close it, proxy channel = {}",
-                            () -> new Object[]{
-                                    proxyChannel.id().asLongText()
-                            });
-                    proxyChannel.close();
-                    return;
-                }
-                var agentTcpChannel = tcpConnectionInfo.getAgentTcpChannel();
-                PpaassLogger.INSTANCE.debug(SocksAgentP2ATcpChannelHandler.class,
-                        () -> "Found connection information in proxy channel [HEARTBEAT], agent channel = {},  proxy channel = {}",
-                        () -> new Object[]{
-                                agentTcpChannel.id().asLongText(), proxyChannel.id().asLongText()
-                        });
-                var originalData = proxyMessage.getBody().getData();
-                var heartbeat = MessageSerializer.JSON_OBJECT_MAPPER.readValue(originalData, HeartbeatInfo.class);
-                PpaassLogger.INSTANCE.trace(SocksAgentP2ATcpChannelHandler.class,
-                        () -> "[HEARTBEAT FROM PROXY]: agent channel = {}, proxy channel = {}, heartbeat id = {}, heartbeat time = {}",
-                        () -> new Object[]{
-                                agentTcpChannel.id().asLongText(), proxyChannel.id().asLongText(), heartbeat.getId(),
-                                heartbeat.getUtcDateTime()
                         });
             }
             case CONNECT_FAIL -> {

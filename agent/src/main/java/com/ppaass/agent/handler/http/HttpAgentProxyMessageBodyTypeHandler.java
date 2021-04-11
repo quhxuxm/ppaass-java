@@ -2,8 +2,6 @@ package com.ppaass.agent.handler.http;
 
 import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.common.message.AgentMessageBodyType;
-import com.ppaass.common.message.HeartbeatInfo;
-import com.ppaass.common.message.MessageSerializer;
 import com.ppaass.common.message.ProxyMessage;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
@@ -34,16 +32,6 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
         }
         var agentChannel = connectionInfo.getAgentChannel();
         switch (proxyMessage.getBody().getBodyType()) {
-            case HEARTBEAT -> {
-                var originalData = proxyMessage.getBody().getData();
-                var heartbeat = MessageSerializer.JSON_OBJECT_MAPPER.readValue(originalData, HeartbeatInfo.class);
-                PpaassLogger.INSTANCE.trace(HttpAgentProxyMessageBodyTypeHandler.class,
-                        () -> "[HEARTBEAT FROM PROXY]: agent channel = {}, proxy channel = {}, heartbeat id = {}, heartbeat time = {}",
-                        () -> new Object[]{
-                                agentChannel.id().asLongText(), proxyChannel.id().asLongText(), heartbeat.getId(),
-                                heartbeat.getUtcDateTime()
-                        });
-            }
             case CONNECT_FAIL -> {
                 PpaassLogger.INSTANCE.error(HttpAgentProxyMessageBodyTypeHandler.class,
                         () -> "Connect fail for uri: [{}], close it, agent channel = {}, proxy channel = {}",
