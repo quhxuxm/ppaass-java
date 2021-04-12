@@ -1,6 +1,7 @@
 package com.ppaass.common.handler;
 
 import com.ppaass.common.log.PpaassLogger;
+import com.ppaass.common.message.AgentMessage;
 import com.ppaass.common.message.MessageSerializer;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -21,7 +22,7 @@ public class AgentMessageDecoder extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        var message = MessageSerializer.INSTANCE.decodeAgentMessage(in, this.proxyPrivateKey);
+        AgentMessage message = MessageSerializer.INSTANCE.decodeAgentMessage(in, this.proxyPrivateKey);
         PpaassLogger.INSTANCE
                 .trace(AgentMessageDecoder.class, () -> "Decode agent message, channel = {}, agent message = {}",
                         () -> new Object[]{

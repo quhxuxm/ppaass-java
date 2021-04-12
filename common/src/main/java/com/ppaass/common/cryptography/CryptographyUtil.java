@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.security.KeyFactory;
-import java.security.KeyPairGenerator;
+import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
@@ -38,8 +38,8 @@ public class CryptographyUtil {
      */
     public byte[] aesEncrypt(byte[] encryptionToken, byte[] data) {
         try {
-            var key = new SecretKeySpec(encryptionToken, ALGORITHM_AES);
-            var cipher = Cipher.getInstance(AES_CIPHER);
+            SecretKeySpec key = new SecretKeySpec(encryptionToken, ALGORITHM_AES);
+            Cipher cipher = Cipher.getInstance(AES_CIPHER);
             cipher.init(Cipher.ENCRYPT_MODE, key);
             return cipher.doFinal(data);
         } catch (Exception e) {
@@ -62,8 +62,8 @@ public class CryptographyUtil {
      */
     public byte[] aesDecrypt(byte[] encryptionToken, byte[] aesData) {
         try {
-            var key = new SecretKeySpec(encryptionToken, ALGORITHM_AES);
-            var cipher = Cipher.getInstance(AES_CIPHER);
+            SecretKeySpec key = new SecretKeySpec(encryptionToken, ALGORITHM_AES);
+            Cipher cipher = Cipher.getInstance(AES_CIPHER);
             cipher.init(Cipher.DECRYPT_MODE, key);
             return cipher.doFinal(aesData);
         } catch (Exception e) {
@@ -85,8 +85,8 @@ public class CryptographyUtil {
      */
     public byte[] blowfishEncrypt(byte[] encryptionToken, byte[] data) {
         try {
-            var key = new SecretKeySpec(encryptionToken, ALGORITHM_BLOWFISH);
-            var cipher = Cipher.getInstance(BLOWFISH_CIPHER);
+            SecretKeySpec key = new SecretKeySpec(encryptionToken, ALGORITHM_BLOWFISH);
+            Cipher cipher = Cipher.getInstance(BLOWFISH_CIPHER);
             cipher.init(Cipher.ENCRYPT_MODE, key);
             return cipher.doFinal(data);
         } catch (Exception e) {
@@ -109,8 +109,8 @@ public class CryptographyUtil {
      */
     public byte[] blowfishDecrypt(byte[] encryptionToken, byte[] blowfishData) {
         try {
-            var key = new SecretKeySpec(encryptionToken, ALGORITHM_BLOWFISH);
-            var cipher = Cipher.getInstance(BLOWFISH_CIPHER);
+            SecretKeySpec key = new SecretKeySpec(encryptionToken, ALGORITHM_BLOWFISH);
+            Cipher cipher = Cipher.getInstance(BLOWFISH_CIPHER);
             cipher.init(Cipher.DECRYPT_MODE, key);
             return cipher.doFinal(blowfishData);
         } catch (Exception e) {
@@ -132,10 +132,10 @@ public class CryptographyUtil {
      */
     public byte[] rsaEncrypt(byte[] target, byte[] publicKeyBytes) {
         try {
-            var publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
-            var keyFactory = KeyFactory.getInstance(ALGORITHM_RSA);
-            var publicKey = keyFactory.generatePublic(publicKeySpec);
-            var cipher = Cipher.getInstance(RSA_CHIPHER);
+            X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM_RSA);
+            PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
+            Cipher cipher = Cipher.getInstance(RSA_CHIPHER);
             cipher.init(Cipher.ENCRYPT_MODE, publicKey);
             cipher.update(target);
             return cipher.doFinal();
@@ -157,10 +157,10 @@ public class CryptographyUtil {
      */
     public byte[] rsaDecrypt(byte[] target, byte[] privateKeyBytes) {
         try {
-            var privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
-            var keyFactory = KeyFactory.getInstance(ALGORITHM_RSA);
-            var privateKey = keyFactory.generatePrivate(privateKeySpec);
-            var cipher = Cipher.getInstance(RSA_CHIPHER);
+            PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM_RSA);
+            PrivateKey privateKey = keyFactory.generatePrivate(privateKeySpec);
+            Cipher cipher = Cipher.getInstance(RSA_CHIPHER);
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
             cipher.update(target);
             return cipher.doFinal();
@@ -192,27 +192,27 @@ public class CryptographyUtil {
     }
 
     private void writeBytesToFile(Path filePath, byte[] bytes) throws IOException {
-        var targetFile = filePath.toFile();
+        File targetFile = filePath.toFile();
         if (targetFile.exists()) {
             if (!targetFile.delete()) {
                 logger.error("Fail to delete existing file: {}", filePath);
                 throw new PpaassException("Fail to delete existing file.");
             }
         }
-        var fileOutputStream = new FileOutputStream(targetFile);
+        FileOutputStream fileOutputStream = new FileOutputStream(targetFile);
         fileOutputStream.write(bytes);
         fileOutputStream.close();
     }
 
     private RsaKeyPair generateRsaKeyPair() throws Exception {
-        var keyPairGen = KeyPairGenerator.getInstance(ALGORITHM_RSA);
+        KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(ALGORITHM_RSA);
         keyPairGen.initialize(1024);
-        var keyPair = keyPairGen.generateKeyPair();
-        var publicKey = keyPair.getPublic().getEncoded();
+        KeyPair keyPair = keyPairGen.generateKeyPair();
+        byte[] publicKey = keyPair.getPublic().getEncoded();
         logger.info(
                 "RSA key pair public key:\n${}", ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(publicKey))
         );
-        var privateKey = keyPair.getPrivate().getEncoded();
+        byte[] privateKey = keyPair.getPrivate().getEncoded();
         logger.info(
                 "RSA key pair private key:\n{}", ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(privateKey)));
         return new RsaKeyPair(publicKey, privateKey);
@@ -220,11 +220,11 @@ public class CryptographyUtil {
 
     public static void main(String[] args) throws Exception {
         System.out.println("\nGenerate agent RSA key pair:\n");
-        var agentKeyPair = CryptographyUtil.INSTANCE.generateRsaKeyPair();
+        CryptographyUtil.RsaKeyPair agentKeyPair = CryptographyUtil.INSTANCE.generateRsaKeyPair();
         CryptographyUtil.INSTANCE.writeBytesToFile(Path.of("D://", "agentPublicKey"), agentKeyPair.getPublicKey());
         CryptographyUtil.INSTANCE.writeBytesToFile(Path.of("D://", "agentPrivateKey"), agentKeyPair.getPrivateKey());
         System.out.println("\nGenerate proxy RSA key pair:\n");
-        var proxyKeyPair = CryptographyUtil.INSTANCE.generateRsaKeyPair();
+        CryptographyUtil.RsaKeyPair proxyKeyPair = CryptographyUtil.INSTANCE.generateRsaKeyPair();
         CryptographyUtil.INSTANCE.writeBytesToFile(Path.of("D://", "proxyPublicKey"), proxyKeyPair.getPublicKey());
         CryptographyUtil.INSTANCE.writeBytesToFile(Path.of("D://", "proxyPrivateKey"), proxyKeyPair.getPrivateKey());
     }

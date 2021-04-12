@@ -24,7 +24,7 @@ public class MessageSerializer {
     }
 
     private AgentMessageBodyType parseAgentMessageBodyType(byte b) {
-        for (var e : AgentMessageBodyType.values()) {
+        for (AgentMessageBodyType e : AgentMessageBodyType.values()) {
             if (e.value() == b) {
                 return e;
             }
@@ -33,7 +33,7 @@ public class MessageSerializer {
     }
 
     private ProxyMessageBodyType parseProxyMessageBodyType(byte b) {
-        for (var e : ProxyMessageBodyType.values()) {
+        for (ProxyMessageBodyType e : ProxyMessageBodyType.values()) {
             if (e.value() == b) {
                 return e;
             }
@@ -42,7 +42,7 @@ public class MessageSerializer {
     }
 
     private EncryptionType parseEncryptionType(byte b) {
-        for (var e : EncryptionType.values()) {
+        for (EncryptionType e : EncryptionType.values()) {
             if (e.value() == b) {
                 return e;
             }
@@ -53,42 +53,50 @@ public class MessageSerializer {
     private byte[] encryptMessageBody(byte[] messageBodyByteArrayBeforeEncrypt,
                                       EncryptionType messageBodyBodyEncryptionType,
                                       byte[] messageBodyEncryptionToken) {
-        return switch (messageBodyBodyEncryptionType) {
-            case AES -> CryptographyUtil.INSTANCE.aesEncrypt(messageBodyEncryptionToken,
-                    messageBodyByteArrayBeforeEncrypt);
-            case BLOWFISH -> CryptographyUtil.INSTANCE.blowfishEncrypt(messageBodyEncryptionToken,
-                    messageBodyByteArrayBeforeEncrypt);
-        };
+        switch (messageBodyBodyEncryptionType) {
+            case AES:
+                return CryptographyUtil.INSTANCE.aesEncrypt(messageBodyEncryptionToken,
+                        messageBodyByteArrayBeforeEncrypt);
+            case BLOWFISH:
+                return CryptographyUtil.INSTANCE.blowfishEncrypt(messageBodyEncryptionToken,
+                        messageBodyByteArrayBeforeEncrypt);
+            default:
+                throw new PpaassException("Unsupported encryption type. ");
+        }
     }
 
     private byte[] decryptMessageBody(byte[] messageBodyByteArrayBeforeDecrypt,
                                       EncryptionType messageBodyBodyEncryptionType,
                                       byte[] messageBodyEncryptionToken) {
-        return switch (messageBodyBodyEncryptionType) {
-            case AES -> CryptographyUtil.INSTANCE.aesDecrypt(messageBodyEncryptionToken,
-                    messageBodyByteArrayBeforeDecrypt);
-            case BLOWFISH -> CryptographyUtil.INSTANCE.blowfishDecrypt(messageBodyEncryptionToken,
-                    messageBodyByteArrayBeforeDecrypt);
-        };
+        switch (messageBodyBodyEncryptionType) {
+            case AES:
+                return CryptographyUtil.INSTANCE.aesDecrypt(messageBodyEncryptionToken,
+                        messageBodyByteArrayBeforeDecrypt);
+            case BLOWFISH:
+                return CryptographyUtil.INSTANCE.blowfishDecrypt(messageBodyEncryptionToken,
+                        messageBodyByteArrayBeforeDecrypt);
+            default:
+                throw new PpaassException("Unsupported encryption type. ");
+        }
     }
 
     private <T extends MessageBodyType> ByteBuf encodeMessageBody(MessageBody<T> messageBody,
                                                                   EncryptionType messageBodyBodyEncryptionType,
                                                                   byte[] messageBodyEncryptionToken) {
-        var tempBuffer = Unpooled.buffer();
-        var bodyType = messageBody.getBodyType().value();
+        ByteBuf tempBuffer = Unpooled.buffer();
+        int bodyType = messageBody.getBodyType().value();
         tempBuffer.writeByte(bodyType);
-        var messageIdByteArray = messageBody.getId().getBytes(StandardCharsets.UTF_8);
+        byte[] messageIdByteArray = messageBody.getId().getBytes(StandardCharsets.UTF_8);
         tempBuffer.writeInt(messageIdByteArray.length);
         tempBuffer.writeBytes(messageIdByteArray);
-        var userTokenByteArray = messageBody.getUserToken().getBytes(StandardCharsets.UTF_8);
+        byte[] userTokenByteArray = messageBody.getUserToken().getBytes(StandardCharsets.UTF_8);
         tempBuffer.writeInt(userTokenByteArray.length);
         tempBuffer.writeBytes(userTokenByteArray);
-        var targetAddressByteArray = messageBody.getTargetHost().getBytes(StandardCharsets.UTF_8);
+        byte[] targetAddressByteArray = messageBody.getTargetHost().getBytes(StandardCharsets.UTF_8);
         tempBuffer.writeInt(targetAddressByteArray.length);
         tempBuffer.writeBytes(targetAddressByteArray);
         tempBuffer.writeInt(messageBody.getTargetPort());
-        var targetOriginalData = messageBody.getData();
+        byte[] targetOriginalData = messageBody.getData();
         tempBuffer.writeInt(targetOriginalData.length);
         tempBuffer.writeBytes(targetOriginalData);
         return Unpooled.wrappedBuffer(encryptMessageBody(
@@ -100,26 +108,26 @@ public class MessageSerializer {
     private AgentMessageBody decodeAgentMessageBody(byte[] messageBytes,
                                                     EncryptionType messageBodyBodyEncryptionType,
                                                     byte[] messageBodyEncryptionToken) {
-        var messageBodyBytes =
+        byte[] messageBodyBytes =
                 decryptMessageBody(messageBytes, messageBodyBodyEncryptionType, messageBodyEncryptionToken);
-        var messageBodyByteBuf = Unpooled.wrappedBuffer(messageBodyBytes);
-        var bodyType = parseAgentMessageBodyType(messageBodyByteBuf.readByte());
+        ByteBuf messageBodyByteBuf = Unpooled.wrappedBuffer(messageBodyBytes);
+        AgentMessageBodyType bodyType = parseAgentMessageBodyType(messageBodyByteBuf.readByte());
         if (bodyType == null) {
             throw new PpaassException(
                     "Can not parse agent message body type from the message.");
         }
-        var messageIdLength = messageBodyByteBuf.readInt();
-        var messageId =
+        int messageIdLength = messageBodyByteBuf.readInt();
+        String messageId =
                 messageBodyByteBuf.readCharSequence(messageIdLength, StandardCharsets.UTF_8).toString();
-        var userTokenLength = messageBodyByteBuf.readInt();
-        var userToken =
+        int userTokenLength = messageBodyByteBuf.readInt();
+        String userToken =
                 messageBodyByteBuf.readCharSequence(userTokenLength, StandardCharsets.UTF_8).toString();
-        var targetAddressLength = messageBodyByteBuf.readInt();
-        var targetAddress = messageBodyByteBuf.readCharSequence(targetAddressLength,
+        int targetAddressLength = messageBodyByteBuf.readInt();
+        String targetAddress = messageBodyByteBuf.readCharSequence(targetAddressLength,
                 StandardCharsets.UTF_8).toString();
-        var targetPort = messageBodyByteBuf.readInt();
-        var originalDataLength = messageBodyByteBuf.readInt();
-        var originalData = new byte[originalDataLength];
+        int targetPort = messageBodyByteBuf.readInt();
+        int originalDataLength = messageBodyByteBuf.readInt();
+        byte[] originalData = new byte[originalDataLength];
         messageBodyByteBuf.readBytes(originalData);
         return new AgentMessageBody(messageId, userToken, targetAddress, targetPort, bodyType, originalData);
     }
@@ -127,26 +135,26 @@ public class MessageSerializer {
     private ProxyMessageBody decodeProxyMessageBody(byte[] messageBytes,
                                                     EncryptionType messageBodyBodyEncryptionType,
                                                     byte[] messageBodyEncryptionToken) {
-        var messageBodyBytes =
+        byte[] messageBodyBytes =
                 decryptMessageBody(messageBytes, messageBodyBodyEncryptionType, messageBodyEncryptionToken);
-        var messageBodyByteBuf = Unpooled.wrappedBuffer(messageBodyBytes);
-        var bodyType = parseProxyMessageBodyType(messageBodyByteBuf.readByte());
+        ByteBuf messageBodyByteBuf = Unpooled.wrappedBuffer(messageBodyBytes);
+        ProxyMessageBodyType bodyType = parseProxyMessageBodyType(messageBodyByteBuf.readByte());
         if (bodyType == null) {
             throw new PpaassException(
                     "Can not parse proxy message body type from the message.");
         }
-        var messageIdLength = messageBodyByteBuf.readInt();
-        var messageId =
+        int messageIdLength = messageBodyByteBuf.readInt();
+        String messageId =
                 messageBodyByteBuf.readCharSequence(messageIdLength, StandardCharsets.UTF_8).toString();
-        var userTokenLength = messageBodyByteBuf.readInt();
-        var userToken =
+        int userTokenLength = messageBodyByteBuf.readInt();
+        String userToken =
                 messageBodyByteBuf.readCharSequence(userTokenLength, StandardCharsets.UTF_8).toString();
-        var targetAddressLength = messageBodyByteBuf.readInt();
-        var targetAddress = messageBodyByteBuf.readCharSequence(targetAddressLength,
+        int targetAddressLength = messageBodyByteBuf.readInt();
+        String targetAddress = messageBodyByteBuf.readCharSequence(targetAddressLength,
                 StandardCharsets.UTF_8).toString();
-        var targetPort = messageBodyByteBuf.readInt();
-        var originalDataLength = messageBodyByteBuf.readInt();
-        var originalData = new byte[originalDataLength];
+        int targetPort = messageBodyByteBuf.readInt();
+        int originalDataLength = messageBodyByteBuf.readInt();
+        byte[] originalData = new byte[originalDataLength];
         messageBodyByteBuf.readBytes(originalData);
         return new ProxyMessageBody(messageId, userToken, targetAddress, targetPort, bodyType, originalData);
     }
@@ -170,14 +178,14 @@ public class MessageSerializer {
                                                           byte[] publicKey,
                                                           ByteBuf output) {
         output.writeBytes(MAGIC_CODE);
-        var originalMessageBodyEncryptionToken = message.getEncryptionToken();
-        var encryptedMessageBodyEncryptionToken =
+        byte[] originalMessageBodyEncryptionToken = message.getEncryptionToken();
+        byte[] encryptedMessageBodyEncryptionToken =
                 CryptographyUtil.INSTANCE.rsaEncrypt(originalMessageBodyEncryptionToken,
                         publicKey);
         output.writeInt(encryptedMessageBodyEncryptionToken.length);
         output.writeBytes(encryptedMessageBodyEncryptionToken);
         output.writeByte(message.getEncryptionType().value());
-        var bodyByteBuf = encodeMessageBody(message.getBody(),
+        ByteBuf bodyByteBuf = encodeMessageBody(message.getBody(),
                 message.getEncryptionType(),
                 originalMessageBodyEncryptionToken);
         output.writeBytes(bodyByteBuf);
@@ -192,7 +200,7 @@ public class MessageSerializer {
      */
     public AgentMessage decodeAgentMessage(ByteBuf input,
                                            byte[] proxyPrivateKey) {
-        var magicCodeByteBuf = input.readBytes(MAGIC_CODE.length);
+        ByteBuf magicCodeByteBuf = input.readBytes(MAGIC_CODE.length);
         if (magicCodeByteBuf.compareTo(Unpooled.wrappedBuffer(MAGIC_CODE)) != 0) {
             logger.error(
                     "Incoming agent message is not follow Ppaass protocol, incoming message is:\n{}\n"
@@ -200,18 +208,18 @@ public class MessageSerializer {
             throw new PpaassException("Incoming message is not follow Ppaass protocol.");
         }
         ReferenceCountUtil.release(magicCodeByteBuf);
-        var encryptedMessageBodyEncryptionTokenLength = input.readInt();
-        var encryptedMessageBodyEncryptionToken = new byte[encryptedMessageBodyEncryptionTokenLength];
+        int encryptedMessageBodyEncryptionTokenLength = input.readInt();
+        byte[] encryptedMessageBodyEncryptionToken = new byte[encryptedMessageBodyEncryptionTokenLength];
         input.readBytes(encryptedMessageBodyEncryptionToken);
-        var messageBodyEncryptionToken =
+        byte[] messageBodyEncryptionToken =
                 CryptographyUtil.INSTANCE.rsaDecrypt(encryptedMessageBodyEncryptionToken,
                         proxyPrivateKey);
-        var messageBodyEncryptionType = parseEncryptionType(input.readByte());
+        EncryptionType messageBodyEncryptionType = parseEncryptionType(input.readByte());
         if (messageBodyEncryptionType == null) {
             throw new PpaassException(
                     "Can not parse encryption type from the message.");
         }
-        var messageBodyByteArray = new byte[input.readableBytes()];
+        byte[] messageBodyByteArray = new byte[input.readableBytes()];
         input.readBytes(messageBodyByteArray);
         return new AgentMessage(messageBodyEncryptionToken,
                 messageBodyEncryptionType,
@@ -230,7 +238,7 @@ public class MessageSerializer {
      */
     public ProxyMessage decodeProxyMessage(ByteBuf input,
                                            byte[] agentPrivateKey) {
-        var magicCodeByteBuf = input.readBytes(MAGIC_CODE.length);
+        ByteBuf magicCodeByteBuf = input.readBytes(MAGIC_CODE.length);
         if (magicCodeByteBuf.compareTo(Unpooled.wrappedBuffer(MAGIC_CODE)) != 0) {
             logger.error(
                     "Incoming proxy message is not follow Ppaass protocol, incoming message is:\n${}\n",
@@ -239,18 +247,18 @@ public class MessageSerializer {
             throw new PpaassException("Incoming message is not follow Ppaass protocol.");
         }
         ReferenceCountUtil.release(magicCodeByteBuf);
-        var encryptedMessageBodyEncryptionTokenLength = input.readInt();
-        var encryptedMessageBodyEncryptionToken = new byte[encryptedMessageBodyEncryptionTokenLength];
+        int encryptedMessageBodyEncryptionTokenLength = input.readInt();
+        byte[] encryptedMessageBodyEncryptionToken = new byte[encryptedMessageBodyEncryptionTokenLength];
         input.readBytes(encryptedMessageBodyEncryptionToken);
-        var messageBodyEncryptionToken =
+        byte[] messageBodyEncryptionToken =
                 CryptographyUtil.INSTANCE.rsaDecrypt(encryptedMessageBodyEncryptionToken,
                         agentPrivateKey);
-        var messageBodyEncryptionType = parseEncryptionType(input.readByte());
+        EncryptionType messageBodyEncryptionType = parseEncryptionType(input.readByte());
         if (messageBodyEncryptionType == null) {
             throw new PpaassException(
                     "Can not parse encryption type from the message.");
         }
-        var messageBodyByteArray = new byte[input.readableBytes()];
+        byte[] messageBodyByteArray = new byte[input.readableBytes()];
         input.readBytes(messageBodyByteArray);
         return new ProxyMessage(messageBodyEncryptionToken,
                 messageBodyEncryptionType,

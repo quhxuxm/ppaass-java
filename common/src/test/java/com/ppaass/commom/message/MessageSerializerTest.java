@@ -1,6 +1,7 @@
 package com.ppaass.commom.message;
 
 import com.ppaass.common.message.MessageSerializer;
+import com.ppaass.common.message.ProxyMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -20,7 +21,7 @@ public class MessageSerializerTest {
                         new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
         embeddedChannel.writeInbound(Unpooled.wrappedBuffer(allBytes));
         ByteBuf proxyMessageBuf = embeddedChannel.readInbound();
-        var message = MessageSerializer.INSTANCE
+        ProxyMessage message = MessageSerializer.INSTANCE
                 .decodeProxyMessage(proxyMessageBuf, proxyPublicKeyStream.readAllBytes());
         System.out.println(message.getBody().getBodyType());
     }
