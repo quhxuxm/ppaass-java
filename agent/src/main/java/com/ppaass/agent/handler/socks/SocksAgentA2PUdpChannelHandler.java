@@ -3,14 +3,12 @@ package com.ppaass.agent.handler.socks;
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.handler.socks.bo.SocksAgentUdpRequestMessage;
 import com.ppaass.common.cryptography.EncryptionType;
-import com.ppaass.common.message.AgentMessage;
-import com.ppaass.common.message.AgentMessageBody;
-import com.ppaass.common.message.AgentMessageBodyType;
-import com.ppaass.common.message.MessageSerializer;
+import com.ppaass.common.message.*;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.socksx.v5.Socks5AddressType;
 import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
@@ -45,15 +43,29 @@ class SocksAgentA2PUdpChannelHandler extends SimpleChannelInboundHandler<SocksAg
         udpConnectionInfo.setClientRecipientHost(socks5UdpMessage.getTargetHost());
         udpConnectionInfo.setClientRecipientPort(socks5UdpMessage.getTargetPort());
         agentUdpChannelContext.channel().attr(ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO).set(udpConnectionInfo);
-        var udpData = socks5UdpMessage.getData();
+        var udpMessageContent = new UdpMessageContent();
+        udpMessageContent.setData(socks5UdpMessage.getData());
+        udpMessageContent.setSourceAddress(socks5UdpMessage.getUdpMessageSender().getAddress().getHostAddress());
+        udpMessageContent.setSourcePort(socks5UdpMessage.getUdpMessageSender().getPort());
+        udpMessageContent.setDestinationAddress(socks5UdpMessage.getTargetHost());
+        udpMessageContent.setDestinationPort(socks5UdpMessage.getTargetPort());
+        if (socks5UdpMessage.getAddressType() == Socks5AddressType.DOMAIN) {
+            udpMessageContent.setAddrType(UdpMessageContent.AddrType.DOMAIN);
+        } else {
+            if (socks5UdpMessage.getAddressType() == Socks5AddressType.IPv6) {
+                udpMessageContent.setAddrType(UdpMessageContent.AddrType.IPV6);
+            } else {
+                udpMessageContent.setAddrType(UdpMessageContent.AddrType.IPV4);
+            }
+        }
         var agentMessageBody =
                 new AgentMessageBody(
                         MessageSerializer.INSTANCE.generateUuid(),
                         this.agentConfiguration.getUserToken(),
-                        socks5UdpMessage.getTargetHost(),
-                        socks5UdpMessage.getTargetPort(),
+                        udpMessageContent.getDestinationAddress(),
+                        udpMessageContent.getDestinationPort(),
                         AgentMessageBodyType.UDP_DATA,
-                        udpData);
+                        MessageSerializer.JSON_OBJECT_MAPPER.writeValueAsBytes(udpMessageContent));
         var agentMessage =
                 new AgentMessage(
                         MessageSerializer.INSTANCE.generateUuidInBytes(),

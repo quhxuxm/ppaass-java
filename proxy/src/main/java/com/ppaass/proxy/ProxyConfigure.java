@@ -132,7 +132,7 @@ class ProxyConfigure {
     @Bean
     public ServerBootstrap proxyTcpServerBootstrap(EventLoopGroup proxyTcpMasterLoopGroup,
                                                    EventLoopGroup proxyTcpWorkerLoopGroup,
-                                                   P2ATcpChannelHeartbeatHandler p2ATcpChannelHeartbeatHandler,
+                                                   P2ATcpChannelCleanupHandler p2ATcpChannelCleanupHandler,
                                                    P2TTcpChannelHandler p2TTcpChannelHandler,
                                                    PrintExceptionHandler printExceptionHandler) {
         ServerBootstrap result = new ServerBootstrap();
@@ -164,7 +164,7 @@ class ProxyConfigure {
                         new IdleStateHandler(0,
                                0,
                                 proxyConfiguration.getProxyTcpChannelAllIdleSeconds()));
-                proxyChannel.pipeline().addLast(p2ATcpChannelHeartbeatHandler);
+                proxyChannel.pipeline().addLast(p2ATcpChannelCleanupHandler);
                 proxyChannel.pipeline().addLast(new ChannelTrafficShapingHandler(
                         proxyConfiguration.getProxyTcpTrafficShapingWriteChannelLimit(),
                         proxyConfiguration.getProxyTcpTrafficShapingReadChannelLimit(),

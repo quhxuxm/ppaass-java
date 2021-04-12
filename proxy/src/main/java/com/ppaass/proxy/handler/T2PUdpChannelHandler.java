@@ -2,10 +2,7 @@ package com.ppaass.proxy.handler;
 
 import com.ppaass.common.cryptography.EncryptionType;
 import com.ppaass.common.log.PpaassLogger;
-import com.ppaass.common.message.MessageSerializer;
-import com.ppaass.common.message.ProxyMessage;
-import com.ppaass.common.message.ProxyMessageBody;
-import com.ppaass.common.message.ProxyMessageBodyType;
+import com.ppaass.common.message.*;
 import com.ppaass.proxy.IProxyConstant;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandler;
@@ -29,6 +26,14 @@ public class T2PUdpChannelHandler extends SimpleChannelInboundHandler<DatagramPa
                         .get();
         var targetUdpMessageContent = targetUdpMessage.content();
         var sender = targetUdpMessage.sender();
+        var udpData = ByteBufUtil.getBytes(targetUdpMessageContent);
+        var udpMessageContent = new UdpMessageContent();
+        udpMessageContent.setData(udpData);
+        udpMessageContent.setAddrType(udpConnectionInfo.getAddrType());
+        udpMessageContent.setSourceAddress(udpConnectionInfo.getSourceAddress());
+        udpMessageContent.setSourcePort(udpConnectionInfo.getSourcePort());
+        udpMessageContent.setDestinationAddress(udpConnectionInfo.getDestinationAddress());
+        udpMessageContent.setDestinationPort(udpConnectionInfo.getDestinationPort());
         var proxyMessageBody =
                 new ProxyMessageBody(
                         MessageSerializer.INSTANCE.generateUuid(),
@@ -36,7 +41,7 @@ public class T2PUdpChannelHandler extends SimpleChannelInboundHandler<DatagramPa
                         sender.getHostName(),
                         sender.getPort(),
                         ProxyMessageBodyType.OK_UDP,
-                        ByteBufUtil.getBytes(targetUdpMessageContent));
+                        MessageSerializer.JSON_OBJECT_MAPPER.writeValueAsBytes(udpMessageContent));
         var proxyMessage =
                 new ProxyMessage(
                         MessageSerializer.INSTANCE.generateUuidInBytes(),

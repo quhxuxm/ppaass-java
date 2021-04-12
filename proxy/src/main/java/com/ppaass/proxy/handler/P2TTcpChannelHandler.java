@@ -84,8 +84,10 @@ public class P2TTcpChannelHandler extends SimpleChannelInboundHandler<AgentMessa
                                     });
                             var failProxyMessageBody = new ProxyMessageBody(MessageSerializer.INSTANCE.generateUuid(),
                                     agentMessage.getBody().getUserToken(), agentMessage.getBody().getTargetHost(),
-                                    agentMessage.getBody().getTargetPort(),ProxyMessageBodyType.FAIL_TCP, new byte[]{} );
-                            var failProxyMessage=new ProxyMessage(MessageSerializer.INSTANCE.generateUuidInBytes(), EncryptionType.choose(), failProxyMessageBody);
+                                    agentMessage.getBody().getTargetPort(), ProxyMessageBodyType.FAIL_TCP,
+                                    new byte[]{});
+                            var failProxyMessage = new ProxyMessage(MessageSerializer.INSTANCE.generateUuidInBytes(),
+                                    EncryptionType.choose(), failProxyMessageBody);
                             targetTcpChannel.close().addListener(future -> {
                                 proxyChannel.writeAndFlush(failProxyMessage).addListener(ChannelFutureListener.CLOSE);
                             });
@@ -94,7 +96,9 @@ public class P2TTcpChannelHandler extends SimpleChannelInboundHandler<AgentMessa
             case UDP_DATA -> {
                 var recipient = new InetSocketAddress(agentMessage.getBody().getTargetHost(),
                         agentMessage.getBody().getTargetPort());
-                var udpData = Unpooled.wrappedBuffer(agentMessage.getBody().getData());
+                var udpMessageContent = MessageSerializer.JSON_OBJECT_MAPPER
+                        .readValue(agentMessage.getBody().getData(), UdpMessageContent.class);
+                var udpData = Unpooled.wrappedBuffer(udpMessageContent.getData());
                 var udpPackage = new DatagramPacket(udpData, recipient);
                 PpaassLogger.INSTANCE.debug(P2TTcpChannelHandler.class,
                         () -> "Agent message for udp, proxy channel = {}, udp data: \n{}\n",
@@ -109,6 +113,9 @@ public class P2TTcpChannelHandler extends SimpleChannelInboundHandler<AgentMessa
                     udpConnectionInfo = new UdpConnectionInfo(
                             agentMessage.getBody().getTargetHost(),
                             agentMessage.getBody().getTargetPort(),
+                            udpMessageContent.getSourceAddress(),
+                            udpMessageContent.getSourcePort(),
+                            udpMessageContent.getAddrType(),
                             agentMessage.getBody().getUserToken(),
                             proxyChannel,
                             targetUdpChannel

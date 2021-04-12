@@ -2,7 +2,6 @@ package com.ppaass.proxy.handler;
 
 import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.proxy.IProxyConstant;
-import com.ppaass.proxy.ProxyConfiguration;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -10,18 +9,11 @@ import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.springframework.stereotype.Service;
 
-import java.util.TimeZone;
-
 @Service
 @ChannelHandler.Sharable
-public class P2ATcpChannelHeartbeatHandler extends ChannelInboundHandlerAdapter {
+public class P2ATcpChannelCleanupHandler extends ChannelInboundHandlerAdapter {
     static {
-        PpaassLogger.INSTANCE.register(P2ATcpChannelHeartbeatHandler.class);
-    }
-
-    private static final TimeZone UTC_TIME_ZONE = TimeZone.getTimeZone("UTC");
-
-    public P2ATcpChannelHeartbeatHandler(ProxyConfiguration proxyConfiguration) {
+        PpaassLogger.INSTANCE.register(P2ATcpChannelCleanupHandler.class);
     }
 
     @Override
