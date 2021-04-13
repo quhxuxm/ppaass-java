@@ -43,27 +43,27 @@ class SocksAgentA2PUdpChannelHandler extends SimpleChannelInboundHandler<SocksAg
         udpConnectionInfo.setClientRecipientHost(socks5UdpMessage.getTargetHost());
         udpConnectionInfo.setClientRecipientPort(socks5UdpMessage.getTargetPort());
         agentUdpChannelContext.channel().attr(ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO).set(udpConnectionInfo);
-        var udpMessageContent = new UdpMessageContent();
+        var udpMessageContent = new UdpTransferMessageContent();
         udpMessageContent.setData(socks5UdpMessage.getData());
-        udpMessageContent.setSourceAddress(socks5UdpMessage.getUdpMessageSender().getAddress().getHostAddress());
-        udpMessageContent.setSourcePort(socks5UdpMessage.getUdpMessageSender().getPort());
-        udpMessageContent.setDestinationAddress(socks5UdpMessage.getTargetHost());
-        udpMessageContent.setDestinationPort(socks5UdpMessage.getTargetPort());
+        udpMessageContent.setOriginalSourceAddress(socks5UdpMessage.getUdpMessageSender().getAddress().getHostAddress());
+        udpMessageContent.setOriginalSourcePort(socks5UdpMessage.getUdpMessageSender().getPort());
+        udpMessageContent.setOriginalDestinationAddress(socks5UdpMessage.getTargetHost());
+        udpMessageContent.setOriginalDestinationPort(socks5UdpMessage.getTargetPort());
         if (socks5UdpMessage.getAddressType() == Socks5AddressType.DOMAIN) {
-            udpMessageContent.setAddrType(UdpMessageContent.AddrType.DOMAIN);
+            udpMessageContent.setOriginalAddrType(UdpTransferMessageContent.AddrType.DOMAIN);
         } else {
             if (socks5UdpMessage.getAddressType() == Socks5AddressType.IPv6) {
-                udpMessageContent.setAddrType(UdpMessageContent.AddrType.IPV6);
+                udpMessageContent.setOriginalAddrType(UdpTransferMessageContent.AddrType.IPV6);
             } else {
-                udpMessageContent.setAddrType(UdpMessageContent.AddrType.IPV4);
+                udpMessageContent.setOriginalAddrType(UdpTransferMessageContent.AddrType.IPV4);
             }
         }
         var agentMessageBody =
                 new AgentMessageBody(
                         MessageSerializer.INSTANCE.generateUuid(),
                         this.agentConfiguration.getUserToken(),
-                        udpMessageContent.getDestinationAddress(),
-                        udpMessageContent.getDestinationPort(),
+                        udpMessageContent.getOriginalDestinationAddress(),
+                        udpMessageContent.getOriginalDestinationPort(),
                         AgentMessageBodyType.UDP_DATA,
                         MessageSerializer.JSON_OBJECT_MAPPER.writeValueAsBytes(udpMessageContent));
         var agentMessage =

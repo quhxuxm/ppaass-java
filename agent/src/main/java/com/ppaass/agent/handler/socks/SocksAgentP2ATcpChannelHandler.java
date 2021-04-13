@@ -4,7 +4,7 @@ import com.ppaass.agent.IAgentConst;
 import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.common.message.MessageSerializer;
 import com.ppaass.common.message.ProxyMessage;
-import com.ppaass.common.message.UdpMessageContent;
+import com.ppaass.common.message.UdpTransferMessageContent;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -216,13 +216,13 @@ class SocksAgentP2ATcpChannelHandler extends SimpleChannelInboundHandler<ProxyMe
                         });
             }
             case OK_UDP -> {
+                var udpMessageContent = MessageSerializer.JSON_OBJECT_MAPPER.readValue(proxyMessage.getBody().getData(),
+                        UdpTransferMessageContent.class);
                 var udpConnectionInfo = proxyChannel.attr(ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO).get();
                 var recipient = new InetSocketAddress(udpConnectionInfo.getClientSenderHost(),
                         udpConnectionInfo.getClientSenderPort());
                 var sender = new InetSocketAddress(IAgentConst.LOCAL_IP_ADDRESS,
                         udpConnectionInfo.getAgentUdpPort());
-                var udpMessageContent = MessageSerializer.JSON_OBJECT_MAPPER.readValue(proxyMessage.getBody().getData(),
-                        UdpMessageContent.class);
                 var udpData = udpMessageContent.getData();
                 var socks5UdpResponseBuf = Unpooled.buffer();
                 socks5UdpResponseBuf.writeByte(0);

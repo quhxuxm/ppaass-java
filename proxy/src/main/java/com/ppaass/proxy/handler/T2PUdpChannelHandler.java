@@ -27,13 +27,13 @@ public class T2PUdpChannelHandler extends SimpleChannelInboundHandler<DatagramPa
         var targetUdpMessageContent = targetUdpMessage.content();
         var sender = targetUdpMessage.sender();
         var udpData = ByteBufUtil.getBytes(targetUdpMessageContent);
-        var udpMessageContent = new UdpMessageContent();
+        var udpMessageContent = new UdpTransferMessageContent();
         udpMessageContent.setData(udpData);
-        udpMessageContent.setAddrType(udpConnectionInfo.getAddrType());
-        udpMessageContent.setSourceAddress(udpConnectionInfo.getSourceAddress());
-        udpMessageContent.setSourcePort(udpConnectionInfo.getSourcePort());
-        udpMessageContent.setDestinationAddress(udpConnectionInfo.getDestinationAddress());
-        udpMessageContent.setDestinationPort(udpConnectionInfo.getDestinationPort());
+        udpMessageContent.setOriginalAddrType(udpConnectionInfo.getAddrType());
+        udpMessageContent.setOriginalSourceAddress(udpConnectionInfo.getSourceAddress());
+        udpMessageContent.setOriginalSourcePort(udpConnectionInfo.getSourcePort());
+        udpMessageContent.setOriginalDestinationAddress(udpConnectionInfo.getDestinationAddress());
+        udpMessageContent.setOriginalDestinationPort(udpConnectionInfo.getDestinationPort());
         var proxyMessageBody =
                 new ProxyMessageBody(
                         MessageSerializer.INSTANCE.generateUuid(),

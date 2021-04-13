@@ -1,20 +1,20 @@
 package com.ppaass.proxy.handler.bo;
 
-import com.ppaass.common.message.UdpMessageContent;
+import com.ppaass.common.message.UdpTransferMessageContent;
 import io.netty.channel.Channel;
 
 public class UdpConnectionInfo {
     private final String destinationAddress;
     private final int destinationPort;
     private final String sourceAddress;
-    private final UdpMessageContent.AddrType addrType;
+    private final UdpTransferMessageContent.AddrType addrType;
     private final int sourcePort;
     private final String userToken;
     private final Channel proxyTcpChannel;
     private final Channel targetUdpChannel;
 
     public UdpConnectionInfo(String destinationAddress, int destinationPort, String sourceAddress, int sourcePort,
-                             UdpMessageContent.AddrType addrType, String userToken, Channel proxyTcpChannel,
+                             UdpTransferMessageContent.AddrType addrType, String userToken, Channel proxyTcpChannel,
                              Channel targetUdpChannel) {
         this.destinationAddress = destinationAddress;
         this.destinationPort = destinationPort;
@@ -54,7 +54,7 @@ public class UdpConnectionInfo {
         return sourcePort;
     }
 
-    public UdpMessageContent.AddrType getAddrType() {
+    public UdpTransferMessageContent.AddrType getAddrType() {
         return addrType;
     }
 }

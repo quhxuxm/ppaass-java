@@ -1,7 +1,7 @@
 import socket
 import socks
 
-host = "127.0.0.1"
+host = "45.63.92.64"
 port = 888
 
 sock = socks.socksocket(socket.AF_INET, socket.SOCK_DGRAM)
