@@ -5,7 +5,10 @@ public enum ProxyMessageBodyType implements MessageBodyType {
      * TCP data handled.
      */
     OK_TCP(0),
-    CLOSE_TCP(2),
+    /**
+     * TCP connection close.
+     */
+    CONNECTION_CLOSE(2),
     /**
      * UDP data handled.
      */

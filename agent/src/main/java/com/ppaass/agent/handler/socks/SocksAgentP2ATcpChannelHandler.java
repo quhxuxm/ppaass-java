@@ -168,7 +168,7 @@ class SocksAgentP2ATcpChannelHandler extends SimpleChannelInboundHandler<ProxyMe
                 proxyChannel.close();
                 agentTcpChannel.close();
             }
-            case CLOSE_TCP -> {
+            case CONNECTION_CLOSE -> {
                 var agentTcpChannel = tcpConnectionInfo.getAgentTcpChannel();
                 agentTcpChannel.close();
                 proxyChannel.close();

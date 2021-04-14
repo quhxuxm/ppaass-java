@@ -116,6 +116,10 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
             case OK_TCP -> {
                 proxyChannelContext.fireChannelRead(proxyMessage);
             }
+            case CONNECTION_CLOSE -> {
+                proxyChannel.close();
+                agentChannel.close();
+            }
             case FAIL_TCP -> {
                 PpaassLogger.INSTANCE.trace(HttpAgentProxyMessageBodyTypeHandler.class,
                         () -> "FAIL_TCP happen close connection, agent channel = {}, proxy channel = {}.",
