@@ -64,7 +64,7 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
         targetOriginalMessageBuf.readBytes(originalDataByteArray);
         var proxyMessageBody =
                 new ProxyMessageBody(
-                        MessageSerializer.INSTANCE.generateUuid(),
+                        connectionInfo.getConnectionId(),
                         connectionInfo.getUserToken(),
                         connectionInfo.getTargetHost(),
                         connectionInfo.getTargetPort(),

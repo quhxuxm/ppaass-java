@@ -3,6 +3,7 @@ package com.ppaass.proxy.handler.bo;
 import io.netty.channel.Channel;
 
 public class TcpConnectionInfo {
+    private final String connectionId;
     private final String targetHost;
     private final int targetPort;
     private final String userToken;
@@ -11,8 +12,10 @@ public class TcpConnectionInfo {
     private final boolean targetTcpConnectionKeepAlive;
     private boolean heartbeatPending;
 
-    public TcpConnectionInfo(String targetHost, int targetPort, String userToken, Channel proxyTcpChannel,
+    public TcpConnectionInfo(String connectionId, String targetHost, int targetPort, String userToken,
+                             Channel proxyTcpChannel,
                              Channel targetTcpChannel, boolean targetTcpConnectionKeepAlive) {
+        this.connectionId = connectionId;
         this.targetHost = targetHost;
         this.targetPort = targetPort;
         this.userToken = userToken;
@@ -20,6 +23,10 @@ public class TcpConnectionInfo {
         this.targetTcpChannel = targetTcpChannel;
         this.targetTcpConnectionKeepAlive = targetTcpConnectionKeepAlive;
         this.heartbeatPending = false;
+    }
+
+    public String getConnectionId() {
+        return connectionId;
     }
 
     public String getTargetHost() {

@@ -82,7 +82,7 @@ public class P2TTcpChannelHandler extends SimpleChannelInboundHandler<AgentMessa
                                             proxyChannel.id().asLongText(), targetTcpChannel.id().asLongText(),
                                             targetChannelFuture.cause()
                                     });
-                            var failProxyMessageBody = new ProxyMessageBody(MessageSerializer.INSTANCE.generateUuid(),
+                            var failProxyMessageBody = new ProxyMessageBody(connectionInfo.getConnectionId(),
                                     agentMessage.getBody().getUserToken(), agentMessage.getBody().getTargetHost(),
                                     agentMessage.getBody().getTargetPort(), ProxyMessageBodyType.FAIL_TCP,
                                     new byte[]{});
@@ -156,6 +156,7 @@ public class P2TTcpChannelHandler extends SimpleChannelInboundHandler<AgentMessa
                             }
                             var targetChannel = targetChannelFuture.channel();
                             var connectionInfo = new TcpConnectionInfo(
+                                    agentMessage.getBody().getId(),
                                     agentMessage.getBody().getTargetHost(),
                                     agentMessage.getBody().getTargetPort(),
                                     agentMessage.getBody().getUserToken(),
@@ -173,7 +174,7 @@ public class P2TTcpChannelHandler extends SimpleChannelInboundHandler<AgentMessa
                                             connectionInfo.isTargetTcpConnectionKeepAlive());
                             var proxyMessageBody =
                                     new ProxyMessageBody(
-                                            MessageSerializer.INSTANCE.generateUuid(),
+                                            connectionInfo.getConnectionId(),
                                             connectionInfo.getUserToken(),
                                             connectionInfo.getTargetHost(),
                                             connectionInfo.getTargetPort(),
