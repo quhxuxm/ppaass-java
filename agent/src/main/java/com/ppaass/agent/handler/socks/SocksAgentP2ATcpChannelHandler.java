@@ -168,6 +168,11 @@ class SocksAgentP2ATcpChannelHandler extends SimpleChannelInboundHandler<ProxyMe
                 proxyChannel.close();
                 agentTcpChannel.close();
             }
+            case CLOSE_TCP -> {
+                var agentTcpChannel = tcpConnectionInfo.getAgentTcpChannel();
+                agentTcpChannel.close();
+                proxyChannel.close();
+            }
             case OK_TCP -> {
                 var tcpDataByteBuf = Unpooled.wrappedBuffer(proxyMessage.getBody().getData());
                 PpaassLogger.INSTANCE.trace(SocksAgentP2ATcpChannelHandler.class,

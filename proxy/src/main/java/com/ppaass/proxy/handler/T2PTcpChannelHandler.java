@@ -26,6 +26,34 @@ public class T2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
     }
 
     @Override
+    public void channelInactive(ChannelHandlerContext targetChannelContext) throws Exception {
+        var targetChannel = targetChannelContext.channel();
+        var connectionInfo = targetChannel.attr(IProxyConstant.TCP_CONNECTION_INFO).get();
+        if (connectionInfo == null) {
+            PpaassLogger.INSTANCE.error(T2PTcpChannelHandler.class,
+                    () -> "Fail to transfer data from target to proxy because of no agent connection information attached, target channel = {}.",
+                    () -> new Object[]{
+                            targetChannel.id().asLongText()
+                    });
+            targetChannel.close();
+            return;
+        }
+        var proxyChannel = connectionInfo.getProxyTcpChannel();
+        var proxyMessageBody =
+                new ProxyMessageBody(
+                        connectionInfo.getConnectionId(),
+                        connectionInfo.getUserToken(),
+                        connectionInfo.getTargetHost(),
+                        connectionInfo.getTargetPort(),
+                        ProxyMessageBodyType.CLOSE_TCP, new byte[]{});
+        var proxyMessage = new ProxyMessage(
+                MessageSerializer.INSTANCE.generateUuidInBytes(),
+                EncryptionType.choose(),
+                proxyMessageBody);
+        proxyChannel.writeAndFlush(proxyMessage);
+    }
+
+    @Override
     public void channelActive(ChannelHandlerContext targetChannelContext) throws Exception {
         super.channelActive(targetChannelContext);
         var targetChannel = targetChannelContext.channel();
