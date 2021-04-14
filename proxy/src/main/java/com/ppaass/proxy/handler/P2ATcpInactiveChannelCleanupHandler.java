@@ -11,9 +11,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 @ChannelHandler.Sharable
-public class P2ATcpChannelCleanupHandler extends ChannelInboundHandlerAdapter {
+public class P2ATcpInactiveChannelCleanupHandler extends ChannelInboundHandlerAdapter {
     static {
-        PpaassLogger.INSTANCE.register(P2ATcpChannelCleanupHandler.class);
+        PpaassLogger.INSTANCE.register(P2ATcpInactiveChannelCleanupHandler.class);
     }
 
     @Override
