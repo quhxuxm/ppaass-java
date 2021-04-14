@@ -141,7 +141,7 @@ public class P2TTcpChannelHandler extends SimpleChannelInboundHandler<AgentMessa
                         .addListener((ChannelFutureListener) targetChannelFuture -> {
                             if (!targetChannelFuture.isSuccess()) {
                                 var proxyMessageBody = new ProxyMessageBody(
-                                        MessageSerializer.INSTANCE.generateUuid(),
+                                        agentMessage.getBody().getId(),
                                         agentMessage.getBody().getUserToken(),
                                         agentMessage.getBody().getTargetHost(),
                                         agentMessage.getBody().getTargetPort(),
