@@ -50,6 +50,7 @@ public class AgentConfiguration {
     private String agentInstanceId;
     private final ObjectMapper objectMapper;
     private String agentSourceAddress;
+    private int proxyConnectionAcquireTimeout;
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private static class AgentDynamicConfiguration {
@@ -364,6 +365,14 @@ public class AgentConfiguration {
 
     public String getAgentSourceAddress() {
         return agentSourceAddress;
+    }
+
+    public void setProxyConnectionAcquireTimeout(int proxyConnectionAcquireTimeout) {
+        this.proxyConnectionAcquireTimeout = proxyConnectionAcquireTimeout;
+    }
+
+    public int getProxyConnectionAcquireTimeout() {
+        return proxyConnectionAcquireTimeout;
     }
 
     public void save() {

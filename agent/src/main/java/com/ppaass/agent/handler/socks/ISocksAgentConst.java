@@ -14,8 +14,8 @@ interface ISocksAgentConst {
                 AttributeKey.valueOf("TCP_CONNECTION_INFO");
     }
     interface IProxyChannelAttr{
-        AttributeKey<ConcurrentMap<String, Channel>> AGENT_CHANNELS =
-                AttributeKey.valueOf("AGENT_CHANNELS");
+        AttributeKey<Channel> AGENT_CHANNEL =
+                AttributeKey.valueOf("AGENT_CHANNEL");
         AttributeKey<ChannelPool> CHANNEL_POOL =
                 AttributeKey.valueOf("CHANNEL_POOL");
     }

@@ -1,10 +1,8 @@
 package com.ppaass.agent.handler.socks;
 
 import com.ppaass.agent.AgentConfiguration;
-import com.ppaass.common.log.PpaassLogger;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.pool.ChannelPool;
@@ -53,24 +51,12 @@ class SocksAgentConfigure {
 //    }
 
     @Bean
-    public FixedChannelPool socksProxyTcpChannelPool(Bootstrap socksProxyTcpBootstrap,
+    public ChannelPool socksProxyTcpChannelPool(Bootstrap socksProxyTcpBootstrap,
                                                 SocksAgentProxyTcpChannelPoolInitializer socksAgentProxyTcpChannelPoolInitializer,
                                                 AgentConfiguration agentConfiguration) {
         var channelPool = new FixedChannelPool(socksProxyTcpBootstrap, socksAgentProxyTcpChannelPoolInitializer,
                 agentConfiguration.getProxyChannelPoolSize());
         socksAgentProxyTcpChannelPoolInitializer.setChannelPool(channelPool);
-        int i = 0;
-        while (i < agentConfiguration.getProxyChannelPoolSize()) {
-            try {
-                Channel channel = channelPool.acquire().get();
-                channelPool.release(channel).get();
-                i++;
-                PpaassLogger.INSTANCE.info(() -> "One proxy channel warmed, proxy channel = {}",
-                        () -> new Object[]{channel.id().asLongText()});
-            } catch (Exception e) {
-                PpaassLogger.INSTANCE.error(() -> "One proxy channel warm fail, skip it.", () -> new Object[]{e});
-            }
-        }
         return channelPool;
     }
 }

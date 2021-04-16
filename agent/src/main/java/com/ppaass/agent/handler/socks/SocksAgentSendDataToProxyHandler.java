@@ -16,11 +16,22 @@ import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
 @Service
-class SocksAgentA2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
+class SocksAgentSendDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
     private final AgentConfiguration agentConfiguration;
 
-    SocksAgentA2PTcpChannelHandler(AgentConfiguration agentConfiguration) {
+    SocksAgentSendDataToProxyHandler(AgentConfiguration agentConfiguration) {
         this.agentConfiguration = agentConfiguration;
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext agentChannelContext) throws Exception {
+        var agentChannel = agentChannelContext.channel();
+        var tcpConnectionInfo = agentChannel.attr(ISocksAgentConst.IAgentChannelAttr.TCP_CONNECTION_INFO).get();
+        if (tcpConnectionInfo == null) {
+            return;
+        }
+        var proxyTcpChannel = tcpConnectionInfo.getProxyTcpChannel();
+        proxyTcpChannel.attr(ISocksAgentConst.IProxyChannelAttr.CHANNEL_POOL).get().release(proxyTcpChannel);
     }
 
     @Override
@@ -28,7 +39,7 @@ class SocksAgentA2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf
         var agentChannel = agentChannelContext.channel();
         var tcpConnectionInfo = agentChannel.attr(ISocksAgentConst.IAgentChannelAttr.TCP_CONNECTION_INFO).get();
         if (tcpConnectionInfo == null) {
-            PpaassLogger.INSTANCE.error(SocksAgentA2PTcpChannelHandler.class,
+            PpaassLogger.INSTANCE.error(
                     () -> "Fail write agent original message to proxy because of no connection information attached, agent channel = {}",
                     () -> new Object[]{agentChannel.id().asLongText()});
             return;
@@ -66,13 +77,13 @@ class SocksAgentA2PTcpChannelHandler extends SimpleChannelInboundHandler<ByteBuf
                         });
                 return;
             }
-            proxyTcpChannel.attr(ISocksAgentConst.IProxyChannelAttr.CHANNEL_POOL).get().release(proxyTcpChannel);
             PpaassLogger.INSTANCE.error(
                     () -> "Fail forward client original message to proxy because of exception, agent channel = {}, proxy channel = {}",
                     () -> new Object[]{
                             agentChannel.id().asLongText(), proxyTcpChannel.id().asLongText(),
                             proxyChannelFuture.cause()
                     });
+            agentChannel.close();
         });
     }
 }

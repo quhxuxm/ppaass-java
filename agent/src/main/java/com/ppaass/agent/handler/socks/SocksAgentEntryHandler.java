@@ -8,7 +8,6 @@ import com.ppaass.protocol.vpn.message.AgentMessage;
 import com.ppaass.protocol.vpn.message.AgentMessageBody;
 import com.ppaass.protocol.vpn.message.AgentMessageBodyType;
 import com.ppaass.protocol.vpn.message.EncryptionType;
-import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.pool.ChannelPool;
 import io.netty.handler.codec.socksx.SocksMessage;
@@ -16,10 +15,13 @@ import io.netty.handler.codec.socksx.SocksVersion;
 import io.netty.handler.codec.socksx.v5.*;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 @ChannelHandler.Sharable
 @Service
 public class SocksAgentEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
-//    private final Bootstrap socksProxyUdpBootstrap;
+    //    private final Bootstrap socksProxyUdpBootstrap;
     private final AgentConfiguration agentConfiguration;
     private final ChannelPool socksProxyTcpChannelPool;
 
@@ -89,8 +91,15 @@ public class SocksAgentEntryHandler extends SimpleChannelInboundHandler<SocksMes
                             () -> new Object[]{
                                     agentChannel.id().asLongText()
                             });
-            Channel proxyChannel = this.socksProxyTcpChannelPool.acquire().syncUninterruptibly().get();
-            this.processProxyConnect(agentChannel, proxyChannel, socks5CommandRequest);
+            try {
+                Channel proxyChannel = this.socksProxyTcpChannelPool.acquire()
+                        .get(this.agentConfiguration.getProxyConnectionAcquireTimeout(),
+                                TimeUnit.MILLISECONDS);
+                this.processProxyConnect(agentChannel, proxyChannel, socks5CommandRequest);
+            } catch (TimeoutException e) {
+                agentChannel.writeAndFlush(new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE,
+                        socks5CommandRequest.dstAddrType())).addListener(ChannelFutureListener.CLOSE);
+            }
             return;
         }
         if (socks5CommandRequest.type() == Socks5CommandType.UDP_ASSOCIATE) {
@@ -153,8 +162,7 @@ public class SocksAgentEntryHandler extends SimpleChannelInboundHandler<SocksMes
         PpaassLogger.INSTANCE.trace(
                 () -> "Send TCP_CONNECT from agent to proxy [BEGIN] , agent channel = {}, proxy channel = {}",
                 () -> new Object[]{proxyChannel.id().asLongText()});
-        proxyChannel.attr(ISocksAgentConst.IProxyChannelAttr.AGENT_CHANNELS).get()
-                .putIfAbsent(agentChannel.id().asLongText(), agentChannel);
+        proxyChannel.attr(ISocksAgentConst.IProxyChannelAttr.AGENT_CHANNEL).setIfAbsent(agentChannel);
         proxyChannel.writeAndFlush(agentMessage)
                 .addListener((ChannelFutureListener) proxyWriteChannelFuture -> {
                     if (proxyWriteChannelFuture.isSuccess()) {
