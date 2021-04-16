@@ -27,6 +27,17 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
     @Override
     public void exceptionCaught(ChannelHandlerContext targetChannelContext, Throwable cause) throws Exception {
         PpaassLogger.INSTANCE.error(() -> "Exception happen on target channel.", () -> new Object[]{cause});
+        var targetChannel = targetChannelContext.channel();
+        var targetTcpInfo = targetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO).get();
+        if (targetTcpInfo == null) {
+            targetChannel.close();
+            return;
+        }
+        var proxyChannel = targetTcpInfo.getProxyTcpChannel();
+        var targetChannels = proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNELS).get();
+        var targetChannelKey = String.format(IProxyConstant.TARGET_CHANNEL_KEY_FORMAT,
+                targetTcpInfo.getAgentInstanceId(), targetTcpInfo.getAgentChannelId());
+        targetChannels.remove(targetChannelKey);
     }
 
     @Override
@@ -72,6 +83,14 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
             }
             PpaassLogger.INSTANCE.error(() -> "Fail to write TCP_CONNECTION_CLOSE to agent, tcp info:\n{}\n",
                     () -> new Object[]{targetTcpInfo});
+            targetChannels.forEach((k, channel) -> {
+                targetChannels.remove(k);
+                try {
+                    channel.close();
+                } catch (Exception e) {
+                }
+            });
+            proxyChannel.close();
         });
     }
 
@@ -123,7 +142,18 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
                             () -> new Object[]{
                                     targetTcpInfo
                             });
+                    var targetChannels = proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNELS).get();
+                    var targetChannelKey = String.format(IProxyConstant.TARGET_CHANNEL_KEY_FORMAT,
+                            targetTcpInfo.getAgentInstanceId(), targetTcpInfo.getAgentChannelId());
+                    targetChannels.remove(targetChannelKey);
                     targetChannel.close();
+                    targetChannels.forEach((k, channel) -> {
+                        targetChannels.remove(k);
+                        try {
+                            channel.close();
+                        } catch (Exception e) {
+                        }
+                    });
                 });
     }
 }
