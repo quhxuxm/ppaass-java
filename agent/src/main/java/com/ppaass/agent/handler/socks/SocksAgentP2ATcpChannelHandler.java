@@ -60,6 +60,12 @@ class SocksAgentP2ATcpChannelHandler extends SimpleChannelInboundHandler<ProxyMe
             case TCP_DATA_SUCCESS -> {
                 handleTcpDataSuccess(proxyMessage, proxyChannel, agentChannels);
             }
+            case UDP_DATA_FAIL -> {
+
+            }
+            case UDP_DATA_SUCCESS -> {
+
+            }
 //            case OK_UDP -> {
 //                var udpMessageContent = MessageSerializer.JSON_OBJECT_MAPPER.readValue(proxyMessage.getBody().getData(),
 //                        UdpTransferMessageContent.class);
