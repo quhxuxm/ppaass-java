@@ -1,0 +1,736 @@
+2021-04-16 16:04:41:943 INFO TraceId: main com.ppaass.proxy.Launcher [] Starting Launcher using Java 15.0.2 on CPEKW-Q1100753 with PID 17564 (D:\Git\ppaass\proxy\target\classes started by quh in D:\Git\ppaass) 
+2021-04-16 16:04:41:952 INFO TraceId: main com.ppaass.proxy.Launcher [] No active profile set, falling back to default profiles: default 
+2021-04-16 16:04:44:922 INFO TraceId: main com.ppaass.proxy.Launcher [] Started Launcher in 3.33 seconds (JVM running for 4.443) 
+2021-04-16 16:04:44:928 INFO TraceId: main com.ppaass.proxy.Launcher [] Begin to start proxy... 
+2021-04-16 16:04:45:039 WARN TraceId: main io.netty.bootstrap.ServerBootstrap [] Unknown channel option 'TCP_NODELAY' for channel '[id: 0x5a7ec380]' 
+2021-04-16 16:04:45:050 INFO TraceId: main com.ppaass.proxy.Launcher [] Proxy started... 
+2021-04-16 16:05:35:730 ERROR TraceId: nioEventLoopGroup-3-12 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-00000015-23750e8c732146be-ab3b1414, target channel = 00000000000000e0-0000449c-0000001a-10334d34732146e4-9df6d2c2 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:05:35:730 ERROR TraceId: nioEventLoopGroup-3-10 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-00000013-1253ca8c732146bc-42ef3be6, target channel = 00000000000000e0-0000449c-00000019-0741e934732146e2-49bc843c 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:05:35:809 ERROR TraceId: nioEventLoopGroup-3-9 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-0000000d-0cfb7dc073214584-c6e7b314, target channel = 00000000000000e0-0000449c-0000000e-12382580732145a4-7d694e58 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:05:44:699 ERROR TraceId: nioEventLoopGroup-3-14 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-0000001b-1f33fbd4332168a7-05fe163b, target channel = 00000000000000e0-0000449c-0000001d-3ea54064332168db-fa398812 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:06:20:614 ERROR TraceId: nioEventLoopGroup-3-61 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-00000079-0b6866b12321f50f-78a422fa, target channel = 00000000000000e0-0000449c-0000007a-394cd5512321f514-1e75924d 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:06:21:442 ERROR TraceId: nioEventLoopGroup-3-65 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-00000081-3a458cc32321f9e5-eddf566d, target channel = 00000000000000e0-0000449c-00000082-089a29032321f9ec-98437605 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:06:40:502 ERROR TraceId: nioEventLoopGroup-3-74 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-00000093-3942e6209f201f76-b88fd0e5, target channel = 00000000000000e0-0000449c-00000094-28466da09f201f7b-a8e88ab2 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:06:42:287 ERROR TraceId: nioEventLoopGroup-3-84 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-000000a7-094cc45c1f2030e0-3f474272, target channel = 00000000000000e0-0000449c-000000a8-387331dc1f2030e7-65848050 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:08:23:916 ERROR TraceId: nioEventLoopGroup-3-29 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-00000038-295f7bde43218d5a-4ba7a0ca, target channel = 00000000000000e0-0000449c-00000039-179e1cde43218d60-edc69a62 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:08:52:998 ERROR TraceId: nioEventLoopGroup-3-116 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-000000e7-39a748d8182e47b5-2e5304ae, target channel = 00000000000000e0-0000449c-000000e8-26605ed8182e47bc-40b5b44b 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:09:02:903 ERROR TraceId: nioEventLoopGroup-3-120 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-000000ef-39c1b303182e55e9-113f0589, target channel = 00000000000000e0-0000449c-000000f0-1227f803182e55ef-f23754e0 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:09:15:204 ERROR TraceId: nioEventLoopGroup-3-16 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-0000001f-194a3b2a33216a07-fa49b666, target channel = 00000000000000e0-0000449c-00000021-03842e4a33216a32-b1973483 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:09:20:219 ERROR TraceId: nioEventLoopGroup-3-15 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-0000001c-20be3e14332168c2-dad02eff, target channel = 00000000000000e0-0000449c-0000001e-3c8247e4332168ea-204579b2 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:09:23:267 ERROR TraceId: nioEventLoopGroup-3-112 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-000000df-3b1931d4982e3a0b-f065a63d, target channel = 00000000000000e0-0000449c-000000e0-2dc507d4982e3a10-9a0fcaaa 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:09:29:395 WARN TraceId: nioEventLoopGroup-4-111 io.netty.channel.DefaultChannelPipeline [] An exceptionCaught() event was fired, and it reached at the tail of the pipeline. It usually means the last handler in the pipeline did not handle the exception. 
+java.net.SocketException: Connection reset
+	at sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:367) ~[?:?]
+	at sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:398) ~[?:?]
+	at io.netty.buffer.PooledByteBuf.setBytes(PooledByteBuf.java:253) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.buffer.AbstractByteBuf.writeBytes(AbstractByteBuf.java:1132) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.socket.nio.NioSocketChannel.doReadBytes(NioSocketChannel.java:350) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:151) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:719) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:655) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:581) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:493) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at java.lang.Thread.run(Thread.java:832) [?:?]
+2021-04-16 16:09:30:532 ERROR TraceId: nioEventLoopGroup-3-24 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-0000002f-3241cf0ac3217b12-5bff16fb, target channel = 00000000000000e0-0000449c-00000030-36f1b20ac3217b18-214e0c1a 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:09:36:081 ERROR TraceId: nioEventLoopGroup-3-19 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-00000025-0b648fad33217063-c8ac092a, target channel = 00000000000000e0-0000449c-00000026-0ce430cd33217087-5cf5771a 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:09:36:317 ERROR TraceId: nioEventLoopGroup-3-27 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-00000035-0f7c806dc32180f9-030f5872, target channel = 00000000000000e0-0000449c-00000036-15f3ca6dc32180ff-123f3793 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:09:37:985 ERROR TraceId: nioEventLoopGroup-3-30 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-0000003b-1b4acbf78321a74d-65a8fb1d, target channel = 00000000000000e0-0000449c-0000003c-35f556f78321a757-de2e21c1 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:09:45:741 ERROR TraceId: nioEventLoopGroup-3-21 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-00000028-0c03329f33217458-f4d84f9c, target channel = 00000000000000e0-0000449c-0000002a-06423aef3321747a-c3a31dc2 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:09:46:934 ERROR TraceId: nioEventLoopGroup-3-44 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-00000057-1dac7d006321cbcc-424de4dd, target channel = 00000000000000e0-0000449c-00000059-236848006321cbd2-dfef5c1c 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:11:32:365 WARN TraceId: nioEventLoopGroup-4-125 io.netty.channel.DefaultChannelPipeline [] An exceptionCaught() event was fired, and it reached at the tail of the pipeline. It usually means the last handler in the pipeline did not handle the exception. 
+java.net.SocketException: Connection reset
+	at sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:367) ~[?:?]
+	at sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:398) ~[?:?]
+	at io.netty.buffer.PooledByteBuf.setBytes(PooledByteBuf.java:253) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.buffer.AbstractByteBuf.writeBytes(AbstractByteBuf.java:1132) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.socket.nio.NioSocketChannel.doReadBytes(NioSocketChannel.java:350) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:151) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:719) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:655) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:581) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:493) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at java.lang.Thread.run(Thread.java:832) [?:?]
+2021-04-16 16:12:37:784 ERROR TraceId: nioEventLoopGroup-3-105 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-000000d1-1e60f248bf2061a6-6ba4e706, target channel = 00000000000000e0-0000449c-000000d2-388855c8bf2061ac-18f4f697 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:12:39:079 ERROR TraceId: nioEventLoopGroup-3-86 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-000000ab-195ca7261f20367f-07ed820a, target channel = 00000000000000e0-0000449c-000000ac-2b0862261f203686-f5c9e315 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:13:19:086 ERROR TraceId: nioEventLoopGroup-3-126 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-000000fb-0e8aaecfa82d0f7c-f004f91b, target channel = 00000000000000e0-0000449c-000000fc-0b1fe30fa82d0f81-a3390e38 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:14:18:778 ERROR TraceId: nioEventLoopGroup-3-104 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-000000ce-12dbf3f87f20501e-dbc7901b, target channel = 00000000000000e0-0000449c-000000d0-00bc06f87f205027-c1cbacce 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:14:32:081 WARN TraceId: nioEventLoopGroup-4-136 io.netty.channel.DefaultChannelPipeline [] An exceptionCaught() event was fired, and it reached at the tail of the pipeline. It usually means the last handler in the pipeline did not handle the exception. 
+java.net.SocketException: Connection reset
+	at sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:367) ~[?:?]
+	at sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:398) ~[?:?]
+	at io.netty.buffer.PooledByteBuf.setBytes(PooledByteBuf.java:253) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.buffer.AbstractByteBuf.writeBytes(AbstractByteBuf.java:1132) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.socket.nio.NioSocketChannel.doReadBytes(NioSocketChannel.java:350) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:151) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:719) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:655) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:581) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:493) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at java.lang.Thread.run(Thread.java:832) [?:?]
+2021-04-16 16:15:40:417 ERROR TraceId: nioEventLoopGroup-4-1 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to transfer data from target to proxy because of no agent connection information attached, target channel = 00000000000000e0-0000449c-00000003-1d721269f3213bc9-e5cec7c0. 
+2021-04-16 16:15:41:018 ERROR TraceId: nioEventLoopGroup-4-46 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to transfer data from target to proxy because of no agent connection information attached, target channel = 00000000000000e0-0000449c-0000005c-2f2c21146321cd5b-1d7319bb. 
+2021-04-16 16:15:48:652 ERROR TraceId: nioEventLoopGroup-4-48 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to transfer data from target to proxy because of no agent connection information attached, target channel = 00000000000000e0-0000449c-00000060-3b5275816321d440-36ee8684. 
+2021-04-16 16:16:06:296 ERROR TraceId: nioEventLoopGroup-4-82 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to transfer data from target to proxy because of no agent connection information attached, target channel = 00000000000000e0-0000449c-000000a4-255289901f202ffd-484e720f. 
+2021-04-16 16:16:32:114 ERROR TraceId: nioEventLoopGroup-4-107 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to transfer data from target to proxy because of no agent connection information attached, target channel = 00000000000000e0-0000449c-000000d6-2206ec944f2096ca-ac1bea65. 
+2021-04-16 16:18:40:173 ERROR TraceId: nioEventLoopGroup-3-101 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-000000c8-259d7784ff204369-0fce69f9, target channel = 00000000000000e0-0000449c-000000c9-08a1ae84ff204372-b04133c8 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:18:40:259 ERROR TraceId: nioEventLoopGroup-3-100 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-000000c7-05e0eb84ff204367-bf21b37c, target channel = 00000000000000e0-0000449c-000000ca-2349d17aff204373-99ca71bb 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:18:40:282 ERROR TraceId: nioEventLoopGroup-3-102 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-000000cb-0625c901ff20499d-0306b940, target channel = 00000000000000e0-0000449c-000000cc-171c8401ff2049a6-a8bce2b8 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:18:47:276 ERROR TraceId: nioEventLoopGroup-4-75 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to transfer data from target to proxy because of no agent connection information attached, target channel = 00000000000000e0-0000449c-00000096-048e8c8c9f2020d3-199a4dcc. 
+2021-04-16 16:19:18:248 ERROR TraceId: nioEventLoopGroup-3-137 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-00000111-0b52964dca2ad84a-1b92dd04, target channel = 00000000000000e0-0000449c-00000112-3b874fcdca2ad853-f6c7e3e2 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:19:20:418 ERROR TraceId: nioEventLoopGroup-3-138 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-00000113-3f00e8459e288d85-cb6e3e5b, target channel = 00000000000000e0-0000449c-00000115-13e671c59e288d8d-7ea252f2 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:19:31:343 WARN TraceId: nioEventLoopGroup-4-152 io.netty.channel.DefaultChannelPipeline [] An exceptionCaught() event was fired, and it reached at the tail of the pipeline. It usually means the last handler in the pipeline did not handle the exception. 
+java.net.SocketException: Connection reset
+	at sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:367) ~[?:?]
+	at sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:398) ~[?:?]
+	at io.netty.buffer.PooledByteBuf.setBytes(PooledByteBuf.java:253) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.buffer.AbstractByteBuf.writeBytes(AbstractByteBuf.java:1132) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.socket.nio.NioSocketChannel.doReadBytes(NioSocketChannel.java:350) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:151) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:719) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:655) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:581) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:493) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at java.lang.Thread.run(Thread.java:832) [?:?]
+2021-04-16 16:19:34:373 ERROR TraceId: nioEventLoopGroup-4-69 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to transfer data from target to proxy because of no agent connection information attached, target channel = 00000000000000e0-0000449c-0000008a-120810aedf200331-f66bfe3f. 
+2021-04-16 16:19:36:656 ERROR TraceId: nioEventLoopGroup-3-161 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-00000141-32c3cf4fc1941a9f-ee98826b, target channel = 00000000000000e0-0000449c-00000142-0b40724fc1941aa5-7e6da4bc 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:19:36:656 ERROR TraceId: nioEventLoopGroup-3-163 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-00000144-0256f007c1941bcf-367267ba, target channel = 00000000000000e0-0000449c-00000146-35722607c1941bd4-88f37753 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:19:36:684 ERROR TraceId: nioEventLoopGroup-3-162 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-00000143-11b2bf07c1941bce-ca3c59b7, target channel = 00000000000000e0-0000449c-00000148-08e5fe07c1941bd6-cc4fc546 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:19:36:801 ERROR TraceId: nioEventLoopGroup-3-165 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-00000149-3359740841941cdd-67c54e93, target channel = 00000000000000e0-0000449c-0000014b-1b8c618841941ce3-98ac7b4b 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:19:36:844 ERROR TraceId: nioEventLoopGroup-3-166 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-0000014a-24ea420841941cdf-d3523e0d, target channel = 00000000000000e0-0000449c-0000014c-2e73458841941ce5-1b2516fc 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:20:06:162 ERROR TraceId: nioEventLoopGroup-3-169 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-0000449c-00000151-3af8a23481943002-0569e8b0, target channel = 00000000000000e0-0000449c-00000152-321d2bb48194300b-b6178361 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:20:55:698 ERROR TraceId: nioEventLoopGroup-4-133 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to transfer data from target to proxy because of no agent connection information attached, target channel = 00000000000000e0-0000449c-0000010a-36b8c70ebc2c99c6-ff695950. 
+2021-04-16 16:21:26:952 ERROR TraceId: nioEventLoopGroup-4-135 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to transfer data from target to proxy because of no agent connection information attached, target channel = 00000000000000e0-0000449c-0000010e-2b90da7f6c2b16b7-ad35627e. 
+2021-04-16 16:21:37:448 WARN TraceId: nioEventLoopGroup-4-170 io.netty.channel.DefaultChannelPipeline [] An exceptionCaught() event was fired, and it reached at the tail of the pipeline. It usually means the last handler in the pipeline did not handle the exception. 
+java.net.SocketException: Connection reset
+	at sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:367) ~[?:?]
+	at sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:398) ~[?:?]
+	at io.netty.buffer.PooledByteBuf.setBytes(PooledByteBuf.java:253) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.buffer.AbstractByteBuf.writeBytes(AbstractByteBuf.java:1132) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.socket.nio.NioSocketChannel.doReadBytes(NioSocketChannel.java:350) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:151) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:719) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:655) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:581) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:493) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at java.lang.Thread.run(Thread.java:832) [?:?]
+2021-04-16 16:22:34:038 INFO TraceId: main com.ppaass.proxy.Launcher [] Starting Launcher using Java 15.0.2 on CPEKW-Q1100753 with PID 20400 (D:\Git\ppaass\proxy\target\classes started by quh in D:\Git\ppaass) 
+2021-04-16 16:22:34:046 INFO TraceId: main com.ppaass.proxy.Launcher [] No active profile set, falling back to default profiles: default 
+2021-04-16 16:22:37:077 INFO TraceId: main com.ppaass.proxy.Launcher [] Started Launcher in 3.361 seconds (JVM running for 4.423) 
+2021-04-16 16:22:37:085 INFO TraceId: main com.ppaass.proxy.Launcher [] Begin to start proxy... 
+2021-04-16 16:22:37:222 WARN TraceId: main io.netty.bootstrap.ServerBootstrap [] Unknown channel option 'TCP_NODELAY' for channel '[id: 0x0efe80bc]' 
+2021-04-16 16:22:37:230 INFO TraceId: main com.ppaass.proxy.Launcher [] Proxy started... 
+2021-04-16 16:23:46:351 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:358 ERROR TraceId: nioEventLoopGroup-3-4 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000006-3a12eb1b6b91914f-48bb3458, target channel = 00000000000000e0-00004fb0-00000007-017f186b6b919175-7e27a596 
+java.io.IOException: An established connection was aborted by the software in your host machine
+	at sun.nio.ch.SocketDispatcher.write0(Native Method) ~[?:?]
+	at sun.nio.ch.SocketDispatcher.write(SocketDispatcher.java:54) ~[?:?]
+	at sun.nio.ch.IOUtil.writeFromNativeBuffer(IOUtil.java:113) ~[?:?]
+	at sun.nio.ch.IOUtil.write(IOUtil.java:58) ~[?:?]
+	at sun.nio.ch.IOUtil.write(IOUtil.java:50) ~[?:?]
+	at sun.nio.ch.SocketChannelImpl.write(SocketChannelImpl.java:506) ~[?:?]
+	at io.netty.channel.socket.nio.NioSocketChannel.doWrite(NioSocketChannel.java:408) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.flush0(AbstractChannel.java:953) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.flush0(AbstractNioChannel.java:354) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.flush(AbstractChannel.java:917) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.flush(DefaultChannelPipeline.java:1372) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeFlush0(AbstractChannelHandlerContext.java:750) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeFlush(AbstractChannelHandlerContext.java:742) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.flush(AbstractChannelHandlerContext.java:728) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.flush(Lz4FrameEncoder.java:304) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeFlush0(AbstractChannelHandlerContext.java:750) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeFlush(AbstractChannelHandlerContext.java:742) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.flush(AbstractChannelHandlerContext.java:728) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.ChannelOutboundHandlerAdapter.flush(ChannelOutboundHandlerAdapter.java:125) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeFlush0(AbstractChannelHandlerContext.java:750) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWriteAndFlush(AbstractChannelHandlerContext.java:765) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1071) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:164) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:472) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at java.lang.Thread.run(Thread.java:832) [?:?]
+2021-04-16 16:23:46:368 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:373 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:373 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:374 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:374 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:375 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:375 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:376 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:376 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:377 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:377 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:377 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:378 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:378 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:379 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:379 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:379 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:380 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:380 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:381 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:381 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:380 ERROR TraceId: nioEventLoopGroup-3-4 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000006-3a12eb1b6b91914f-48bb3458, target channel = 00000000000000e0-00004fb0-00000007-017f186b6b919175-7e27a596 
+io.netty.handler.codec.EncoderException: java.lang.IllegalStateException: encode finished and not enough space to write remaining data
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:125) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite(AbstractChannelHandlerContext.java:709) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:792) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:702) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:697) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToMessageEncoder.writePromiseCombiner(MessageToMessageEncoder.java:137) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToMessageEncoder.write(MessageToMessageEncoder.java:117) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite(AbstractChannelHandlerContext.java:709) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:792) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:702) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:113) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWriteAndFlush(AbstractChannelHandlerContext.java:764) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1071) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:164) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:472) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at java.lang.Thread.run(Thread.java:832) [?:?]
+Caused by: java.lang.IllegalStateException: encode finished and not enough space to write remaining data
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.encode(Lz4FrameEncoder.java:239) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.encode(Lz4FrameEncoder.java:69) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:107) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	... 22 more
+2021-04-16 16:23:46:381 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:382 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:382 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:383 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:383 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:383 ERROR TraceId: nioEventLoopGroup-3-4 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000006-3a12eb1b6b91914f-48bb3458, target channel = 00000000000000e0-00004fb0-00000007-017f186b6b919175-7e27a596 
+io.netty.handler.codec.EncoderException: java.lang.IllegalStateException: encode finished and not enough space to write remaining data
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:125) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite(AbstractChannelHandlerContext.java:709) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:792) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:702) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:697) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToMessageEncoder.writePromiseCombiner(MessageToMessageEncoder.java:137) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToMessageEncoder.write(MessageToMessageEncoder.java:117) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite(AbstractChannelHandlerContext.java:709) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:792) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:702) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:113) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWriteAndFlush(AbstractChannelHandlerContext.java:764) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1071) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:164) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:472) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at java.lang.Thread.run(Thread.java:832) [?:?]
+Caused by: java.lang.IllegalStateException: encode finished and not enough space to write remaining data
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.encode(Lz4FrameEncoder.java:239) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.encode(Lz4FrameEncoder.java:69) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:107) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	... 22 more
+2021-04-16 16:23:46:384 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:384 ERROR TraceId: nioEventLoopGroup-3-3 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000005-2e5b7d1b6b91914d-ce8764af, target channel = 00000000000000e0-00004fb0-00000008-33b80beb6b919181-c0e96870 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:385 ERROR TraceId: nioEventLoopGroup-3-4 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000006-3a12eb1b6b91914f-48bb3458, target channel = 00000000000000e0-00004fb0-00000007-017f186b6b919175-7e27a596 
+io.netty.handler.codec.EncoderException: java.lang.IllegalStateException: encode finished and not enough space to write remaining data
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:125) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite(AbstractChannelHandlerContext.java:709) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:792) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:702) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:697) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToMessageEncoder.writePromiseCombiner(MessageToMessageEncoder.java:137) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToMessageEncoder.write(MessageToMessageEncoder.java:117) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite(AbstractChannelHandlerContext.java:709) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:792) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:702) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:113) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWriteAndFlush(AbstractChannelHandlerContext.java:764) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1071) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:164) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:472) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at java.lang.Thread.run(Thread.java:832) [?:?]
+Caused by: java.lang.IllegalStateException: encode finished and not enough space to write remaining data
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.encode(Lz4FrameEncoder.java:239) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.encode(Lz4FrameEncoder.java:69) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:107) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	... 22 more
+2021-04-16 16:23:46:387 ERROR TraceId: nioEventLoopGroup-3-4 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000006-3a12eb1b6b91914f-48bb3458, target channel = 00000000000000e0-00004fb0-00000007-017f186b6b919175-7e27a596 
+io.netty.handler.codec.EncoderException: java.lang.IllegalStateException: encode finished and not enough space to write remaining data
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:125) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite(AbstractChannelHandlerContext.java:709) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:792) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:702) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:697) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToMessageEncoder.writePromiseCombiner(MessageToMessageEncoder.java:137) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToMessageEncoder.write(MessageToMessageEncoder.java:117) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite(AbstractChannelHandlerContext.java:709) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:792) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:702) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:113) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWriteAndFlush(AbstractChannelHandlerContext.java:764) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1071) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:164) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:472) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at java.lang.Thread.run(Thread.java:832) [?:?]
+Caused by: java.lang.IllegalStateException: encode finished and not enough space to write remaining data
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.encode(Lz4FrameEncoder.java:239) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.encode(Lz4FrameEncoder.java:69) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:107) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	... 22 more
+2021-04-16 16:23:46:389 ERROR TraceId: nioEventLoopGroup-3-4 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000006-3a12eb1b6b91914f-48bb3458, target channel = 00000000000000e0-00004fb0-00000007-017f186b6b919175-7e27a596 
+io.netty.handler.codec.EncoderException: java.lang.IllegalStateException: encode finished and not enough space to write remaining data
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:125) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite(AbstractChannelHandlerContext.java:709) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:792) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:702) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:697) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToMessageEncoder.writePromiseCombiner(MessageToMessageEncoder.java:137) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToMessageEncoder.write(MessageToMessageEncoder.java:117) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite(AbstractChannelHandlerContext.java:709) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:792) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:702) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:113) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWriteAndFlush(AbstractChannelHandlerContext.java:764) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1071) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:164) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:472) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at java.lang.Thread.run(Thread.java:832) [?:?]
+Caused by: java.lang.IllegalStateException: encode finished and not enough space to write remaining data
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.encode(Lz4FrameEncoder.java:239) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.encode(Lz4FrameEncoder.java:69) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:107) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	... 22 more
+2021-04-16 16:23:46:390 ERROR TraceId: nioEventLoopGroup-3-4 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000006-3a12eb1b6b91914f-48bb3458, target channel = 00000000000000e0-00004fb0-00000007-017f186b6b919175-7e27a596 
+io.netty.handler.codec.EncoderException: java.lang.IllegalStateException: encode finished and not enough space to write remaining data
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:125) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite(AbstractChannelHandlerContext.java:709) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:792) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:702) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:697) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToMessageEncoder.writePromiseCombiner(MessageToMessageEncoder.java:137) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToMessageEncoder.write(MessageToMessageEncoder.java:117) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite(AbstractChannelHandlerContext.java:709) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:792) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:702) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:113) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWriteAndFlush(AbstractChannelHandlerContext.java:764) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1071) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:164) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:472) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at java.lang.Thread.run(Thread.java:832) [?:?]
+Caused by: java.lang.IllegalStateException: encode finished and not enough space to write remaining data
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.encode(Lz4FrameEncoder.java:239) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.encode(Lz4FrameEncoder.java:69) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:107) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	... 22 more
+2021-04-16 16:23:46:399 ERROR TraceId: nioEventLoopGroup-3-4 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000006-3a12eb1b6b91914f-48bb3458, target channel = 00000000000000e0-00004fb0-00000007-017f186b6b919175-7e27a596 
+io.netty.handler.codec.EncoderException: java.lang.IllegalStateException: encode finished and not enough space to write remaining data
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:125) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite(AbstractChannelHandlerContext.java:709) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:792) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:702) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:697) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToMessageEncoder.writePromiseCombiner(MessageToMessageEncoder.java:137) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToMessageEncoder.write(MessageToMessageEncoder.java:117) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite(AbstractChannelHandlerContext.java:709) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:792) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:702) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:113) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWriteAndFlush(AbstractChannelHandlerContext.java:764) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1071) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:164) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:472) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at java.lang.Thread.run(Thread.java:832) [?:?]
+Caused by: java.lang.IllegalStateException: encode finished and not enough space to write remaining data
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.encode(Lz4FrameEncoder.java:239) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.encode(Lz4FrameEncoder.java:69) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:107) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	... 22 more
+2021-04-16 16:23:46:401 ERROR TraceId: nioEventLoopGroup-3-4 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000006-3a12eb1b6b91914f-48bb3458, target channel = 00000000000000e0-00004fb0-00000007-017f186b6b919175-7e27a596 
+io.netty.handler.codec.EncoderException: java.lang.IllegalStateException: encode finished and not enough space to write remaining data
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:125) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite(AbstractChannelHandlerContext.java:709) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:792) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:702) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:697) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToMessageEncoder.writePromiseCombiner(MessageToMessageEncoder.java:137) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToMessageEncoder.write(MessageToMessageEncoder.java:117) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite(AbstractChannelHandlerContext.java:709) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:792) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:702) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:113) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWriteAndFlush(AbstractChannelHandlerContext.java:764) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1071) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:164) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:472) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at java.lang.Thread.run(Thread.java:832) [?:?]
+Caused by: java.lang.IllegalStateException: encode finished and not enough space to write remaining data
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.encode(Lz4FrameEncoder.java:239) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.encode(Lz4FrameEncoder.java:69) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:107) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	... 22 more
+2021-04-16 16:23:46:403 ERROR TraceId: nioEventLoopGroup-3-4 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000006-3a12eb1b6b91914f-48bb3458, target channel = 00000000000000e0-00004fb0-00000007-017f186b6b919175-7e27a596 
+io.netty.handler.codec.EncoderException: java.lang.IllegalStateException: encode finished and not enough space to write remaining data
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:125) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite(AbstractChannelHandlerContext.java:709) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:792) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:702) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:697) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToMessageEncoder.writePromiseCombiner(MessageToMessageEncoder.java:137) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToMessageEncoder.write(MessageToMessageEncoder.java:117) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite(AbstractChannelHandlerContext.java:709) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:792) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:702) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:113) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWriteAndFlush(AbstractChannelHandlerContext.java:764) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1071) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:164) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:472) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at java.lang.Thread.run(Thread.java:832) [?:?]
+Caused by: java.lang.IllegalStateException: encode finished and not enough space to write remaining data
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.encode(Lz4FrameEncoder.java:239) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.encode(Lz4FrameEncoder.java:69) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:107) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	... 22 more
+2021-04-16 16:23:46:405 ERROR TraceId: nioEventLoopGroup-3-4 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000006-3a12eb1b6b91914f-48bb3458, target channel = 00000000000000e0-00004fb0-00000007-017f186b6b919175-7e27a596 
+io.netty.handler.codec.EncoderException: java.lang.IllegalStateException: encode finished and not enough space to write remaining data
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:125) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite(AbstractChannelHandlerContext.java:709) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:792) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:702) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:697) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToMessageEncoder.writePromiseCombiner(MessageToMessageEncoder.java:137) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToMessageEncoder.write(MessageToMessageEncoder.java:117) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite(AbstractChannelHandlerContext.java:709) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:792) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:702) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:113) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWriteAndFlush(AbstractChannelHandlerContext.java:764) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1071) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:164) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:472) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at java.lang.Thread.run(Thread.java:832) [?:?]
+Caused by: java.lang.IllegalStateException: encode finished and not enough space to write remaining data
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.encode(Lz4FrameEncoder.java:239) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.encode(Lz4FrameEncoder.java:69) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:107) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	... 22 more
+2021-04-16 16:23:46:407 ERROR TraceId: nioEventLoopGroup-3-4 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000006-3a12eb1b6b91914f-48bb3458, target channel = 00000000000000e0-00004fb0-00000007-017f186b6b919175-7e27a596 
+io.netty.handler.codec.EncoderException: java.lang.IllegalStateException: encode finished and not enough space to write remaining data
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:125) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite(AbstractChannelHandlerContext.java:709) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:792) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:702) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:697) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToMessageEncoder.writePromiseCombiner(MessageToMessageEncoder.java:137) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToMessageEncoder.write(MessageToMessageEncoder.java:117) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite(AbstractChannelHandlerContext.java:709) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:792) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.write(AbstractChannelHandlerContext.java:702) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:113) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWrite0(AbstractChannelHandlerContext.java:717) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeWriteAndFlush(AbstractChannelHandlerContext.java:764) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1071) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:164) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:472) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at java.lang.Thread.run(Thread.java:832) [?:?]
+Caused by: java.lang.IllegalStateException: encode finished and not enough space to write remaining data
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.encode(Lz4FrameEncoder.java:239) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.compression.Lz4FrameEncoder.encode(Lz4FrameEncoder.java:69) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.handler.codec.MessageToByteEncoder.write(MessageToByteEncoder.java:107) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	... 22 more
+2021-04-16 16:23:46:424 ERROR TraceId: nioEventLoopGroup-3-1 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000001-182ff9666b918c2e-c4c9cf2a, target channel = 00000000000000e0-00004fb0-00000002-1a822e596b918d05-55dfb654 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:23:46:424 ERROR TraceId: nioEventLoopGroup-3-1 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000001-182ff9666b918c2e-c4c9cf2a, target channel = 00000000000000e0-00004fb0-00000002-1a822e596b918d05-55dfb654 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:27:39:218 ERROR TraceId: nioEventLoopGroup-3-2 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000003-225669016b918eab-095c0c91, target channel = 00000000000000e0-00004fb0-00000004-3452c5fd6b918ede-d21e1d3d 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:29:18:871 ERROR TraceId: nioEventLoopGroup-3-18 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-00000023-33f1b9c91f90fea7-ee61f2a5, target channel = 00000000000000e0-00004fb0-00000024-077456891f90fed6-583e8377 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:29:34:752 WARN TraceId: nioEventLoopGroup-4-32 io.netty.channel.DefaultChannelPipeline [] An exceptionCaught() event was fired, and it reached at the tail of the pipeline. It usually means the last handler in the pipeline did not handle the exception. 
+java.net.SocketException: Connection reset
+	at sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:367) ~[?:?]
+	at sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:398) ~[?:?]
+	at io.netty.buffer.PooledByteBuf.setBytes(PooledByteBuf.java:253) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.buffer.AbstractByteBuf.writeBytes(AbstractByteBuf.java:1132) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.socket.nio.NioSocketChannel.doReadBytes(NioSocketChannel.java:350) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:151) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:719) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:655) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:581) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:493) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at java.lang.Thread.run(Thread.java:832) [?:?]
+2021-04-16 16:31:53:913 WARN TraceId: nioEventLoopGroup-4-33 io.netty.channel.DefaultChannelPipeline [] An exceptionCaught() event was fired, and it reached at the tail of the pipeline. It usually means the last handler in the pipeline did not handle the exception. 
+java.net.SocketException: Connection reset
+	at sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:367) ~[?:?]
+	at sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:398) ~[?:?]
+	at io.netty.buffer.PooledByteBuf.setBytes(PooledByteBuf.java:253) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.buffer.AbstractByteBuf.writeBytes(AbstractByteBuf.java:1132) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.socket.nio.NioSocketChannel.doReadBytes(NioSocketChannel.java:350) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:151) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:719) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:655) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:581) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:493) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at java.lang.Thread.run(Thread.java:832) [?:?]
+2021-04-16 16:34:33:903 ERROR TraceId: nioEventLoopGroup-4-12 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to transfer data from target to proxy because of no agent connection information attached, target channel = 00000000000000e0-00004fb0-00000018-06b7d1c3df90d18f-3923c129. 
+2021-04-16 16:34:41:716 WARN TraceId: nioEventLoopGroup-4-34 io.netty.channel.DefaultChannelPipeline [] An exceptionCaught() event was fired, and it reached at the tail of the pipeline. It usually means the last handler in the pipeline did not handle the exception. 
+java.net.SocketException: Connection reset
+	at sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:367) ~[?:?]
+	at sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:398) ~[?:?]
+	at io.netty.buffer.PooledByteBuf.setBytes(PooledByteBuf.java:253) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.buffer.AbstractByteBuf.writeBytes(AbstractByteBuf.java:1132) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.socket.nio.NioSocketChannel.doReadBytes(NioSocketChannel.java:350) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:151) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:719) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:655) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:581) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:493) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at java.lang.Thread.run(Thread.java:832) [?:?]
+2021-04-16 16:34:58:592 ERROR TraceId: nioEventLoopGroup-4-25 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to transfer data from target to proxy because of no agent connection information attached, target channel = 00000000000000e0-00004fb0-00000032-0f0542638f9f790d-b62b7704. 
+2021-04-16 16:35:13:656 ERROR TraceId: nioEventLoopGroup-4-9 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to transfer data from target to proxy because of no agent connection information attached, target channel = 00000000000000e0-00004fb0-00000015-1821428ddf90ce97-887edb52. 
+2021-04-16 16:38:33:184 ERROR TraceId: nioEventLoopGroup-3-7 com.ppaass.proxy.handler.T2PTcpChannelHandler [] Fail to write proxy message to agent because of exception, proxy channel = 00000000000000e0-00004fb0-0000000d-33929848a390a258-5dd44e2d, target channel = 00000000000000e0-00004fb0-0000000e-1ca6a488a390a28b-f25a8c51 
+io.netty.channel.StacklessClosedChannelException: null
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.write(Object, ChannelPromise)(Unknown Source) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+2021-04-16 16:39:42:683 WARN TraceId: nioEventLoopGroup-4-35 io.netty.channel.DefaultChannelPipeline [] An exceptionCaught() event was fired, and it reached at the tail of the pipeline. It usually means the last handler in the pipeline did not handle the exception. 
+java.net.SocketException: Connection reset
+	at sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:367) ~[?:?]
+	at sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:398) ~[?:?]
+	at io.netty.buffer.PooledByteBuf.setBytes(PooledByteBuf.java:253) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.buffer.AbstractByteBuf.writeBytes(AbstractByteBuf.java:1132) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.socket.nio.NioSocketChannel.doReadBytes(NioSocketChannel.java:350) ~[netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:151) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:719) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:655) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:581) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:493) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) [netty-all-4.1.63.Final.jar:4.1.63.Final]
+	at java.lang.Thread.run(Thread.java:832) [?:?]
