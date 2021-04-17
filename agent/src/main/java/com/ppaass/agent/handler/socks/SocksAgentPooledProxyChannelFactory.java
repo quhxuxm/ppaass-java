@@ -14,12 +14,12 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 class SocksAgentPooledProxyChannelFactory implements PooledObjectFactory<Channel> {
-    private final Bootstrap proxyBootstrap;
+    private final Bootstrap socksProxyTcpBootstrap;
     private final AgentConfiguration agentConfiguration;
     private GenericObjectPool<Channel> pool;
 
-    public SocksAgentPooledProxyChannelFactory(Bootstrap proxyBootstrap, AgentConfiguration agentConfiguration) {
-        this.proxyBootstrap = proxyBootstrap;
+    public SocksAgentPooledProxyChannelFactory(Bootstrap socksProxyTcpBootstrap, AgentConfiguration agentConfiguration) {
+        this.socksProxyTcpBootstrap = socksProxyTcpBootstrap;
         this.agentConfiguration = agentConfiguration;
     }
 
@@ -30,7 +30,7 @@ class SocksAgentPooledProxyChannelFactory implements PooledObjectFactory<Channel
     @Override
     public PooledObject<Channel> makeObject() throws Exception {
         PpaassLogger.INSTANCE.debug(() -> "Begin to create proxy channel object.");
-        var proxyChannelConnectFuture = this.proxyBootstrap
+        var proxyChannelConnectFuture = this.socksProxyTcpBootstrap
                 .connect(this.agentConfiguration.getProxyHost(), this.agentConfiguration.getProxyPort())
                 .sync();
         proxyChannelConnectFuture

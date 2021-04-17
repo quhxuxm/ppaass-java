@@ -5,20 +5,24 @@ import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.protocol.vpn.message.ProxyMessage;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
+import io.netty.channel.socket.DatagramPacket;
 import io.netty.handler.codec.socksx.v5.DefaultSocks5CommandResponse;
+import io.netty.handler.codec.socksx.v5.Socks5AddressEncoder;
 import io.netty.handler.codec.socksx.v5.Socks5AddressType;
 import io.netty.handler.codec.socksx.v5.Socks5CommandStatus;
-import org.apache.commons.pool2.DestroyMode;
+import io.netty.util.NetUtil;
 import org.springframework.stereotype.Service;
+
+import java.net.InetSocketAddress;
 
 @ChannelHandler.Sharable
 @Service
 class SocksAgentReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage> {
-    private final SocksAgentSendDataToProxyHandler socksAgentSendDataToProxyHandler;
+    private final SocksAgentSendTcpDataToProxyHandler socksAgentSendTcpDataToProxyHandler;
 
     SocksAgentReceiveProxyDataHandler(
-            SocksAgentSendDataToProxyHandler socksAgentSendDataToProxyHandler) {
-        this.socksAgentSendDataToProxyHandler = socksAgentSendDataToProxyHandler;
+            SocksAgentSendTcpDataToProxyHandler socksAgentSendTcpDataToProxyHandler) {
+        this.socksAgentSendTcpDataToProxyHandler = socksAgentSendTcpDataToProxyHandler;
     }
 
     @Override
@@ -69,49 +73,69 @@ class SocksAgentReceiveProxyDataHandler extends SimpleChannelInboundHandler<Prox
             case UDP_DATA_FAIL -> {
             }
             case UDP_DATA_SUCCESS -> {
+                handleUdpDataSuccess(proxyMessage, proxyChannel);
             }
-//            case OK_UDP -> {
-//                var udpMessageContent = MessageSerializer.JSON_OBJECT_MAPPER.readValue(proxyMessage.getBody().getData(),
-//                        UdpTransferMessageContent.class);
-//                var udpConnectionInfo = proxyChannel.attr(ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO).get();
-//                var recipient = new InetSocketAddress(udpConnectionInfo.getClientSenderHost(),
-//                        udpConnectionInfo.getClientSenderPort());
-//                var sender = new InetSocketAddress(IAgentConst.LOCAL_IP_ADDRESS,
-//                        udpConnectionInfo.getAgentUdpPort());
-//                var udpData = udpMessageContent.getData();
-//                var socks5UdpResponseBuf = Unpooled.buffer();
-//                socks5UdpResponseBuf.writeByte(0);
-//                socks5UdpResponseBuf.writeByte(0);
-//                socks5UdpResponseBuf.writeByte(0);
-//                var clientRecipientHost = udpConnectionInfo.getClientRecipientHost();
-//                if (NetUtil.isValidIpV4Address(clientRecipientHost)) {
-//                    socks5UdpResponseBuf.writeByte(Socks5AddressType.IPv4.byteValue());
-//                    Socks5AddressEncoder.DEFAULT
-//                            .encodeAddress(Socks5AddressType.IPv4, clientRecipientHost,
-//                                    socks5UdpResponseBuf);
-//                } else {
-//                    if (NetUtil.isValidIpV6Address(clientRecipientHost)) {
-//                        socks5UdpResponseBuf.writeByte(Socks5AddressType.IPv6.byteValue());
-//                        Socks5AddressEncoder.DEFAULT
-//                                .encodeAddress(Socks5AddressType.IPv6, clientRecipientHost,
-//                                        socks5UdpResponseBuf);
-//                    } else {
-//                        socks5UdpResponseBuf.writeByte(clientRecipientHost.length());
-//                        Socks5AddressEncoder.DEFAULT
-//                                .encodeAddress(Socks5AddressType.DOMAIN,
-//                                        clientRecipientHost,
-//                                        socks5UdpResponseBuf);
-//                    }
-//                }
-//                socks5UdpResponseBuf.writeShort(udpConnectionInfo.getClientRecipientPort());
-//                socks5UdpResponseBuf.writeBytes(udpData);
-//                var udpPackage = new DatagramPacket(socks5UdpResponseBuf, recipient, sender);
-//                udpConnectionInfo.getAgentUdpChannel().writeAndFlush(udpPackage)
-//                        .addListener((ChannelFutureListener) agentChannelFuture -> {
-//                            proxyChannel.read();
-//                        });
-//            }
         }
+    }
+
+    private void handleUdpDataSuccess(ProxyMessage proxyMessage, Channel proxyChannel) {
+        var udpConnectionInfo = proxyChannel.attr(ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO).get();
+//        var recipient = new InetSocketAddress(udpConnectionInfo.getClientSenderHost(),
+//                udpConnectionInfo.getClientSenderPort());
+        var recipient = new InetSocketAddress(proxyMessage.getBody().getSourceHost(),
+                proxyMessage.getBody().getSourcePort());
+        var sender = new InetSocketAddress(IAgentConst.LOCAL_IP_ADDRESS,
+                udpConnectionInfo.getAgentUdpPort());
+        var udpData = proxyMessage.getBody().getData();
+        var socks5UdpResponseBuf = Unpooled.buffer();
+        socks5UdpResponseBuf.writeByte(0);
+        socks5UdpResponseBuf.writeByte(0);
+        socks5UdpResponseBuf.writeByte(0);
+        var clientRecipientHost = udpConnectionInfo.getClientRecipientHost();
+        if (NetUtil.isValidIpV4Address(clientRecipientHost)) {
+            socks5UdpResponseBuf.writeByte(Socks5AddressType.IPv4.byteValue());
+            try {
+                Socks5AddressEncoder.DEFAULT
+                        .encodeAddress(Socks5AddressType.IPv4, clientRecipientHost,
+                                socks5UdpResponseBuf);
+            } catch (Exception e) {
+                PpaassLogger.INSTANCE.error(() -> "Fail to write udp message back to agent because of exception(1).",
+                        () -> new Object[]{e});
+                return;
+            }
+        } else {
+            if (NetUtil.isValidIpV6Address(clientRecipientHost)) {
+                socks5UdpResponseBuf.writeByte(Socks5AddressType.IPv6.byteValue());
+                try {
+                    Socks5AddressEncoder.DEFAULT
+                            .encodeAddress(Socks5AddressType.IPv6, clientRecipientHost,
+                                    socks5UdpResponseBuf);
+                } catch (Exception e) {
+                    PpaassLogger.INSTANCE
+                            .error(() -> "Fail to write udp message back to agent because of exception(2).",
+                                    () -> new Object[]{e});
+                    return;
+                }
+            } else {
+                socks5UdpResponseBuf.writeByte(clientRecipientHost.length());
+                try {
+                    Socks5AddressEncoder.DEFAULT
+                            .encodeAddress(Socks5AddressType.DOMAIN,
+                                    clientRecipientHost,
+                                    socks5UdpResponseBuf);
+                } catch (Exception e) {
+                    PpaassLogger.INSTANCE
+                            .error(() -> "Fail to write udp message back to agent because of exception(3).",
+                                    () -> new Object[]{e});
+                    return;
+                }
+            }
+        }
+        socks5UdpResponseBuf.writeShort(udpConnectionInfo.getClientRecipientPort());
+        socks5UdpResponseBuf.writeBytes(udpData);
+        var udpPackageSendToAgent =
+                new DatagramPacket(socks5UdpResponseBuf, sender);
+        udpConnectionInfo.getAgentUdpChannel().writeAndFlush(udpPackageSendToAgent);
     }
 
     private void handleTcpDataSuccess(ProxyMessage proxyMessage, Channel proxyChannel,
@@ -385,7 +409,7 @@ class SocksAgentReceiveProxyDataHandler extends SimpleChannelInboundHandler<Prox
                                 });
                         agentTcpChannel.pipeline().addBefore(IAgentConst.LAST_INBOUND_HANDLER,
                                 SocksAgentEntryHandler.class.getName(),
-                                this.socksAgentSendDataToProxyHandler);
+                                this.socksAgentSendTcpDataToProxyHandler);
                         return;
                     }
                     PpaassLogger.INSTANCE.debug(

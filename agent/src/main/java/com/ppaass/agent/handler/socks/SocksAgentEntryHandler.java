@@ -8,6 +8,7 @@ import com.ppaass.protocol.vpn.message.AgentMessage;
 import com.ppaass.protocol.vpn.message.AgentMessageBody;
 import com.ppaass.protocol.vpn.message.AgentMessageBodyType;
 import com.ppaass.protocol.vpn.message.EncryptionType;
+import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.handler.codec.socksx.SocksMessage;
 import io.netty.handler.codec.socksx.SocksVersion;
@@ -18,14 +19,14 @@ import org.springframework.stereotype.Service;
 @ChannelHandler.Sharable
 @Service
 public class SocksAgentEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
-    //    private final Bootstrap socksProxyUdpBootstrap;
+    private final Bootstrap socksProxyUdpBootstrap;
     private final AgentConfiguration agentConfiguration;
     private final GenericObjectPool<Channel> socksProxyTcpChannelPool;
 
     public SocksAgentEntryHandler(GenericObjectPool<Channel> socksProxyTcpChannelPool,
-//                                  Bootstrap socksProxyUdpBootstrap,
+                                  Bootstrap socksProxyUdpBootstrap,
                                   AgentConfiguration agentConfiguration) {
-//        this.socksProxyUdpBootstrap = socksProxyUdpBootstrap;
+        this.socksProxyUdpBootstrap = socksProxyUdpBootstrap;
         this.agentConfiguration = agentConfiguration;
         this.socksProxyTcpChannelPool = socksProxyTcpChannelPool;
     }
@@ -101,15 +102,15 @@ public class SocksAgentEntryHandler extends SimpleChannelInboundHandler<SocksMes
             return;
         }
         if (socks5CommandRequest.type() == Socks5CommandType.UDP_ASSOCIATE) {
-//            PpaassLogger.INSTANCE
-//                    .debug(
-//                            () -> "Socks5 udp associate request coming, agent channel = {}",
-//                            () -> new Object[]{
-//                                    agentChannel.id().asLongText()
-//                            });
-//            agentChannel.config().setOption(ChannelOption.SO_KEEPALIVE, true);
-//            this.socksProxyUdpBootstrap.bind(0).addListener(new SocksAgentProxyUdpChannelBindListener(agentChannel,
-//                    this.socksProxyTcpChannelPool, agentConfiguration, socks5CommandRequest));
+            PpaassLogger.INSTANCE
+                    .debug(
+                            () -> "Socks5 udp associate request coming, agent channel = {}",
+                            () -> new Object[]{
+                                    agentChannel.id().asLongText()
+                            });
+            agentChannel.config().setOption(ChannelOption.SO_KEEPALIVE, true);
+            this.socksProxyUdpBootstrap.bind(0).addListener(new SocksAgentUdpBindListener(agentChannel,
+                    this.socksProxyTcpChannelPool.borrowObject(), agentConfiguration, socks5CommandRequest));
             return;
         }
         PpaassLogger.INSTANCE

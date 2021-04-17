@@ -4,7 +4,7 @@ import io.netty.handler.codec.socksx.v5.Socks5AddressType;
 
 import java.net.InetSocketAddress;
 
-public class SocksAgentUdpRequestMessage {
+public class SocksAgentUdpProtocolMessage {
     private final InetSocketAddress udpMessageSender;
     private final InetSocketAddress udpMessageRecipient;
     private final int rsv;
@@ -14,10 +14,10 @@ public class SocksAgentUdpRequestMessage {
     private final int targetPort;
     private final byte[] data;
 
-    public SocksAgentUdpRequestMessage(InetSocketAddress udpMessageSender, InetSocketAddress udpMessageRecipient,
-                                       int rsv,
-                                       byte frag, Socks5AddressType addressType, String targetHost, int targetPort,
-                                       byte[] data) {
+    public SocksAgentUdpProtocolMessage(InetSocketAddress udpMessageSender, InetSocketAddress udpMessageRecipient,
+                                        int rsv,
+                                        byte frag, Socks5AddressType addressType, String targetHost, int targetPort,
+                                        byte[] data) {
         this.udpMessageSender = udpMessageSender;
         this.udpMessageRecipient = udpMessageRecipient;
         this.rsv = rsv;

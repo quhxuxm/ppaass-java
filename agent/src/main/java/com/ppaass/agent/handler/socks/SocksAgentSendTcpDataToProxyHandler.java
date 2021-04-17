@@ -16,10 +16,10 @@ import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
 @Service
-class SocksAgentSendDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
+class SocksAgentSendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
     private final AgentConfiguration agentConfiguration;
 
-    SocksAgentSendDataToProxyHandler(AgentConfiguration agentConfiguration) {
+    SocksAgentSendTcpDataToProxyHandler(AgentConfiguration agentConfiguration) {
         this.agentConfiguration = agentConfiguration;
     }
 

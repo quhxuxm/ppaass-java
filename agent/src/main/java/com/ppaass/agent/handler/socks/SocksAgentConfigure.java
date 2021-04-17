@@ -8,6 +8,8 @@ import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.apache.commons.pool2.impl.DefaultEvictionPolicy;
 import org.apache.commons.pool2.impl.GenericObjectPool;
@@ -42,19 +44,20 @@ class SocksAgentConfigure {
         result.handler(proxyChannelInitializer);
         return result;
     }
-//    @Bean
-//    public Bootstrap socksProxyUdpBootstrap(AgentConfiguration agentConfiguration,
-//                                            SocksAgentProxyUdpChannelInitializer proxyChannelInitializer) {
-//        var result = new Bootstrap();
-//        var socksProxyUdpLoopGroup = new NioEventLoopGroup(
-//                agentConfiguration.getAgentUdpThreadNumber());
-//        result.group(socksProxyUdpLoopGroup)
-//                .channel(NioDatagramChannel.class)
-//                .option(ChannelOption.SO_BROADCAST, false)
-//                .option(ChannelOption.AUTO_READ, true)
-//                .handler(proxyChannelInitializer);
-//        return result;
-//    }
+
+    @Bean
+    public Bootstrap socksProxyUdpBootstrap(AgentConfiguration agentConfiguration,
+                                            SocksAgentUdpChannelInitializer udpChannelInitializer) {
+        var result = new Bootstrap();
+        var socksProxyUdpLoopGroup = new NioEventLoopGroup(
+                agentConfiguration.getAgentUdpThreadNumber());
+        result.group(socksProxyUdpLoopGroup)
+                .channel(NioDatagramChannel.class)
+                .option(ChannelOption.SO_BROADCAST, false)
+                .option(ChannelOption.AUTO_READ, true)
+                .handler(udpChannelInitializer);
+        return result;
+    }
 
     @Bean
     public GenericObjectPool<Channel> socksProxyTcpChannelPool(
