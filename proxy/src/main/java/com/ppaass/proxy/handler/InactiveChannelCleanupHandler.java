@@ -1,5 +1,6 @@
 package com.ppaass.proxy.handler;
 
+import com.ppaass.proxy.IProxyConstant;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -22,6 +23,7 @@ public class InactiveChannelCleanupHandler extends ChannelInboundHandlerAdapter 
             return;
         }
         var proxyChannel = proxyChannelContext.channel();
+        proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).set(null);
         proxyChannel.close();
     }
 }

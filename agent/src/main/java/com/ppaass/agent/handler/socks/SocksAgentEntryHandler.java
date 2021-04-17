@@ -160,7 +160,7 @@ public class SocksAgentEntryHandler extends SimpleChannelInboundHandler<SocksMes
         PpaassLogger.INSTANCE.trace(
                 () -> "Send TCP_CONNECT from agent to proxy [BEGIN] , agent channel = {}, proxy channel = {}",
                 () -> new Object[]{proxyChannel.id().asLongText()});
-        proxyChannel.attr(ISocksAgentConst.IProxyChannelAttr.AGENT_CHANNEL).setIfAbsent(agentChannel);
+        proxyChannel.attr(ISocksAgentConst.IProxyChannelAttr.AGENT_CHANNEL).set(agentChannel);
         proxyChannel.writeAndFlush(agentMessage)
                 .addListener((ChannelFutureListener) proxyWriteChannelFuture -> {
                     if (proxyWriteChannelFuture.isSuccess()) {
