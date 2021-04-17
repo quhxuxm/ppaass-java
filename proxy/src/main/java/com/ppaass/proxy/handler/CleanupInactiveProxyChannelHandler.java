@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @ChannelHandler.Sharable
-public class InactiveChannelCleanupHandler extends ChannelInboundHandlerAdapter {
+public class CleanupInactiveProxyChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void userEventTriggered(ChannelHandlerContext proxyChannelContext, Object evt) throws Exception {
         if (!(evt instanceof IdleStateEvent)) {

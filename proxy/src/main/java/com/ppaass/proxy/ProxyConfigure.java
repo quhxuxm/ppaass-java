@@ -3,7 +3,7 @@ package com.ppaass.proxy;
 import com.ppaass.common.handler.AgentMessageDecoder;
 import com.ppaass.common.handler.PrintExceptionHandler;
 import com.ppaass.common.handler.ProxyMessageEncoder;
-import com.ppaass.proxy.handler.InactiveChannelCleanupHandler;
+import com.ppaass.proxy.handler.CleanupInactiveProxyChannelHandler;
 import com.ppaass.proxy.handler.ProxyEntryChannelHandler;
 import com.ppaass.proxy.handler.ReceiveTargetTcpDataChannelHandler;
 import io.netty.bootstrap.Bootstrap;
@@ -96,7 +96,7 @@ class ProxyConfigure {
     @Bean
     public ServerBootstrap proxyTcpServerBootstrap(EventLoopGroup proxyTcpMasterLoopGroup,
                                                    EventLoopGroup proxyTcpWorkerLoopGroup,
-                                                   InactiveChannelCleanupHandler inactiveChannelCleanupHandler,
+                                                   CleanupInactiveProxyChannelHandler cleanupInactiveProxyChannelHandler,
                                                    ProxyEntryChannelHandler proxyEntryChannelHandler) {
         ServerBootstrap result = new ServerBootstrap();
         result.group(proxyTcpMasterLoopGroup, proxyTcpWorkerLoopGroup);
@@ -127,7 +127,7 @@ class ProxyConfigure {
                         new IdleStateHandler(0,
                                 0,
                                 proxyConfiguration.getProxyTcpChannelAllIdleSeconds()));
-                proxyChannel.pipeline().addLast(inactiveChannelCleanupHandler);
+                proxyChannel.pipeline().addLast(cleanupInactiveProxyChannelHandler);
                 proxyChannel.pipeline().addLast(new ChannelTrafficShapingHandler(
                         proxyConfiguration.getProxyTcpTrafficShapingWriteChannelLimit(),
                         proxyConfiguration.getProxyTcpTrafficShapingReadChannelLimit(),

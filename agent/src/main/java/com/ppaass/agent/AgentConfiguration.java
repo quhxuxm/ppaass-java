@@ -36,6 +36,7 @@ public class AgentConfiguration {
     private int agentTcpSoSndbuf;
     private int agentToProxyTcpChannelConnectRetry;
     private int agentToProxyTcpChannelWriteRetry;
+    private int agentChannelAllIdleSeconds;
     private int proxyTcpThreadNumber;
     private int proxyTcpConnectionTimeout;
     private int proxyTcpSoLinger;
@@ -400,6 +401,14 @@ public class AgentConfiguration {
 
     public int getProxyChannelPoolTimeBetweenEvictionRunsMillis() {
         return proxyChannelPoolTimeBetweenEvictionRunsMillis;
+    }
+
+    public void setAgentChannelAllIdleSeconds(int agentChannelAllIdleSeconds) {
+        this.agentChannelAllIdleSeconds = agentChannelAllIdleSeconds;
+    }
+
+    public int getAgentChannelAllIdleSeconds() {
+        return agentChannelAllIdleSeconds;
     }
 
     public void save() {
