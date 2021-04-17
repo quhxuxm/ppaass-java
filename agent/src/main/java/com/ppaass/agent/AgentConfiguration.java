@@ -46,11 +46,14 @@ public class AgentConfiguration {
     private Resource proxyPublicKeyFile;
     private byte[] proxyPublicKey;
     private byte[] agentPrivateKey;
-    private int proxyChannelPoolSize;
     private String agentInstanceId;
     private final ObjectMapper objectMapper;
     private String agentSourceAddress;
-    private int proxyConnectionAcquireTimeout;
+    private int proxyChannelPoolMaxIdleSize;
+    private int proxyChannelPoolMaxTotalSize;
+    private int proxyChannelPoolMinIdleSize;
+    private int proxyChannelPoolAcquireTimeoutMillis;
+    private int proxyChannelPoolTimeBetweenEvictionRunsMillis;
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private static class AgentDynamicConfiguration {
@@ -275,14 +278,6 @@ public class AgentConfiguration {
         this.agentToProxyTcpChannelWriteRetry = agentToProxyTcpChannelWriteRetry;
     }
 
-    public void setProxyChannelPoolSize(int proxyChannelPoolSize) {
-        this.proxyChannelPoolSize = proxyChannelPoolSize;
-    }
-
-    public int getProxyChannelPoolSize() {
-        return proxyChannelPoolSize;
-    }
-
     public int getProxyTcpThreadNumber() {
         return proxyTcpThreadNumber;
     }
@@ -367,12 +362,44 @@ public class AgentConfiguration {
         return agentSourceAddress;
     }
 
-    public void setProxyConnectionAcquireTimeout(int proxyConnectionAcquireTimeout) {
-        this.proxyConnectionAcquireTimeout = proxyConnectionAcquireTimeout;
+    public int getProxyChannelPoolMaxIdleSize() {
+        return proxyChannelPoolMaxIdleSize;
     }
 
-    public int getProxyConnectionAcquireTimeout() {
-        return proxyConnectionAcquireTimeout;
+    public void setProxyChannelPoolMaxIdleSize(int proxyChannelPoolMaxIdleSize) {
+        this.proxyChannelPoolMaxIdleSize = proxyChannelPoolMaxIdleSize;
+    }
+
+    public int getProxyChannelPoolMaxTotalSize() {
+        return proxyChannelPoolMaxTotalSize;
+    }
+
+    public void setProxyChannelPoolMaxTotalSize(int proxyChannelPoolMaxTotalSize) {
+        this.proxyChannelPoolMaxTotalSize = proxyChannelPoolMaxTotalSize;
+    }
+
+    public int getProxyChannelPoolMinIdleSize() {
+        return proxyChannelPoolMinIdleSize;
+    }
+
+    public void setProxyChannelPoolMinIdleSize(int proxyChannelPoolMinIdleSize) {
+        this.proxyChannelPoolMinIdleSize = proxyChannelPoolMinIdleSize;
+    }
+
+    public int getProxyChannelPoolAcquireTimeoutMillis() {
+        return proxyChannelPoolAcquireTimeoutMillis;
+    }
+
+    public void setProxyChannelPoolAcquireTimeoutMillis(int proxyChannelPoolAcquireTimeoutMillis) {
+        this.proxyChannelPoolAcquireTimeoutMillis = proxyChannelPoolAcquireTimeoutMillis;
+    }
+
+    public void setProxyChannelPoolTimeBetweenEvictionRunsMillis(int proxyChannelPoolTimeBetweenEvictionRunsMillis) {
+        this.proxyChannelPoolTimeBetweenEvictionRunsMillis = proxyChannelPoolTimeBetweenEvictionRunsMillis;
+    }
+
+    public int getProxyChannelPoolTimeBetweenEvictionRunsMillis() {
+        return proxyChannelPoolTimeBetweenEvictionRunsMillis;
     }
 
     public void save() {

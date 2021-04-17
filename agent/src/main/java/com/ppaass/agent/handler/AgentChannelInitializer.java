@@ -11,16 +11,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class AgentChannelInitializer extends ChannelInitializer<SocketChannel> {
     private final DetectProtocolHandler detectProtocolHandler;
-    private final PrintExceptionHandler printExceptionHandler;
 
-    public AgentChannelInitializer(DetectProtocolHandler detectProtocolHandler,
-                                   PrintExceptionHandler printExceptionHandler) {
+    public AgentChannelInitializer(DetectProtocolHandler detectProtocolHandler) {
         this.detectProtocolHandler = detectProtocolHandler;
-        this.printExceptionHandler = printExceptionHandler;
     }
 
     public void initChannel(SocketChannel agentChannel) {
         agentChannel.pipeline().addLast(detectProtocolHandler);
-        agentChannel.pipeline().addLast(IAgentConst.LAST_INBOUND_HANDLER, printExceptionHandler);
+        agentChannel.pipeline().addLast(IAgentConst.LAST_INBOUND_HANDLER, PrintExceptionHandler.INSTANCE);
     }
 }

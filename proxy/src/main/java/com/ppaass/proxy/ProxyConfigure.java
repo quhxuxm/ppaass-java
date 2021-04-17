@@ -22,8 +22,6 @@ import io.netty.handler.traffic.ChannelTrafficShapingHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 import static com.ppaass.proxy.IProxyConstant.LAST_INBOUND_HANDLER;
 
 @Configuration
@@ -53,15 +51,9 @@ class ProxyConfigure {
     }
 
     @Bean
-    public PrintExceptionHandler printExceptionHandler() {
-        return new PrintExceptionHandler();
-    }
-
-    @Bean
     public Bootstrap targetTcpBootstrap(
             EventLoopGroup targetTcpLoopGroup,
-            ReceiveTargetTcpDataChannelHandler receiveTargetTcpDataChannelHandler,
-            PrintExceptionHandler printExceptionHandler) {
+            ReceiveTargetTcpDataChannelHandler receiveTargetTcpDataChannelHandler) {
         Bootstrap result = new Bootstrap();
         result.group(targetTcpLoopGroup);
         result.channel(NioSocketChannel.class);
@@ -94,7 +86,7 @@ class ProxyConfigure {
                         proxyConfiguration.getTargetTcpTrafficShapingCheckInterval()
                 ));
                 targetChannel.pipeline().addLast(receiveTargetTcpDataChannelHandler);
-                targetChannel.pipeline().addLast(LAST_INBOUND_HANDLER, printExceptionHandler);
+                targetChannel.pipeline().addLast(LAST_INBOUND_HANDLER, PrintExceptionHandler.INSTANCE);
             }
         };
         result.handler(channelInitializer);
@@ -105,8 +97,7 @@ class ProxyConfigure {
     public ServerBootstrap proxyTcpServerBootstrap(EventLoopGroup proxyTcpMasterLoopGroup,
                                                    EventLoopGroup proxyTcpWorkerLoopGroup,
                                                    InactiveChannelCleanupHandler inactiveChannelCleanupHandler,
-                                                   ProxyEntryChannelHandler proxyEntryChannelHandler,
-                                                   PrintExceptionHandler printExceptionHandler) {
+                                                   ProxyEntryChannelHandler proxyEntryChannelHandler) {
         ServerBootstrap result = new ServerBootstrap();
         result.group(proxyTcpMasterLoopGroup, proxyTcpWorkerLoopGroup);
         result.channel(NioServerSocketChannel.class);
@@ -131,8 +122,6 @@ class ProxyConfigure {
                         proxyConfiguration.getProxyTcpReceiveDataAverageBufferMaxSize()));
         var channelInitializer = new ChannelInitializer<SocketChannel>() {
             public void initChannel(SocketChannel proxyChannel) {
-                proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNELS)
-                        .setIfAbsent(new ConcurrentHashMap<>());
                 //Inbound
                 proxyChannel.pipeline().addLast(
                         new IdleStateHandler(0,
@@ -159,7 +148,7 @@ class ProxyConfigure {
                 proxyChannel.pipeline().addLast(new LengthFieldPrepender(4));
                 proxyChannel.pipeline().addLast(
                         new ProxyMessageEncoder(proxyConfiguration.getAgentPublicKey()));
-                proxyChannel.pipeline().addLast(LAST_INBOUND_HANDLER, printExceptionHandler);
+                proxyChannel.pipeline().addLast(LAST_INBOUND_HANDLER, PrintExceptionHandler.INSTANCE);
             }
         };
         result.childHandler(channelInitializer);

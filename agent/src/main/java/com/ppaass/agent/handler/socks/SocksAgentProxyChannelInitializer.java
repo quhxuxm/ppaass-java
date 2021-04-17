@@ -6,8 +6,7 @@ import com.ppaass.common.handler.PrintExceptionHandler;
 import com.ppaass.common.handler.ProxyMessageDecoder;
 import com.ppaass.common.log.PpaassLogger;
 import io.netty.channel.Channel;
-import io.netty.channel.pool.AbstractChannelPoolHandler;
-import io.netty.channel.pool.FixedChannelPool;
+import io.netty.channel.ChannelInitializer;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.compression.Lz4FrameDecoder;
@@ -15,44 +14,21 @@ import io.netty.handler.codec.compression.Lz4FrameEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-class SocksAgentProxyTcpChannelPoolInitializer extends AbstractChannelPoolHandler {
-    private final PrintExceptionHandler printExceptionHandler;
+class SocksAgentProxyChannelInitializer extends ChannelInitializer<Channel> {
     private final AgentConfiguration agentConfiguration;
     private final SocksAgentReceiveProxyDataHandler socksAgentReceiveProxyDataHandler;
-    private FixedChannelPool channelPool;
 
-    public void setChannelPool(FixedChannelPool channelPool) {
-        this.channelPool = channelPool;
-    }
-
-    public SocksAgentProxyTcpChannelPoolInitializer(PrintExceptionHandler printExceptionHandler,
-                                                    AgentConfiguration agentConfiguration,
-                                                    SocksAgentReceiveProxyDataHandler socksAgentReceiveProxyDataHandler) {
-        this.printExceptionHandler = printExceptionHandler;
+    public SocksAgentProxyChannelInitializer(
+            AgentConfiguration agentConfiguration,
+            SocksAgentReceiveProxyDataHandler socksAgentReceiveProxyDataHandler) {
         this.agentConfiguration = agentConfiguration;
         this.socksAgentReceiveProxyDataHandler = socksAgentReceiveProxyDataHandler;
     }
 
     @Override
-    public void channelAcquired(Channel proxyChannel) {
-        PpaassLogger.INSTANCE.info(
-                () -> "Proxy channel acquired, proxy channel = {}",
-                () -> new Object[]{proxyChannel.id().asLongText()});
-    }
-
-    @Override
-    public void channelReleased(Channel proxyChannel) {
-        PpaassLogger.INSTANCE.info(
-                () -> "Proxy channel released,  proxy channel = {}",
-                () -> new Object[]{proxyChannel.id().asLongText()});
-        proxyChannel.attr(ISocksAgentConst.IProxyChannelAttr.AGENT_CHANNEL).set(null);
-    }
-
-    @Override
-    public void channelCreated(Channel proxyChannel) throws Exception {
+    protected void initChannel(Channel proxyChannel) throws Exception {
         PpaassLogger.INSTANCE.info(
                 () -> "Proxy channel created, proxy channel = " + proxyChannel.id().asLongText());
-        proxyChannel.attr(ISocksAgentConst.IProxyChannelAttr.CHANNEL_POOL).setIfAbsent(this.channelPool);
         var proxyChannelPipeline = proxyChannel.pipeline();
         if (agentConfiguration.isProxyTcpCompressEnable()) {
             proxyChannelPipeline.addLast(new Lz4FrameDecoder());
@@ -65,6 +41,6 @@ class SocksAgentProxyTcpChannelPoolInitializer extends AbstractChannelPoolHandle
         }
         proxyChannelPipeline.addLast(new LengthFieldPrepender(4));
         proxyChannelPipeline.addLast(new AgentMessageEncoder(agentConfiguration.getProxyPublicKey()));
-        proxyChannelPipeline.addLast(this.printExceptionHandler);
+        proxyChannelPipeline.addLast(PrintExceptionHandler.INSTANCE);
     }
 }

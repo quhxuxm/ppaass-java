@@ -21,14 +21,30 @@ class SocksAgentReceiveProxyDataHandler extends SimpleChannelInboundHandler<Prox
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext proxyChannelContext) throws Exception {
+    public void exceptionCaught(ChannelHandlerContext proxyChannelContext, Throwable cause) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
-        PpaassLogger.INSTANCE.info(() -> "Proxy channel closed, proxy channel = {}",
+        PpaassLogger.INSTANCE.error(() -> "Proxy channel exception happen, proxy channel = {}",
                 () -> new Object[]{proxyChannel.id().asLongText()});
         var agentChannel = proxyChannel.attr(ISocksAgentConst.IProxyChannelAttr.AGENT_CHANNEL).get();
         if (agentChannel != null) {
             agentChannel.close();
         }
+        proxyChannel.close();
+        var channelPool = proxyChannel.attr(ISocksAgentConst.IProxyChannelAttr.CHANNEL_POOL).get();
+        channelPool.invalidateObject(proxyChannel);
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext proxyChannelContext) throws Exception {
+        var proxyChannel = proxyChannelContext.channel();
+        PpaassLogger.INSTANCE.error(() -> "Proxy channel closed, proxy channel = {}",
+                () -> new Object[]{proxyChannel.id().asLongText()});
+        var agentChannel = proxyChannel.attr(ISocksAgentConst.IProxyChannelAttr.AGENT_CHANNEL).get();
+        if (agentChannel != null) {
+            agentChannel.close();
+        }
+        var channelPool = proxyChannel.attr(ISocksAgentConst.IProxyChannelAttr.CHANNEL_POOL).get();
+        channelPool.invalidateObject(proxyChannel);
     }
 
     @Override
@@ -205,7 +221,7 @@ class SocksAgentReceiveProxyDataHandler extends SimpleChannelInboundHandler<Prox
             return;
         }
         PpaassLogger.INSTANCE.info(
-                () -> "Found connection information in agent channel [TCP_CONNECTION_CLOSE], agent channel = {},  proxy channel = {}",
+                () -> "Close agent channel on receive TCP_CONNECTION_CLOSE, agent channel = {},  proxy channel = {}",
                 () -> new Object[]{
                         agentTcpChannel.id().asLongText(), proxyChannel.id().asLongText()
                 });
@@ -250,8 +266,8 @@ class SocksAgentReceiveProxyDataHandler extends SimpleChannelInboundHandler<Prox
             agentTcpChannel.close();
             return;
         }
-        PpaassLogger.INSTANCE.error(
-                () -> "Found connection information in agent channel [TCP_DATA_FAIL], agent channel = {},  proxy channel = {}",
+        PpaassLogger.INSTANCE.info(
+                () -> "Close agent channel on receive TCP_DATA_FAIL, agent channel = {},  proxy channel = {}",
                 () -> new Object[]{
                         agentTcpChannel.id().asLongText(), proxyChannel.id().asLongText()
                 });
@@ -305,8 +321,8 @@ class SocksAgentReceiveProxyDataHandler extends SimpleChannelInboundHandler<Prox
                 new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE,
                         tcpConnectionInfo.getTargetAddressType()))
                 .addListener((ChannelFutureListener) agentChannelFuture -> {
-                    PpaassLogger.INSTANCE.error(SocksAgentReceiveProxyDataHandler.class,
-                            () -> "Close connection between client and agent [TCP_CONNECT_FAIL], agent channel = {},  proxy channel = {}",
+                    PpaassLogger.INSTANCE.info(
+                            () -> "Close agent channel on receive TCP_CONNECT_FAIL, agent channel = {},  proxy channel = {}",
                             () -> new Object[]{
                                     agentTcpChannel.id().asLongText(), proxyChannel.id().asLongText()
                             });

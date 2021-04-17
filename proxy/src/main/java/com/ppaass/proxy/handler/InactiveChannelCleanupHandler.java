@@ -1,7 +1,5 @@
 package com.ppaass.proxy.handler;
 
-import com.ppaass.common.log.PpaassLogger;
-import com.ppaass.proxy.IProxyConstant;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -24,16 +22,6 @@ public class InactiveChannelCleanupHandler extends ChannelInboundHandlerAdapter 
             return;
         }
         var proxyChannel = proxyChannelContext.channel();
-        var targetChannelsInProxyChannels = proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNELS).get();
-        if (targetChannelsInProxyChannels != null) {
-            targetChannelsInProxyChannels.forEach((key, channel) -> {
-                PpaassLogger.INSTANCE
-                        .debug(() -> "Close target channel on proxy channel cleanup, target channel key = {}",
-                                () -> new Object[]{key});
-                channel.close();
-            });
-            targetChannelsInProxyChannels.clear();
-        }
         proxyChannel.close();
     }
 }

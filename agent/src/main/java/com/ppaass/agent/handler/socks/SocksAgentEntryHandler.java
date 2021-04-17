@@ -9,23 +9,20 @@ import com.ppaass.protocol.vpn.message.AgentMessageBody;
 import com.ppaass.protocol.vpn.message.AgentMessageBodyType;
 import com.ppaass.protocol.vpn.message.EncryptionType;
 import io.netty.channel.*;
-import io.netty.channel.pool.ChannelPool;
 import io.netty.handler.codec.socksx.SocksMessage;
 import io.netty.handler.codec.socksx.SocksVersion;
 import io.netty.handler.codec.socksx.v5.*;
+import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.springframework.stereotype.Service;
-
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 @ChannelHandler.Sharable
 @Service
 public class SocksAgentEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
     //    private final Bootstrap socksProxyUdpBootstrap;
     private final AgentConfiguration agentConfiguration;
-    private final ChannelPool socksProxyTcpChannelPool;
+    private final GenericObjectPool<Channel> socksProxyTcpChannelPool;
 
-    public SocksAgentEntryHandler(ChannelPool socksProxyTcpChannelPool,
+    public SocksAgentEntryHandler(GenericObjectPool<Channel> socksProxyTcpChannelPool,
 //                                  Bootstrap socksProxyUdpBootstrap,
                                   AgentConfiguration agentConfiguration) {
 //        this.socksProxyUdpBootstrap = socksProxyUdpBootstrap;
@@ -92,11 +89,12 @@ public class SocksAgentEntryHandler extends SimpleChannelInboundHandler<SocksMes
                                     agentChannel.id().asLongText()
                             });
             try {
-                Channel proxyChannel = this.socksProxyTcpChannelPool.acquire()
-                        .get(this.agentConfiguration.getProxyConnectionAcquireTimeout(),
-                                TimeUnit.MILLISECONDS);
+                Channel proxyChannel = this.socksProxyTcpChannelPool.borrowObject();
                 this.processProxyConnect(agentChannel, proxyChannel, socks5CommandRequest);
-            } catch (TimeoutException e) {
+            } catch (Exception e) {
+                PpaassLogger.INSTANCE
+                        .error(() -> "Fail to borrow proxy tcp channel connection from pool because of exception.",
+                                () -> new Object[]{e});
                 agentChannel.writeAndFlush(new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE,
                         socks5CommandRequest.dstAddrType())).addListener(ChannelFutureListener.CLOSE);
             }

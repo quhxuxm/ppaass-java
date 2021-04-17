@@ -34,10 +34,8 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
             return;
         }
         var proxyChannel = targetTcpInfo.getProxyTcpChannel();
-        var targetChannels = proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNELS).get();
-        var targetChannelKey = String.format(IProxyConstant.TARGET_CHANNEL_KEY_FORMAT,
-                targetTcpInfo.getAgentInstanceId(), targetTcpInfo.getAgentChannelId());
-        targetChannels.remove(targetChannelKey);
+        proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).set(null);
+        targetChannel.close();
     }
 
     @Override
@@ -54,10 +52,6 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
             return;
         }
         var proxyChannel = targetTcpInfo.getProxyTcpChannel();
-        var targetChannels = proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNELS).get();
-        var targetChannelKey = String.format(IProxyConstant.TARGET_CHANNEL_KEY_FORMAT,
-                targetTcpInfo.getAgentInstanceId(), targetTcpInfo.getAgentChannelId());
-        targetChannels.remove(targetChannelKey);
         var proxyMessageBody =
                 new ProxyMessageBody(
                         UUIDUtil.INSTANCE.generateUuid(),
@@ -76,6 +70,7 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
                 EncryptionType.choose(),
                 proxyMessageBody);
         proxyChannel.writeAndFlush(proxyMessage).addListener(future -> {
+            proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).set(null);
             if (future.isSuccess()) {
                 PpaassLogger.INSTANCE.debug(() -> "Success to write TCP_CONNECTION_CLOSE to agent, tcp info:\n{}\n",
                         () -> new Object[]{targetTcpInfo});
@@ -83,14 +78,7 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
             }
             PpaassLogger.INSTANCE.error(() -> "Fail to write TCP_CONNECTION_CLOSE to agent, tcp info:\n{}\n",
                     () -> new Object[]{targetTcpInfo});
-            targetChannels.forEach((k, channel) -> {
-                targetChannels.remove(k);
-                try {
-                    channel.close();
-                } catch (Exception e) {
-                }
-            });
-            proxyChannel.close();
+            targetChannel.close();
         });
     }
 
@@ -142,18 +130,8 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
                             () -> new Object[]{
                                     targetTcpInfo
                             });
-                    var targetChannels = proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNELS).get();
-                    var targetChannelKey = String.format(IProxyConstant.TARGET_CHANNEL_KEY_FORMAT,
-                            targetTcpInfo.getAgentInstanceId(), targetTcpInfo.getAgentChannelId());
-                    targetChannels.remove(targetChannelKey);
                     targetChannel.close();
-                    targetChannels.forEach((k, channel) -> {
-                        targetChannels.remove(k);
-                        try {
-                            channel.close();
-                        } catch (Exception e) {
-                        }
-                    });
+                    proxyChannel.close();
                 });
     }
 }

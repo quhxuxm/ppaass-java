@@ -8,7 +8,10 @@ import com.ppaass.proxy.ProxyConfiguration;
 import com.ppaass.proxy.handler.bo.TargetTcpInfo;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -16,7 +19,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import java.util.concurrent.ConcurrentMap;
 
 @Service
 @ChannelHandler.Sharable
@@ -69,6 +71,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                                                     agentMessage,
                                                     proxyChannelFuture.cause()
                                             });
+                                    proxyChannel.close();
                                 });
                         PpaassLogger.INSTANCE
                                 .error(() -> "Fail to create TCP connection for: {}", () -> new Object[]{agentMessage});
@@ -94,11 +97,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                                     () -> new Object[]{targetTcpConnectionInfo});
                     targetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO)
                             .setIfAbsent(targetTcpConnectionInfo);
-                    ConcurrentMap<String, Channel> targetChannelsOnTheProxyChannel =
-                            proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNELS).get();
-                    var targetChannelKey = String.format(IProxyConstant.TARGET_CHANNEL_KEY_FORMAT,
-                            agentMessage.getBody().getAgentInstanceId(), agentMessage.getBody().getAgentChannelId());
-                    targetChannelsOnTheProxyChannel.put(targetChannelKey, targetChannel);
+                    proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).set(targetChannel);
                     var proxyMessageBody =
                             new ProxyMessageBody(
                                     UUIDUtil.INSTANCE.generateUuid(),
@@ -134,16 +133,14 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                                                 targetTcpConnectionInfo,
                                                 proxyChannelFuture.cause()
                                         });
+                                proxyChannel.close();
                             });
                 });
     }
 
     private void handleTcpData(ChannelHandlerContext proxyChannelContext, AgentMessage agentMessage) {
         var proxyChannel = proxyChannelContext.channel();
-        var targetChannelKey = String.format(IProxyConstant.TARGET_CHANNEL_KEY_FORMAT,
-                agentMessage.getBody().getAgentInstanceId(), agentMessage.getBody().getAgentChannelId());
-        var targetChannels = proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNELS).get();
-        var targetChannel = targetChannels.get(targetChannelKey);
+        var targetChannel = proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).get();
         if (targetChannel == null) {
             var proxyMessageBody = new ProxyMessageBody(
                     UUIDUtil.INSTANCE.generateUuid(),
@@ -176,6 +173,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                                         agentMessage,
                                         proxyChannelFuture.cause()
                                 });
+                        proxyChannel.close();
                     });
             return;
         }
@@ -228,6 +226,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                                                 agentMessage,
                                                 proxyChannelFuture.cause()
                                         });
+                                proxyChannel.close();
                             });
                 });
     }
@@ -278,6 +277,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                                         agentMessage,
                                         proxyChannelFuture.cause()
                                 });
+                        proxyTcpChannel.close();
                     });
             return;
         }
@@ -305,7 +305,12 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                             UUIDUtil.INSTANCE.generateUuidInBytes(),
                             EncryptionType.choose(),
                             proxyMessageBody);
-            proxyTcpChannel.writeAndFlush(proxyMessage);
+            proxyTcpChannel.writeAndFlush(proxyMessage).addListener(future -> {
+                if (future.isSuccess()) {
+                    return;
+                }
+                proxyTcpChannel.close();
+            });
         } catch (IOException e) {
             var failProxyMessageBody = new ProxyMessageBody(UUIDUtil.INSTANCE.generateUuid(),
                     proxyConfiguration.getProxyInstanceId(),
@@ -337,6 +342,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                                         agentMessage,
                                         proxyChannelFuture.cause()
                                 });
+                        proxyTcpChannel.close();
                     });
         }
     }

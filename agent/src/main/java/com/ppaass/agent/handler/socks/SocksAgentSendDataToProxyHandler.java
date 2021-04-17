@@ -31,7 +31,8 @@ class SocksAgentSendDataToProxyHandler extends SimpleChannelInboundHandler<ByteB
             return;
         }
         var proxyTcpChannel = tcpConnectionInfo.getProxyTcpChannel();
-        proxyTcpChannel.attr(ISocksAgentConst.IProxyChannelAttr.CHANNEL_POOL).get().release(proxyTcpChannel);
+        var socksProxyTcpChannelPool = proxyTcpChannel.attr(ISocksAgentConst.IProxyChannelAttr.CHANNEL_POOL).get();
+        socksProxyTcpChannelPool.returnObject(proxyTcpChannel);
     }
 
     @Override

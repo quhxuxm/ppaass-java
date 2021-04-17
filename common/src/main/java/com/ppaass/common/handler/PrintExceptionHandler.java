@@ -7,6 +7,11 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 
 @ChannelHandler.Sharable
 public class PrintExceptionHandler extends ChannelInboundHandlerAdapter {
+    public static final PrintExceptionHandler INSTANCE = new PrintExceptionHandler();
+
+    private PrintExceptionHandler() {
+    }
+
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         PpaassLogger.INSTANCE
