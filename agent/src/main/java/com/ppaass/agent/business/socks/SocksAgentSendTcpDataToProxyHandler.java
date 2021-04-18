@@ -1,4 +1,4 @@
-package com.ppaass.agent.handler.socks;
+package com.ppaass.agent.business.socks;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.common.log.PpaassLogger;

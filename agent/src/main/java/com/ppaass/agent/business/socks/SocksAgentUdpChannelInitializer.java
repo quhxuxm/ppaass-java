@@ -1,4 +1,4 @@
-package com.ppaass.agent.handler.socks;
+package com.ppaass.agent.business.socks;
 
 import com.ppaass.common.handler.PrintExceptionHandler;
 import io.netty.channel.ChannelHandler;

@@ -1,13 +1,10 @@
-package com.ppaass.agent.handler.socks;
+package com.ppaass.agent.business.socks;
 
-import com.ppaass.agent.handler.socks.bo.SocksAgentTcpConnectionInfo;
-import com.ppaass.agent.handler.socks.bo.SocksAgentUdpConnectionInfo;
+import com.ppaass.agent.business.socks.bo.SocksAgentTcpConnectionInfo;
+import com.ppaass.agent.business.socks.bo.SocksAgentUdpConnectionInfo;
 import io.netty.channel.Channel;
-import io.netty.channel.pool.ChannelPool;
 import io.netty.util.AttributeKey;
 import org.apache.commons.pool2.impl.GenericObjectPool;
-
-import java.util.concurrent.ConcurrentMap;
 
 interface ISocksAgentConst {
     interface IAgentChannelAttr{

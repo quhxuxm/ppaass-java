@@ -1,6 +1,6 @@
 package com.ppaass.agent;
 
-import com.ppaass.agent.handler.AgentChannelInitializer;
+import com.ppaass.agent.business.AgentChannelInitializer;
 import com.ppaass.common.exception.PpaassException;
 import com.ppaass.common.log.PpaassLogger;
 import io.netty.bootstrap.ServerBootstrap;
@@ -13,6 +13,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
+
 @Service
 public class Agent {
     private Channel serverSocketChannel;
@@ -20,11 +22,13 @@ public class Agent {
     private EventLoopGroup workerThreadGroup;
     private final AgentConfiguration agentConfiguration;
     private final AgentChannelInitializer agentChannelInitializer;
+    private final Set<IAgentResourceManager> resourceManagers;
 
     public Agent(AgentConfiguration agentConfiguration,
-                 AgentChannelInitializer agentChannelInitializer) {
+                 AgentChannelInitializer agentChannelInitializer, Set<IAgentResourceManager> resourceManagers) {
         this.agentConfiguration = agentConfiguration;
         this.agentChannelInitializer = agentChannelInitializer;
+        this.resourceManagers = resourceManagers;
     }
 
     public void start() {
@@ -64,6 +68,7 @@ public class Agent {
         this.serverSocketChannel = channelFuture.channel();
         this.masterThreadGroup = newTcpMasterThreadGroup;
         this.workerThreadGroup = newTcpWorkerThreadGroup;
+        this.resourceManagers.forEach(IAgentResourceManager::prepareResources);
     }
 
     public void stop() {
@@ -84,5 +89,6 @@ public class Agent {
         this.serverSocketChannel = null;
         this.masterThreadGroup = null;
         this.workerThreadGroup = null;
+        this.resourceManagers.forEach(IAgentResourceManager::destroyResources);
     }
 }

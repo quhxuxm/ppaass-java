@@ -1,4 +1,4 @@
-package com.ppaass.agent.handler.socks;
+package com.ppaass.agent.business.socks;
 
 import com.ppaass.agent.IAgentConst;
 import com.ppaass.common.log.PpaassLogger;
@@ -29,7 +29,7 @@ class SocksAgentReceiveProxyDataHandler extends SimpleChannelInboundHandler<Prox
     public void exceptionCaught(ChannelHandlerContext proxyChannelContext, Throwable cause) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
         PpaassLogger.INSTANCE.error(() -> "Proxy channel exception happen, proxy channel = {}",
-                () -> new Object[]{proxyChannel.id().asLongText()});
+                () -> new Object[]{proxyChannel.id().asLongText(), cause});
         var agentChannel = proxyChannel.attr(ISocksAgentConst.IProxyChannelAttr.AGENT_CHANNEL).get();
         if (agentChannel != null) {
             agentChannel.close();
@@ -132,7 +132,7 @@ class SocksAgentReceiveProxyDataHandler extends SimpleChannelInboundHandler<Prox
         socks5UdpResponseBuf.writeShort(udpConnectionInfo.getClientRecipientPort());
         socks5UdpResponseBuf.writeBytes(udpData);
         var udpPackageSendToAgent =
-                new DatagramPacket(socks5UdpResponseBuf, recipient,sender);
+                new DatagramPacket(socks5UdpResponseBuf, recipient, sender);
         udpConnectionInfo.getAgentUdpChannel().writeAndFlush(udpPackageSendToAgent);
     }
 

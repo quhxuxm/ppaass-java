@@ -1,7 +1,7 @@
-package com.ppaass.agent.handler.socks;
+package com.ppaass.agent.business.socks;
 
 import com.ppaass.agent.AgentConfiguration;
-import com.ppaass.agent.handler.socks.bo.SocksAgentUdpProtocolMessage;
+import com.ppaass.agent.business.socks.bo.SocksAgentUdpProtocolMessage;
 import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.protocol.common.util.UUIDUtil;
 import com.ppaass.protocol.vpn.message.AgentMessage;
@@ -30,7 +30,7 @@ class SocksAgentSendUdpDataToProxyHandler extends SimpleChannelInboundHandler<So
         var agentUdpChannel = agentUdpChannelContext.channel();
         var udpConnectionInfo =
                 agentUdpChannel.attr(ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO).get();
-        udpConnectionInfo.setClientSenderHost(socks5UdpMessage.getUdpMessageSender().getHostName());
+        udpConnectionInfo.setClientSenderHost(socks5UdpMessage.getUdpMessageSender().getAddress().getHostAddress());
         udpConnectionInfo.setClientSenderPort(socks5UdpMessage.getUdpMessageSender().getPort());
         udpConnectionInfo.setClientRecipientHost(socks5UdpMessage.getTargetHost());
         udpConnectionInfo.setClientRecipientPort(socks5UdpMessage.getTargetPort());

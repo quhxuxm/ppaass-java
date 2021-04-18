@@ -1,36 +1,36 @@
-package com.ppaass.agent.handler.socks;
+package com.ppaass.agent.business.socks;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.common.log.PpaassLogger;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.PooledObjectFactory;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.apache.commons.pool2.impl.GenericObjectPool;
-import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
-@Service
 class SocksAgentPooledProxyChannelFactory implements PooledObjectFactory<Channel> {
-    private final Bootstrap socksProxyTcpBootstrap;
+    private final Bootstrap socksProxyTcpChannelBootstrap;
     private final AgentConfiguration agentConfiguration;
     private GenericObjectPool<Channel> pool;
 
-    public SocksAgentPooledProxyChannelFactory(Bootstrap socksProxyTcpBootstrap, AgentConfiguration agentConfiguration) {
-        this.socksProxyTcpBootstrap = socksProxyTcpBootstrap;
+    public SocksAgentPooledProxyChannelFactory(Bootstrap socksProxyTcpChannelBootstrap,
+                                               AgentConfiguration agentConfiguration) {
+        this.socksProxyTcpChannelBootstrap = socksProxyTcpChannelBootstrap;
         this.agentConfiguration = agentConfiguration;
     }
 
-    void init(GenericObjectPool<Channel> pool) {
+    void attachPool(GenericObjectPool<Channel> pool) {
         this.pool = pool;
     }
 
     @Override
     public PooledObject<Channel> makeObject() throws Exception {
         PpaassLogger.INSTANCE.debug(() -> "Begin to create proxy channel object.");
-        var proxyChannelConnectFuture = this.socksProxyTcpBootstrap
+        var proxyChannelConnectFuture = this.socksProxyTcpChannelBootstrap
                 .connect(this.agentConfiguration.getProxyHost(), this.agentConfiguration.getProxyPort())
                 .sync();
         proxyChannelConnectFuture
@@ -63,7 +63,8 @@ class SocksAgentPooledProxyChannelFactory implements PooledObjectFactory<Channel
         var proxyChannel = pooledObject.getObject();
         PpaassLogger.INSTANCE.trace(() -> "Begin to validate proxy channel object, proxy channel = {}.",
                 () -> new Object[]{proxyChannel.id().asLongText()});
-        var validStatus = proxyChannel.isActive();
+        var resultFuture = proxyChannel.writeAndFlush(Unpooled.EMPTY_BUFFER).syncUninterruptibly();
+        var validStatus = resultFuture.isSuccess();
         PpaassLogger.INSTANCE.trace(() -> "Proxy channel valid status = {}, proxy channel = {}.",
                 () -> new Object[]{validStatus, proxyChannel.id().asLongText()});
         return validStatus;

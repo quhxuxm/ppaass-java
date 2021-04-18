@@ -1,8 +1,8 @@
-package com.ppaass.agent.handler.socks;
+package com.ppaass.agent.business.socks;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.IAgentConst;
-import com.ppaass.agent.handler.socks.bo.SocksAgentUdpConnectionInfo;
+import com.ppaass.agent.business.socks.bo.SocksAgentUdpConnectionInfo;
 import com.ppaass.common.log.PpaassLogger;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;

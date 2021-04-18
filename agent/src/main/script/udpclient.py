@@ -1,11 +1,11 @@
 import socket
 import socks
 
-host = "192.168.31.11"
+host = "45.63.92.64"
 port = 888
 
 sock = socks.socksocket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.set_proxy(socks.SOCKS5, "127.0.0.1", 10081)
+sock.set_proxy(socks.SOCKS5, "127.0.0.1", 10080)
 sock.connect((host, port))
 
 i = 0

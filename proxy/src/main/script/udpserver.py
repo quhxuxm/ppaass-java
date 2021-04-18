@@ -1,6 +1,6 @@
 import socket
 
-host = "192.168.31.11"
+host = "45.63.92.64"
 port = 888
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

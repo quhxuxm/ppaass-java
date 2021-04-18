@@ -1,10 +1,10 @@
-package com.ppaass.agent.handler;
+package com.ppaass.agent.business;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.ChannelProtocolCategory;
 import com.ppaass.agent.IAgentConst;
-import com.ppaass.agent.handler.socks.SocksAgentCleanupInactiveAgentChannelHandler;
-import com.ppaass.agent.handler.socks.SocksAgentEntryHandler;
+import com.ppaass.agent.business.socks.SocksAgentCleanupInactiveAgentChannelHandler;
+import com.ppaass.agent.business.socks.SocksAgentEntryHandler;
 import com.ppaass.common.log.PpaassLogger;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;

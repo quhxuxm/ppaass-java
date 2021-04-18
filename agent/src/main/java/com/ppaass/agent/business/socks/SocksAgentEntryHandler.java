@@ -1,34 +1,29 @@
-package com.ppaass.agent.handler.socks;
+package com.ppaass.agent.business.socks;
 
 import com.ppaass.agent.AgentConfiguration;
-import com.ppaass.agent.handler.socks.bo.SocksAgentTcpConnectionInfo;
+import com.ppaass.agent.business.socks.bo.SocksAgentTcpConnectionInfo;
 import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.protocol.common.util.UUIDUtil;
 import com.ppaass.protocol.vpn.message.AgentMessage;
 import com.ppaass.protocol.vpn.message.AgentMessageBody;
 import com.ppaass.protocol.vpn.message.AgentMessageBodyType;
 import com.ppaass.protocol.vpn.message.EncryptionType;
-import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.handler.codec.socksx.SocksMessage;
 import io.netty.handler.codec.socksx.SocksVersion;
 import io.netty.handler.codec.socksx.v5.*;
-import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
 @Service
 public class SocksAgentEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
-    private final Bootstrap socksProxyUdpBootstrap;
     private final AgentConfiguration agentConfiguration;
-    private final GenericObjectPool<Channel> socksProxyTcpChannelPool;
+    private final SocksAgentProxyResourceManager socksAgentProxyResourceManager;
 
-    public SocksAgentEntryHandler(GenericObjectPool<Channel> socksProxyTcpChannelPool,
-                                  Bootstrap socksProxyUdpBootstrap,
+    public SocksAgentEntryHandler(SocksAgentProxyResourceManager socksAgentProxyResourceManager,
                                   AgentConfiguration agentConfiguration) {
-        this.socksProxyUdpBootstrap = socksProxyUdpBootstrap;
+        this.socksAgentProxyResourceManager = socksAgentProxyResourceManager;
         this.agentConfiguration = agentConfiguration;
-        this.socksProxyTcpChannelPool = socksProxyTcpChannelPool;
     }
 
     @Override
@@ -90,7 +85,7 @@ public class SocksAgentEntryHandler extends SimpleChannelInboundHandler<SocksMes
                                     agentChannel.id().asLongText()
                             });
             try {
-                Channel proxyChannel = this.socksProxyTcpChannelPool.borrowObject();
+                Channel proxyChannel = this.socksAgentProxyResourceManager.getProxyTcpChannelPool().borrowObject();
                 this.processProxyConnect(agentChannel, proxyChannel, socks5CommandRequest);
             } catch (Exception e) {
                 PpaassLogger.INSTANCE
@@ -109,8 +104,10 @@ public class SocksAgentEntryHandler extends SimpleChannelInboundHandler<SocksMes
                                     agentChannel.id().asLongText()
                             });
             agentChannel.config().setOption(ChannelOption.SO_KEEPALIVE, true);
-            this.socksProxyUdpBootstrap.bind(0).addListener(new SocksAgentUdpBindListener(agentChannel,
-                    this.socksProxyTcpChannelPool.borrowObject(), agentConfiguration, socks5CommandRequest));
+            this.socksAgentProxyResourceManager.getProxyUdpChannelBootstrap().bind(0)
+                    .addListener(new SocksAgentUdpBindListener(agentChannel,
+                            this.socksAgentProxyResourceManager.getProxyTcpChannelPool().borrowObject(),
+                            agentConfiguration, socks5CommandRequest));
             return;
         }
         PpaassLogger.INSTANCE

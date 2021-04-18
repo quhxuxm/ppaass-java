@@ -1,4 +1,4 @@
-package com.ppaass.agent.handler.socks.bo;
+package com.ppaass.agent.business.socks.bo;
 
 import io.netty.channel.Channel;
 import io.netty.handler.codec.socksx.v5.Socks5AddressType;

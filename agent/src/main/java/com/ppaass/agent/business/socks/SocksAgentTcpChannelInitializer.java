@@ -1,4 +1,4 @@
-package com.ppaass.agent.handler.socks;
+package com.ppaass.agent.business.socks;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.common.handler.AgentMessageEncoder;
@@ -14,11 +14,11 @@ import io.netty.handler.codec.compression.Lz4FrameEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-class SocksAgentProxyChannelInitializer extends ChannelInitializer<Channel> {
+class SocksAgentTcpChannelInitializer extends ChannelInitializer<Channel> {
     private final AgentConfiguration agentConfiguration;
     private final SocksAgentReceiveProxyDataHandler socksAgentReceiveProxyDataHandler;
 
-    public SocksAgentProxyChannelInitializer(
+    public SocksAgentTcpChannelInitializer(
             AgentConfiguration agentConfiguration,
             SocksAgentReceiveProxyDataHandler socksAgentReceiveProxyDataHandler) {
         this.agentConfiguration = agentConfiguration;

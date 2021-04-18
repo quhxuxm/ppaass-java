@@ -1,6 +1,6 @@
-package com.ppaass.agent.handler.socks;
+package com.ppaass.agent.business.socks;
 
-import com.ppaass.agent.handler.socks.bo.SocksAgentUdpProtocolMessage;
+import com.ppaass.agent.business.socks.bo.SocksAgentUdpProtocolMessage;
 import com.ppaass.common.log.PpaassLogger;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
