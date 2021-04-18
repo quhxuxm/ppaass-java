@@ -15,7 +15,8 @@ while True:
     i = i + 1
     print('sending [%s]' % message)
     sock.send(message)
-    data = sock.recv(65535)
+    data, addr = sock.recv(65535)
     print('received [%s]' % data)
+    print('from', addr)
 
 sock.close()

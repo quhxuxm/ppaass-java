@@ -344,6 +344,8 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                                 });
                         proxyTcpChannel.close();
                     });
+        } finally {
+            targetUdpSocket.close();
         }
     }
 
