@@ -82,6 +82,8 @@ class SocksAgentReceiveProxyDataHandler extends SimpleChannelInboundHandler<Prox
         var udpConnectionInfo = proxyChannel.attr(ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO).get();
         var recipient = new InetSocketAddress(udpConnectionInfo.getClientSenderHost(),
                 udpConnectionInfo.getClientSenderPort());
+        var sender = new InetSocketAddress(IAgentConst.LOCAL_IP_ADDRESS,
+                udpConnectionInfo.getAgentUdpPort());
         var udpData = proxyMessage.getBody().getData();
         var socks5UdpResponseBuf = Unpooled.buffer();
         socks5UdpResponseBuf.writeByte(0);
@@ -130,7 +132,7 @@ class SocksAgentReceiveProxyDataHandler extends SimpleChannelInboundHandler<Prox
         socks5UdpResponseBuf.writeShort(udpConnectionInfo.getClientRecipientPort());
         socks5UdpResponseBuf.writeBytes(udpData);
         var udpPackageSendToAgent =
-                new DatagramPacket(socks5UdpResponseBuf, recipient);
+                new DatagramPacket(socks5UdpResponseBuf, recipient,sender);
         udpConnectionInfo.getAgentUdpChannel().writeAndFlush(udpPackageSendToAgent);
     }
 

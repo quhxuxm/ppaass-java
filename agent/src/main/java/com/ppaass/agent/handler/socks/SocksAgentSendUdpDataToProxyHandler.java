@@ -27,13 +27,16 @@ class SocksAgentSendUdpDataToProxyHandler extends SimpleChannelInboundHandler<So
     protected void channelRead0(ChannelHandlerContext agentUdpChannelContext,
                                 SocksAgentUdpProtocolMessage socks5UdpMessage)
             throws Exception {
-        var agentChannel = agentUdpChannelContext.channel();
+        var agentUdpChannel = agentUdpChannelContext.channel();
         var udpConnectionInfo =
-                agentUdpChannelContext.channel().attr(ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO).get();
+                agentUdpChannel.attr(ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO).get();
         udpConnectionInfo.setClientSenderHost(socks5UdpMessage.getUdpMessageSender().getHostName());
         udpConnectionInfo.setClientSenderPort(socks5UdpMessage.getUdpMessageSender().getPort());
-        udpConnectionInfo.setClientRecipientHost(socks5UdpMessage.getUdpMessageRecipient().getHostName());
-        udpConnectionInfo.setClientRecipientPort(socks5UdpMessage.getUdpMessageRecipient().getPort());
+        udpConnectionInfo.setClientRecipientHost(socks5UdpMessage.getTargetHost());
+        udpConnectionInfo.setClientRecipientPort(socks5UdpMessage.getTargetPort());
+        agentUdpChannel.attr(ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO).set(udpConnectionInfo);
+        udpConnectionInfo.getAgentTcpChannel().attr(ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO).set(udpConnectionInfo);
+        udpConnectionInfo.getProxyTcpChannel().attr(ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO).set(udpConnectionInfo);
         var data = socks5UdpMessage.getData();
         var agentMessageBody =
                 new AgentMessageBody(
@@ -45,7 +48,7 @@ class SocksAgentSendUdpDataToProxyHandler extends SimpleChannelInboundHandler<So
                         socks5UdpMessage.getTargetHost(),
                         socks5UdpMessage.getTargetPort(),
                         AgentMessageBodyType.UDP_DATA,
-                        agentChannel.id().asLongText(),
+                        agentUdpChannel.id().asLongText(),
                         null,
                         data);
         var agentMessage =

@@ -53,7 +53,7 @@ class SocksAgentConfigure {
                 agentConfiguration.getAgentUdpThreadNumber());
         result.group(socksProxyUdpLoopGroup)
                 .channel(NioDatagramChannel.class)
-                .option(ChannelOption.SO_BROADCAST, false)
+                .option(ChannelOption.SO_BROADCAST, true)
                 .option(ChannelOption.AUTO_READ, true)
                 .handler(udpChannelInitializer);
         return result;
