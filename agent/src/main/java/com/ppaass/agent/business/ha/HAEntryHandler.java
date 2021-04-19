@@ -26,6 +26,16 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     @Override
+    public void exceptionCaught(ChannelHandlerContext agentChannelContext, Throwable cause) {
+        var agentChannel = agentChannelContext.channel();
+        PpaassLogger.INSTANCE.error(() -> "Exception happen on agent channel, close agent channel, agent channel = {}.",
+                () -> new Object[]{
+                        agentChannel.id().asLongText(), cause
+                });
+        agentChannel.close();
+    }
+
+    @Override
     public void channelInactive(ChannelHandlerContext agentChannelContext) throws Exception {
         var agentChannel = agentChannelContext.channel();
         var connectionInfo = agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
