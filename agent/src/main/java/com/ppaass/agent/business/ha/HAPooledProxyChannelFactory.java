@@ -74,11 +74,6 @@ class HAPooledProxyChannelFactory implements PooledObjectFactory<Channel> {
     public void passivateObject(PooledObject<Channel> pooledObject) throws Exception {
         var proxyChannel = pooledObject.getObject();
         proxyChannel.flush();
-        var httpConnectionInfo = proxyChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).get();
-        if (httpConnectionInfo != null) {
-            httpConnectionInfo.getAgentChannel().attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO)
-                    .set(null);
-        }
         proxyChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).set(null);
         PpaassLogger.INSTANCE.debug(() -> "Passivate proxy channel object, proxy channel = {}.",
                 () -> new Object[]{proxyChannel.id().asLongText()});
