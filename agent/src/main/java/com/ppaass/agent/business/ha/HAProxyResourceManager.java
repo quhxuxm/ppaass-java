@@ -36,17 +36,17 @@ class HAProxyResourceManager implements IAgentResourceManager {
     private GenericObjectPool<Channel> proxyTcpChannelPoolForHttp;
     private GenericObjectPool<Channel> proxyTcpChannelPoolForHttps;
     private final ReentrantReadWriteLock reentrantReadWriteLock;
-    private final HASendPureDataToAgentHandler HASendPureDataToAgentHandler;
-    private final HAProxyMessageBodyTypeHandler HAProxyMessageBodyTypeHandler;
+    private final HASendPureDataToAgentHandler haSendPureDataToAgentHandler;
+    private final HAProxyMessageBodyTypeHandler haProxyMessageBodyTypeHandler;
 
     public HAProxyResourceManager(
             AgentConfiguration agentConfiguration,
-            HASendPureDataToAgentHandler HASendPureDataToAgentHandler,
-            HAProxyMessageBodyTypeHandler HAProxyMessageBodyTypeHandler) {
+            HASendPureDataToAgentHandler haSendPureDataToAgentHandler,
+            HAProxyMessageBodyTypeHandler haProxyMessageBodyTypeHandler) {
 
         this.agentConfiguration = agentConfiguration;
-        this.HASendPureDataToAgentHandler = HASendPureDataToAgentHandler;
-        this.HAProxyMessageBodyTypeHandler = HAProxyMessageBodyTypeHandler;
+        this.haSendPureDataToAgentHandler = haSendPureDataToAgentHandler;
+        this.haProxyMessageBodyTypeHandler = haProxyMessageBodyTypeHandler;
         this.reentrantReadWriteLock = new ReentrantReadWriteLock();
     }
 
@@ -136,11 +136,11 @@ class HAProxyResourceManager implements IAgentResourceManager {
                         4));
                 proxyChannelPipeline.addLast(new ProxyMessageDecoder(
                         agentConfiguration.getAgentPrivateKey()));
-                proxyChannelPipeline.addLast(HAProxyMessageBodyTypeHandler);
+                proxyChannelPipeline.addLast(haProxyMessageBodyTypeHandler);
                 proxyChannelPipeline.addLast(new HAExtractPureDataDecoder());
                 proxyChannelPipeline.addLast(new HttpResponseDecoder());
                 proxyChannelPipeline.addLast(new HttpObjectAggregator(Integer.MAX_VALUE, true));
-                proxyChannelPipeline.addLast(HASendPureDataToAgentHandler);
+                proxyChannelPipeline.addLast(haSendPureDataToAgentHandler);
                 if (agentConfiguration.isProxyTcpCompressEnable()) {
                     proxyChannelPipeline.addLast(new Lz4FrameEncoder());
                 }
@@ -183,9 +183,9 @@ class HAProxyResourceManager implements IAgentResourceManager {
                         4));
                 proxyChannelPipeline.addLast(new ProxyMessageDecoder(
                         agentConfiguration.getAgentPrivateKey()));
-                proxyChannelPipeline.addLast(HAProxyMessageBodyTypeHandler);
+                proxyChannelPipeline.addLast(haProxyMessageBodyTypeHandler);
                 proxyChannelPipeline.addLast(new HAExtractPureDataDecoder());
-                proxyChannelPipeline.addLast(HASendPureDataToAgentHandler);
+                proxyChannelPipeline.addLast(haSendPureDataToAgentHandler);
                 if (agentConfiguration.isProxyTcpCompressEnable()) {
                     proxyChannelPipeline.addLast(new Lz4FrameEncoder());
                 }

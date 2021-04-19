@@ -33,19 +33,19 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
     @Override
     protected void channelRead0(ChannelHandlerContext proxyChannelContext, ProxyMessage proxyMessage) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
-        var connectionInfo =
-                proxyChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).get();
-        if (connectionInfo == null) {
-            PpaassLogger.INSTANCE.error(
-                    () -> "Close proxy channel because of connection info not exist, proxy channel = {}",
-                    () -> new Object[]{
-                            proxyChannel.id().asLongText()
-                    });
-            return;
-        }
-        var agentChannel = connectionInfo.getAgentChannel();
         switch (proxyMessage.getBody().getBodyType()) {
             case TCP_CONNECT_FAIL -> {
+                var connectionInfo =
+                        proxyChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).get();
+                if (connectionInfo == null) {
+                    PpaassLogger.INSTANCE.error(
+                            () -> "Ignore proxy channel message [TCP_CONNECT_FAIL] because of connection info not exist, proxy channel = {}",
+                            () -> new Object[]{
+                                    proxyChannel.id().asLongText()
+                            });
+                    return;
+                }
+                var agentChannel = connectionInfo.getAgentChannel();
                 PpaassLogger.INSTANCE.error(
                         () -> "Connect fail for uri: [{}], close it, agent channel = {}, proxy channel = {}",
                         () -> new Object[]{
@@ -56,6 +56,17 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
                 agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
             }
             case TCP_CONNECT_SUCCESS -> {
+                var connectionInfo =
+                        proxyChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).get();
+                if (connectionInfo == null) {
+                    PpaassLogger.INSTANCE.error(
+                            () -> "Ignore proxy channel message [TCP_CONNECT_SUCCESS] because of connection info not exist, proxy channel = {}",
+                            () -> new Object[]{
+                                    proxyChannel.id().asLongText()
+                            });
+                    return;
+                }
+                var agentChannel = connectionInfo.getAgentChannel();
                 if (connectionInfo.isHttps()) {
                     //HTTPS
                     var okResponse =
@@ -125,9 +136,31 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
                 proxyChannelContext.fireChannelRead(proxyMessage);
             }
             case TCP_CONNECTION_CLOSE -> {
+                var connectionInfo =
+                        proxyChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).get();
+                if (connectionInfo == null) {
+                    PpaassLogger.INSTANCE.error(
+                            () -> "Ignore proxy channel message [TCP_CONNECTION_CLOSE] because of connection info not exist, proxy channel = {}",
+                            () -> new Object[]{
+                                    proxyChannel.id().asLongText()
+                            });
+                    return;
+                }
+                var agentChannel = connectionInfo.getAgentChannel();
                 agentChannel.close();
             }
             case TCP_DATA_FAIL -> {
+                var connectionInfo =
+                        proxyChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).get();
+                if (connectionInfo == null) {
+                    PpaassLogger.INSTANCE.error(
+                            () -> "Ignore proxy channel message [TCP_DATA_FAIL] because of connection info not exist, proxy channel = {}",
+                            () -> new Object[]{
+                                    proxyChannel.id().asLongText()
+                            });
+                    return;
+                }
+                var agentChannel = connectionInfo.getAgentChannel();
                 PpaassLogger.INSTANCE.trace(
                         () -> "FAIL_TCP happen close connection, agent channel = {}, proxy channel = {}.",
                         () -> new Object[]{
@@ -140,6 +173,17 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
                 agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
             }
             case UDP_DATA_FAIL, UDP_DATA_SUCCESS -> {
+                var connectionInfo =
+                        proxyChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).get();
+                if (connectionInfo == null) {
+                    PpaassLogger.INSTANCE.error(
+                            () -> "Ignore proxy channel message [UDP_DATA_FAIL, UDP_DATA_SUCCESS] because of connection info not exist, proxy channel = {}",
+                            () -> new Object[]{
+                                    proxyChannel.id().asLongText()
+                            });
+                    return;
+                }
+                var agentChannel = connectionInfo.getAgentChannel();
                 PpaassLogger.INSTANCE.trace(
                         () -> "No OK_UDP proxy message body type for HTTP agent, close it, agent channel = {}, proxy channel = {}",
                         () -> new Object[]{
