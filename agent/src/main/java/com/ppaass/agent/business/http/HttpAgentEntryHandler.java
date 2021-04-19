@@ -16,12 +16,12 @@ import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
 @Service
-public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object> {
+public class HttpAgentEntryHandler extends SimpleChannelInboundHandler<Object> {
     private final AgentConfiguration agentConfiguration;
     private final HttpAgentProxyResourceManager httpAgentProxyResourceManager;
 
-    public HttpAgentProtocolHandler(AgentConfiguration agentConfiguration,
-                                    HttpAgentProxyResourceManager httpAgentProxyResourceManager) {
+    public HttpAgentEntryHandler(AgentConfiguration agentConfiguration,
+                                 HttpAgentProxyResourceManager httpAgentProxyResourceManager) {
         this.agentConfiguration = agentConfiguration;
         this.httpAgentProxyResourceManager = httpAgentProxyResourceManager;
     }
@@ -40,7 +40,7 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
                         HttpAgentUtil.INSTANCE.parseConnectionInfo(fullHttpRequest.uri());
                 if (connectionInfo == null) {
                     PpaassLogger.INSTANCE
-                            .error(HttpAgentProtocolHandler.class,
+                            .error(HttpAgentEntryHandler.class,
                                     () -> "Close agent channel because of fail to parse uri:[{}] on CONNECT, agent channel = {}",
                                     () -> new Object[]{
                                             fullHttpRequest.uri(),
@@ -52,7 +52,7 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
                     return;
                 }
                 PpaassLogger.INSTANCE
-                        .debug(HttpAgentProtocolHandler.class,
+                        .debug(HttpAgentEntryHandler.class,
                                 () -> "A https CONNECT request send to uri: [{}], agent channel = {}",
                                 () -> new Object[]{
                                         fullHttpRequest.uri(),
@@ -142,7 +142,7 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
             //First time create HTTP connection
             connectionInfo = HttpAgentUtil.INSTANCE.parseConnectionInfo(fullHttpRequest.uri());
             if (connectionInfo == null) {
-                PpaassLogger.INSTANCE.error(HttpAgentProtocolHandler.class,
+                PpaassLogger.INSTANCE.error(HttpAgentEntryHandler.class,
                         () -> "Close HTTP agent channel because of fail to parse uri:[{}], agent channel = {}",
                         () -> new Object[]{
                                 fullHttpRequest.uri(),
@@ -154,7 +154,7 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
                 return;
             }
             connectionInfo.setKeepAlive(connectionKeepAlive);
-            PpaassLogger.INSTANCE.trace(HttpAgentProtocolHandler.class,
+            PpaassLogger.INSTANCE.trace(HttpAgentEntryHandler.class,
                     () -> "A http FIRST request send to uri: [{}], agent channel = {}, http data:\n{}\n",
                     () -> new Object[]{
                             fullHttpRequest.uri(),
@@ -199,7 +199,7 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
         //A HTTPS request to send data
         var connectionInfo = agentChannel.attr(IHttpAgentConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
         if (connectionInfo == null) {
-            PpaassLogger.INSTANCE.error(HttpAgentProtocolHandler.class,
+            PpaassLogger.INSTANCE.error(HttpAgentEntryHandler.class,
                     () -> "Close HTTPS agent channel because of connection info not existing for agent channel, agent channel = {}",
                     () -> new Object[]{
                             agentChannel.id().asLongText()
@@ -210,7 +210,7 @@ public class HttpAgentProtocolHandler extends SimpleChannelInboundHandler<Object
             return;
         }
         var httpsProxyTcpChannel = connectionInfo.getProxyChannel();
-        PpaassLogger.INSTANCE.trace(HttpAgentProtocolHandler.class,
+        PpaassLogger.INSTANCE.trace(HttpAgentEntryHandler.class,
                 () -> "HTTPS DATA send to uri: [{}], agent channel = {}, https data:\n{}\n",
                 () -> new Object[]{
                         connectionInfo.getUri(),

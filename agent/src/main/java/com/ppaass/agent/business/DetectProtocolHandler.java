@@ -3,6 +3,7 @@ package com.ppaass.agent.business;
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.ChannelProtocolCategory;
 import com.ppaass.agent.IAgentConst;
+import com.ppaass.agent.business.http.HttpAgentEntryHandler;
 import com.ppaass.agent.business.socks.SocksAgentCleanupInactiveAgentChannelHandler;
 import com.ppaass.agent.business.socks.SocksAgentEntryHandler;
 import com.ppaass.common.log.PpaassLogger;
@@ -23,13 +24,16 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
     private final SocksAgentEntryHandler socksAgentEntryHandler;
     private final AgentConfiguration agentConfiguration;
     private final SocksAgentCleanupInactiveAgentChannelHandler socksAgentCleanupInactiveAgentChannelHandler;
-//    private final HttpAgentProtocolHandler httpAgentProtocolHandler;
+    private final HttpAgentEntryHandler httpAgentEntryHandler;
 
-    public DetectProtocolHandler(SocksAgentEntryHandler socksAgentEntryHandler,
-                                 AgentConfiguration agentConfiguration,
-                                 SocksAgentCleanupInactiveAgentChannelHandler socksAgentCleanupInactiveAgentChannelHandler) {
+    public DetectProtocolHandler(
+            SocksAgentEntryHandler socksAgentEntryHandler,
+            HttpAgentEntryHandler httpAgentEntryHandler,
+            AgentConfiguration agentConfiguration,
+            SocksAgentCleanupInactiveAgentChannelHandler socksAgentCleanupInactiveAgentChannelHandler
+    ) {
         this.socksAgentEntryHandler = socksAgentEntryHandler;
-//        this.httpAgentProtocolHandler = httpAgentProtocolHandler;
+        this.httpAgentEntryHandler = httpAgentEntryHandler;
         this.agentConfiguration = agentConfiguration;
         this.socksAgentCleanupInactiveAgentChannelHandler = socksAgentCleanupInactiveAgentChannelHandler;
     }
@@ -95,7 +99,7 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
         agentChannelPipeline.addLast(HttpServerCodec.class.getName(), new HttpServerCodec());
         agentChannelPipeline.addLast(HttpObjectAggregator.class.getName(),
                 new HttpObjectAggregator(Integer.MAX_VALUE, true));
-//        agentChannelPipeline.addLast(httpAgentProtocolHandler);
+        agentChannelPipeline.addLast(this.httpAgentEntryHandler);
         agentChannelPipeline.remove(this);
         agentChannelContext.fireChannelRead(messageBuf);
     }
