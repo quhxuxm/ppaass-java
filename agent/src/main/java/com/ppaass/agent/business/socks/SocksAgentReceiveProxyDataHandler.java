@@ -11,6 +11,7 @@ import io.netty.handler.codec.socksx.v5.Socks5AddressEncoder;
 import io.netty.handler.codec.socksx.v5.Socks5AddressType;
 import io.netty.handler.codec.socksx.v5.Socks5CommandStatus;
 import io.netty.util.NetUtil;
+import org.apache.commons.pool2.DestroyMode;
 import org.springframework.stereotype.Service;
 
 import java.net.InetSocketAddress;
@@ -47,7 +48,7 @@ class SocksAgentReceiveProxyDataHandler extends SimpleChannelInboundHandler<Prox
             agentChannel.close();
         }
         var channelPool = proxyChannel.attr(IAgentConst.ISocksAgentConst.IProxyChannelAttr.CHANNEL_POOL).get();
-        channelPool.invalidateObject(proxyChannel);
+        channelPool.invalidateObject(proxyChannel, DestroyMode.ABANDONED);
     }
 
     @Override

@@ -31,7 +31,7 @@ class SocksAgentSendUdpDataToProxyHandler extends SimpleChannelInboundHandler<So
         var agentUdpChannel = agentUdpChannelContext.channel();
         var udpConnectionInfo =
                 agentUdpChannel.attr(IAgentConst.ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO).get();
-        udpConnectionInfo.setClientSenderHost(socks5UdpMessage.getUdpMessageSender().getAddress().getHostAddress());
+        udpConnectionInfo.setClientSenderHost(socks5UdpMessage.getUdpMessageSender().getHostName());
         udpConnectionInfo.setClientSenderPort(socks5UdpMessage.getUdpMessageSender().getPort());
         udpConnectionInfo.setClientRecipientHost(socks5UdpMessage.getTargetHost());
         udpConnectionInfo.setClientRecipientPort(socks5UdpMessage.getTargetPort());

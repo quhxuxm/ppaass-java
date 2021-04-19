@@ -7,6 +7,7 @@ import com.ppaass.proxy.IProxyConstant;
 import com.ppaass.proxy.ProxyConfiguration;
 import com.ppaass.proxy.handler.bo.TargetTcpInfo;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
@@ -287,6 +288,9 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
             var receiveDataPacketBuf = new byte[1024 * 64];
             DatagramPacket receiveDataPacket = new DatagramPacket(receiveDataPacketBuf, receiveDataPacketBuf.length);
             targetUdpSocket.receive(receiveDataPacket);
+            ByteBuf pureReceivedData = Unpooled.wrappedBuffer(receiveDataPacket.getData());
+            byte[] proxyMessageData = new byte[receiveDataPacket.getLength()];
+            pureReceivedData.readBytes(proxyMessageData);
             var proxyMessageBody =
                     new ProxyMessageBody(
                             UUIDUtil.INSTANCE.generateUuid(),
@@ -299,7 +303,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                             ProxyMessageBodyType.UDP_DATA_SUCCESS,
                             agentMessage.getBody().getAgentChannelId(),
                             null,
-                            receiveDataPacket.getData());
+                            proxyMessageData);
             var proxyMessage =
                     new ProxyMessage(
                             UUIDUtil.INSTANCE.generateUuidInBytes(),
