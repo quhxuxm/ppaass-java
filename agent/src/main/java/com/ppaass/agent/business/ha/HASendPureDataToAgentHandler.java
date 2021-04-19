@@ -1,4 +1,4 @@
-package com.ppaass.agent.business.http;
+package com.ppaass.agent.business.ha;
 
 import com.ppaass.common.log.PpaassLogger;
 import io.netty.buffer.ByteBuf;
@@ -14,17 +14,17 @@ import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
 @Service
-class HttpAgentSendPureDataToAgentHandler extends ChannelInboundHandlerAdapter {
+class HASendPureDataToAgentHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext proxyChannelContext, Object msg) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
-        var connectionInfo = proxyChannel.attr(IHttpAgentConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).get();
+        var connectionInfo = proxyChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).get();
         if (connectionInfo == null) {
             PpaassLogger.INSTANCE.error(
                     () -> "Close proxy channel because of connection info not exist, proxy channel = {}",
                     () -> new Object[]{proxyChannel.id().asLongText()});
             var channelPool =
-                    proxyChannel.attr(IHttpAgentConstant.IProxyChannelConstant.CHANNEL_POOL)
+                    proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
                             .get();
             channelPool.returnObject(proxyChannel);
             return;
@@ -47,7 +47,7 @@ class HttpAgentSendPureDataToAgentHandler extends ChannelInboundHandlerAdapter {
                         };
                     });
             var channelPool =
-                    proxyChannel.attr(IHttpAgentConstant.IProxyChannelConstant.CHANNEL_POOL)
+                    proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
                             .get();
             channelPool.returnObject(proxyChannel);
             var failResponse =

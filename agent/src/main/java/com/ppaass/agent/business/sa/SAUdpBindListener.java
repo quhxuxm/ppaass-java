@@ -1,8 +1,6 @@
-package com.ppaass.agent.business.socks;
+package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
-import com.ppaass.agent.IAgentConst;
-import com.ppaass.agent.business.socks.bo.SocksAgentUdpConnectionInfo;
 import com.ppaass.common.log.PpaassLogger;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -14,16 +12,16 @@ import io.netty.handler.codec.socksx.v5.Socks5CommandStatus;
 
 import java.net.InetSocketAddress;
 
-class SocksAgentUdpBindListener implements ChannelFutureListener {
+class SAUdpBindListener implements ChannelFutureListener {
     private final Channel agentTcpChannel;
     private final Channel proxyTcpChannel;
     private final AgentConfiguration agentConfiguration;
     private final Socks5CommandRequest socks5CommandRequest;
 
-    public SocksAgentUdpBindListener(Channel agentTcpChannel,
-                                     Channel proxyTcpChannel,
-                                     AgentConfiguration agentConfiguration,
-                                     Socks5CommandRequest socks5CommandRequest) {
+    public SAUdpBindListener(Channel agentTcpChannel,
+                             Channel proxyTcpChannel,
+                             AgentConfiguration agentConfiguration,
+                             Socks5CommandRequest socks5CommandRequest) {
         this.agentTcpChannel = agentTcpChannel;
         this.proxyTcpChannel = proxyTcpChannel;
         this.agentConfiguration = agentConfiguration;
@@ -45,7 +43,7 @@ class SocksAgentUdpBindListener implements ChannelFutureListener {
         var agentUdpAddress =
                 (InetSocketAddress) (agentUdpChannelFuture.channel()
                         .localAddress());
-        var udpConnectionInfo = new SocksAgentUdpConnectionInfo(
+        var udpConnectionInfo = new SAUdpConnectionInfo(
                 agentUdpAddress.getPort(),
                 this.socks5CommandRequest.dstAddr(),
                 this.socks5CommandRequest.dstPort(),
@@ -54,15 +52,15 @@ class SocksAgentUdpBindListener implements ChannelFutureListener {
                 agentUdpChannel,
                 this.proxyTcpChannel
         );
-        this.agentTcpChannel.attr(ISocksAgentConstant.SOCKS_UDP_CONNECTION_INFO)
+        this.agentTcpChannel.attr(ISAConstant.SOCKS_UDP_CONNECTION_INFO)
                 .set(udpConnectionInfo);
-        this.proxyTcpChannel.attr(ISocksAgentConstant.SOCKS_UDP_CONNECTION_INFO)
+        this.proxyTcpChannel.attr(ISAConstant.SOCKS_UDP_CONNECTION_INFO)
                 .set(udpConnectionInfo);
-        agentUdpChannel.attr(ISocksAgentConstant.SOCKS_UDP_CONNECTION_INFO)
+        agentUdpChannel.attr(ISAConstant.SOCKS_UDP_CONNECTION_INFO)
                 .set(udpConnectionInfo);
         this.agentTcpChannel.writeAndFlush(new DefaultSocks5CommandResponse(
                 Socks5CommandStatus.SUCCESS,
-                Socks5AddressType.IPv4, IAgentConst.LOCAL_IP_ADDRESS,
+                Socks5AddressType.IPv4, ISAConstant.LOCAL_IP_ADDRESS,
                 udpConnectionInfo.getAgentUdpPort()));
     }
 }

@@ -43,7 +43,7 @@
                 level="info">
             <appender-ref ref="FILE_APPENDER"/>
         </logger>
-        <logger name="com.ppaass.agent.business.socks.SocksAgentPooledProxyChannelFactory"
+        <logger name="com.ppaass.agent.business.sa.SAPooledProxyChannelFactory"
                 additivity="false"
                 level="debug">
             <appender-ref ref="FILE_APPENDER"/>

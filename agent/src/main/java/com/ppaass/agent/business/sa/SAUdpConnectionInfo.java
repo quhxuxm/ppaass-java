@@ -1,8 +1,8 @@
-package com.ppaass.agent.business.socks.bo;
+package com.ppaass.agent.business.sa;
 
 import io.netty.channel.Channel;
 
-public class SocksAgentUdpConnectionInfo {
+class SAUdpConnectionInfo {
     private final int agentUdpPort;
     private final String clientSenderAssociateHost;
     private final int clientSenderAssociatePort;
@@ -15,11 +15,11 @@ public class SocksAgentUdpConnectionInfo {
     private String clientRecipientHost;
     private int clientRecipientPort;
 
-    public SocksAgentUdpConnectionInfo(int agentUdpPort, String clientSenderAssociateHost,
-                                       int clientSenderAssociatePort,
-                                       String userToken,
-                                       Channel agentTcpChannel, Channel agentUdpChannel,
-                                       Channel proxyTcpChannel) {
+    public SAUdpConnectionInfo(int agentUdpPort, String clientSenderAssociateHost,
+                               int clientSenderAssociatePort,
+                               String userToken,
+                               Channel agentTcpChannel, Channel agentUdpChannel,
+                               Channel proxyTcpChannel) {
         this.agentUdpPort = agentUdpPort;
         this.clientSenderAssociateHost = clientSenderAssociateHost;
         this.clientSenderAssociatePort = clientSenderAssociatePort;

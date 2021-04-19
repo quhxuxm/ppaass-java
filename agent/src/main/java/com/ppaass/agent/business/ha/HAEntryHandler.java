@@ -1,4 +1,4 @@
-package com.ppaass.agent.business.http;
+package com.ppaass.agent.business.ha;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.common.log.PpaassLogger;
@@ -16,14 +16,14 @@ import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
 @Service
-public class HttpAgentEntryHandler extends SimpleChannelInboundHandler<Object> {
+public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
     private final AgentConfiguration agentConfiguration;
-    private final HttpAgentProxyResourceManager httpAgentProxyResourceManager;
+    private final HAProxyResourceManager HAProxyResourceManager;
 
-    public HttpAgentEntryHandler(AgentConfiguration agentConfiguration,
-                                 HttpAgentProxyResourceManager httpAgentProxyResourceManager) {
+    public HAEntryHandler(AgentConfiguration agentConfiguration,
+                          HAProxyResourceManager HAProxyResourceManager) {
         this.agentConfiguration = agentConfiguration;
-        this.httpAgentProxyResourceManager = httpAgentProxyResourceManager;
+        this.HAProxyResourceManager = HAProxyResourceManager;
     }
 
     @Override
@@ -37,10 +37,10 @@ public class HttpAgentEntryHandler extends SimpleChannelInboundHandler<Object> {
             if (HttpMethod.CONNECT == fullHttpRequest.method()) {
                 //A HTTPS request to setup the connection
                 var connectionInfo =
-                        HttpAgentUtil.INSTANCE.parseConnectionInfo(fullHttpRequest.uri());
+                        HAUtil.INSTANCE.parseConnectionInfo(fullHttpRequest.uri());
                 if (connectionInfo == null) {
                     PpaassLogger.INSTANCE
-                            .error(HttpAgentEntryHandler.class,
+                            .error(HAEntryHandler.class,
                                     () -> "Close agent channel because of fail to parse uri:[{}] on CONNECT, agent channel = {}",
                                     () -> new Object[]{
                                             fullHttpRequest.uri(),
@@ -52,7 +52,7 @@ public class HttpAgentEntryHandler extends SimpleChannelInboundHandler<Object> {
                     return;
                 }
                 PpaassLogger.INSTANCE
-                        .debug(HttpAgentEntryHandler.class,
+                        .debug(HAEntryHandler.class,
                                 () -> "A https CONNECT request send to uri: [{}], agent channel = {}",
                                 () -> new Object[]{
                                         fullHttpRequest.uri(),
@@ -60,14 +60,14 @@ public class HttpAgentEntryHandler extends SimpleChannelInboundHandler<Object> {
                                 });
                 connectionInfo.setKeepAlive(connectionKeepAlive);
                 var httpsProxyTcpChannel =
-                        this.httpAgentProxyResourceManager.getProxyTcpChannelPoolForHttps().borrowObject();
+                        this.HAProxyResourceManager.getProxyTcpChannelPoolForHttps().borrowObject();
                 connectionInfo.setAgentChannel(agentChannel);
                 connectionInfo.setProxyChannel(httpsProxyTcpChannel);
                 connectionInfo.setUserToken(agentConfiguration.getUserToken());
-                httpsProxyTcpChannel.attr(IHttpAgentConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO)
+                httpsProxyTcpChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO)
                         .set(connectionInfo);
-                agentChannel.attr(IHttpAgentConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).set(connectionInfo);
-                HttpAgentUtil.INSTANCE
+                agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).set(connectionInfo);
+                HAUtil.INSTANCE
                         .writeAgentMessageToProxy(AgentMessageBodyType.TCP_CONNECT, connectionInfo.getUserToken(),
                                 agentConfiguration.getAgentInstanceId(), httpsProxyTcpChannel,
                                 null, agentConfiguration.getAgentSourceAddress(), agentConfiguration.getTcpPort(),
@@ -96,7 +96,7 @@ public class HttpAgentEntryHandler extends SimpleChannelInboundHandler<Object> {
             }
             // A HTTP request
             ReferenceCountUtil.retain(httpProxyInput, 1);
-            var connectionInfo = agentChannel.attr(IHttpAgentConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
+            var connectionInfo = agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
             if (connectionInfo != null) {
                 var proxyChannel = connectionInfo.getProxyChannel();
                 PpaassLogger.INSTANCE.trace(
@@ -106,7 +106,7 @@ public class HttpAgentEntryHandler extends SimpleChannelInboundHandler<Object> {
                                 agentChannel.id().asLongText(),
                                 ByteBufUtil.prettyHexDump(fullHttpRequest.content())
                         });
-                HttpAgentUtil.INSTANCE.writeAgentMessageToProxy(
+                HAUtil.INSTANCE.writeAgentMessageToProxy(
                         AgentMessageBodyType.TCP_DATA,
                         connectionInfo.getUserToken(),
                         agentConfiguration.getAgentInstanceId(),
@@ -129,7 +129,7 @@ public class HttpAgentEntryHandler extends SimpleChannelInboundHandler<Object> {
                                             proxyChannelWriteFuture.cause()
                                     });
                             var channelPool =
-                                    proxyChannel.attr(IHttpAgentConstant.IProxyChannelConstant.CHANNEL_POOL).get();
+                                    proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL).get();
                             channelPool.invalidateObject(proxyChannel, DestroyMode.ABANDONED);
                             var failResponse =
                                     new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
@@ -140,9 +140,9 @@ public class HttpAgentEntryHandler extends SimpleChannelInboundHandler<Object> {
                 return;
             }
             //First time create HTTP connection
-            connectionInfo = HttpAgentUtil.INSTANCE.parseConnectionInfo(fullHttpRequest.uri());
+            connectionInfo = HAUtil.INSTANCE.parseConnectionInfo(fullHttpRequest.uri());
             if (connectionInfo == null) {
-                PpaassLogger.INSTANCE.error(HttpAgentEntryHandler.class,
+                PpaassLogger.INSTANCE.error(HAEntryHandler.class,
                         () -> "Close HTTP agent channel because of fail to parse uri:[{}], agent channel = {}",
                         () -> new Object[]{
                                 fullHttpRequest.uri(),
@@ -154,21 +154,21 @@ public class HttpAgentEntryHandler extends SimpleChannelInboundHandler<Object> {
                 return;
             }
             connectionInfo.setKeepAlive(connectionKeepAlive);
-            PpaassLogger.INSTANCE.trace(HttpAgentEntryHandler.class,
+            PpaassLogger.INSTANCE.trace(HAEntryHandler.class,
                     () -> "A http FIRST request send to uri: [{}], agent channel = {}, http data:\n{}\n",
                     () -> new Object[]{
                             fullHttpRequest.uri(),
                             agentChannel.id().asLongText(),
                             ByteBufUtil.prettyHexDump(fullHttpRequest.content())
                     });
-            var httpProxyTcpChannel = this.httpAgentProxyResourceManager.getProxyTcpChannelPoolForHttp().borrowObject();
+            var httpProxyTcpChannel = this.HAProxyResourceManager.getProxyTcpChannelPoolForHttp().borrowObject();
             connectionInfo.setAgentChannel(agentChannel);
             connectionInfo.setProxyChannel(httpProxyTcpChannel);
             connectionInfo.setUserToken(agentConfiguration.getUserToken());
             connectionInfo.setHttpMessageCarriedOnConnectTime(fullHttpRequest);
-            httpProxyTcpChannel.attr(IHttpAgentConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).set(connectionInfo);
-            agentChannel.attr(IHttpAgentConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).set(connectionInfo);
-            HttpAgentUtil.INSTANCE
+            httpProxyTcpChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).set(connectionInfo);
+            agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).set(connectionInfo);
+            HAUtil.INSTANCE
                     .writeAgentMessageToProxy(AgentMessageBodyType.TCP_CONNECT, connectionInfo.getUserToken(),
                             agentConfiguration.getAgentInstanceId(), httpProxyTcpChannel,
                             null, agentConfiguration.getAgentSourceAddress(),
@@ -186,7 +186,7 @@ public class HttpAgentEntryHandler extends SimpleChannelInboundHandler<Object> {
                                                 proxyChannelWriteFuture.cause()
                                         });
                                 var channelPool =
-                                        httpProxyTcpChannel.attr(IHttpAgentConstant.IProxyChannelConstant.CHANNEL_POOL)
+                                        httpProxyTcpChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
                                                 .get();
                                 channelPool.invalidateObject(httpProxyTcpChannel, DestroyMode.ABANDONED);
                                 var failResponse =
@@ -197,9 +197,9 @@ public class HttpAgentEntryHandler extends SimpleChannelInboundHandler<Object> {
             return;
         }
         //A HTTPS request to send data
-        var connectionInfo = agentChannel.attr(IHttpAgentConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
+        var connectionInfo = agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
         if (connectionInfo == null) {
-            PpaassLogger.INSTANCE.error(HttpAgentEntryHandler.class,
+            PpaassLogger.INSTANCE.error(HAEntryHandler.class,
                     () -> "Close HTTPS agent channel because of connection info not existing for agent channel, agent channel = {}",
                     () -> new Object[]{
                             agentChannel.id().asLongText()
@@ -210,14 +210,14 @@ public class HttpAgentEntryHandler extends SimpleChannelInboundHandler<Object> {
             return;
         }
         var httpsProxyTcpChannel = connectionInfo.getProxyChannel();
-        PpaassLogger.INSTANCE.trace(HttpAgentEntryHandler.class,
+        PpaassLogger.INSTANCE.trace(HAEntryHandler.class,
                 () -> "HTTPS DATA send to uri: [{}], agent channel = {}, https data:\n{}\n",
                 () -> new Object[]{
                         connectionInfo.getUri(),
                         agentChannel.id().asLongText(),
                         ByteBufUtil.prettyHexDump((ByteBuf) httpProxyInput)
                 });
-        HttpAgentUtil.INSTANCE.writeAgentMessageToProxy(
+        HAUtil.INSTANCE.writeAgentMessageToProxy(
                 AgentMessageBodyType.TCP_DATA,
                 connectionInfo.getUserToken(), agentConfiguration.getAgentInstanceId(),
                 connectionInfo.getProxyChannel(),
@@ -239,7 +239,7 @@ public class HttpAgentEntryHandler extends SimpleChannelInboundHandler<Object> {
                                     proxyChannelWriteFuture.cause()
                             });
                     var channelPool =
-                            httpsProxyTcpChannel.attr(IHttpAgentConstant.IProxyChannelConstant.CHANNEL_POOL).get();
+                            httpsProxyTcpChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL).get();
                     channelPool.invalidateObject(httpsProxyTcpChannel, DestroyMode.ABANDONED);
                     var failResponse =
                             new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,

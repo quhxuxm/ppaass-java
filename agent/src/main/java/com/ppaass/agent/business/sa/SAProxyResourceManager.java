@@ -1,4 +1,4 @@
-package com.ppaass.agent.business.socks;
+package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.IAgentResourceManager;
@@ -19,21 +19,21 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Service
-class SocksAgentProxyResourceManager implements IAgentResourceManager {
-    private final SocksAgentUdpChannelInitializer socksAgentUdpChannelInitializer;
-    private final SocksAgentTcpChannelInitializer socksAgentTcpChannelInitializer;
+class SAProxyResourceManager implements IAgentResourceManager {
+    private final SAUdpChannelInitializer SAUdpChannelInitializer;
+    private final SATcpChannelInitializer SATcpChannelInitializer;
     private final AgentConfiguration agentConfiguration;
     private Bootstrap proxyUdpChannelBootstrap;
     private Bootstrap proxyTcpChannelBootstrap;
     private GenericObjectPool<Channel> proxyTcpChannelPool;
     private final ReentrantReadWriteLock reentrantReadWriteLock;
 
-    public SocksAgentProxyResourceManager(
-            SocksAgentUdpChannelInitializer socksAgentUdpChannelInitializer,
-            SocksAgentTcpChannelInitializer socksAgentTcpChannelInitializer,
+    public SAProxyResourceManager(
+            SAUdpChannelInitializer SAUdpChannelInitializer,
+            SATcpChannelInitializer SATcpChannelInitializer,
             AgentConfiguration agentConfiguration) {
-        this.socksAgentUdpChannelInitializer = socksAgentUdpChannelInitializer;
-        this.socksAgentTcpChannelInitializer = socksAgentTcpChannelInitializer;
+        this.SAUdpChannelInitializer = SAUdpChannelInitializer;
+        this.SATcpChannelInitializer = SATcpChannelInitializer;
         this.agentConfiguration = agentConfiguration;
         this.reentrantReadWriteLock = new ReentrantReadWriteLock();
     }
@@ -96,7 +96,7 @@ class SocksAgentProxyResourceManager implements IAgentResourceManager {
                 .channel(NioDatagramChannel.class)
                 .option(ChannelOption.SO_BROADCAST, true)
                 .option(ChannelOption.AUTO_READ, true)
-                .handler(this.socksAgentUdpChannelInitializer);
+                .handler(this.SAUdpChannelInitializer);
         return result;
     }
 
@@ -120,13 +120,13 @@ class SocksAgentProxyResourceManager implements IAgentResourceManager {
         result.option(ChannelOption.SO_SNDBUF,
                 agentConfiguration.getProxyTcpSoSndbuf());
         result.remoteAddress(agentConfiguration.getProxyHost(), agentConfiguration.getProxyPort());
-        result.handler(this.socksAgentTcpChannelInitializer);
+        result.handler(this.SATcpChannelInitializer);
         return result;
     }
 
     private GenericObjectPool<Channel> createSocksProxyTcpChannelPool(Bootstrap proxyTcpChannelBootstrap) {
         var socksAgentPooledProxyChannelFactory =
-                new SocksAgentPooledProxyChannelFactory(proxyTcpChannelBootstrap, agentConfiguration);
+                new SAPooledProxyChannelFactory(proxyTcpChannelBootstrap, agentConfiguration);
         var config = new GenericObjectPoolConfig<Channel>();
         config.setMaxIdle(agentConfiguration.getProxyChannelPoolMaxIdleSize());
         config.setMaxTotal(agentConfiguration.getProxyChannelPoolMaxTotalSize());

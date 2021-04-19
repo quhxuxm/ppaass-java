@@ -1,4 +1,4 @@
-package com.ppaass.agent.business.socks;
+package com.ppaass.agent.business.ha;
 
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @ChannelHandler.Sharable
-public class SocksAgentCleanupInactiveAgentChannelHandler extends ChannelInboundHandlerAdapter {
+public class HAResourceCleanupHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void userEventTriggered(ChannelHandlerContext agentChannelContext, Object evt) throws Exception {
         if (!(evt instanceof IdleStateEvent)) {
@@ -22,7 +22,7 @@ public class SocksAgentCleanupInactiveAgentChannelHandler extends ChannelInbound
             return;
         }
         var agentChannel = agentChannelContext.channel();
-        agentChannel.attr(ISocksAgentConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).set(null);
+        agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).set(null);
         agentChannel.close();
     }
 }

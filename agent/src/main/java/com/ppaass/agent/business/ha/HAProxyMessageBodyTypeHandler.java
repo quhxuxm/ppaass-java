@@ -1,4 +1,4 @@
-package com.ppaass.agent.business.http;
+package com.ppaass.agent.business.ha;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.common.log.PpaassLogger;
@@ -14,10 +14,10 @@ import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
 @Service
-class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMessage> {
+class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMessage> {
     private final AgentConfiguration agentConfiguration;
 
-    HttpAgentProxyMessageBodyTypeHandler(AgentConfiguration agentConfiguration) {
+    HAProxyMessageBodyTypeHandler(AgentConfiguration agentConfiguration) {
         this.agentConfiguration = agentConfiguration;
     }
 
@@ -25,7 +25,7 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
     protected void channelRead0(ChannelHandlerContext proxyChannelContext, ProxyMessage proxyMessage) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
         var connectionInfo =
-                proxyChannel.attr(IHttpAgentConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).get();
+                proxyChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).get();
         if (connectionInfo == null) {
             PpaassLogger.INSTANCE.error(
                     () -> "Close proxy channel because of connection info not exist, proxy channel = {}",
@@ -33,7 +33,7 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                             proxyChannel.id().asLongText()
                     });
             var channelPool =
-                    proxyChannel.attr(IHttpAgentConstant.IProxyChannelConstant.CHANNEL_POOL)
+                    proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
                             .get();
             channelPool.returnObject(proxyChannel);
             return;
@@ -47,7 +47,7 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                                 connectionInfo.getUri(), agentChannel.id().asLongText(), proxyChannel.id().asLongText()
                         });
                 var channelPool =
-                        proxyChannel.attr(IHttpAgentConstant.IProxyChannelConstant.CHANNEL_POOL)
+                        proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
                                 .get();
                 channelPool.returnObject(proxyChannel);
                 var failResponse =
@@ -60,7 +60,7 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                     var okResponse =
                             new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
                                     HttpResponseStatus.valueOf(HttpResponseStatus.OK.code(),
-                                            IHttpAgentConstant.CONNECTION_ESTABLISHED));
+                                            IHAConstant.CONNECTION_ESTABLISHED));
                     agentChannel.writeAndFlush(okResponse)
                             .addListener((ChannelFutureListener) agentWriteChannelFuture -> {
                                 if (agentWriteChannelFuture.isSuccess()) {
@@ -83,7 +83,7 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                                                 agentWriteChannelFuture.cause()
                                         });
                                 var channelPool =
-                                        proxyChannel.attr(IHttpAgentConstant.IProxyChannelConstant.CHANNEL_POOL)
+                                        proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
                                                 .get();
                                 channelPool.returnObject(proxyChannel);
                                 var failResponse =
@@ -94,7 +94,7 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                     return;
                 }
                 //HTTP
-                HttpAgentUtil.INSTANCE.writeAgentMessageToProxy(
+                HAUtil.INSTANCE.writeAgentMessageToProxy(
                         AgentMessageBodyType.TCP_DATA,
                         connectionInfo.getUserToken(),
                         agentConfiguration.getAgentInstanceId(),
@@ -117,7 +117,7 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                                             proxyWriteChannelFuture.cause()
                                     });
                             var channelPool =
-                                    proxyChannel.attr(IHttpAgentConstant.IProxyChannelConstant.CHANNEL_POOL)
+                                    proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
                                             .get();
                             channelPool.invalidateObject(proxyChannel, DestroyMode.ABANDONED);
                             var failResponse =
@@ -132,7 +132,7 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
             }
             case TCP_CONNECTION_CLOSE -> {
                 var channelPool =
-                        proxyChannel.attr(IHttpAgentConstant.IProxyChannelConstant.CHANNEL_POOL)
+                        proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
                                 .get();
                 channelPool.returnObject(proxyChannel);
                 agentChannel.close();
@@ -145,7 +145,7 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                                 proxyChannel.id().asLongText()
                         });
                 var channelPool =
-                        proxyChannel.attr(IHttpAgentConstant.IProxyChannelConstant.CHANNEL_POOL)
+                        proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
                                 .get();
                 channelPool.returnObject(proxyChannel);
                 var failResponse =
@@ -160,7 +160,7 @@ class HttpAgentProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<P
                                 agentChannel.id().asLongText(), proxyChannel.id().asLongText()
                         });
                 var channelPool =
-                        proxyChannel.attr(IHttpAgentConstant.IProxyChannelConstant.CHANNEL_POOL)
+                        proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
                                 .get();
                 channelPool.invalidateObject(proxyChannel, DestroyMode.ABANDONED);
                 var failResponse =

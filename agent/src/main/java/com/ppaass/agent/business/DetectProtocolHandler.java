@@ -3,9 +3,10 @@ package com.ppaass.agent.business;
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.ChannelProtocolCategory;
 import com.ppaass.agent.IAgentConst;
-import com.ppaass.agent.business.http.HttpAgentEntryHandler;
-import com.ppaass.agent.business.socks.SocksAgentCleanupInactiveAgentChannelHandler;
-import com.ppaass.agent.business.socks.SocksAgentEntryHandler;
+import com.ppaass.agent.business.ha.HAEntryHandler;
+import com.ppaass.agent.business.ha.HAResourceCleanupHandler;
+import com.ppaass.agent.business.sa.SAEntryHandler;
+import com.ppaass.agent.business.sa.SAResourceCleanupHandler;
 import com.ppaass.common.log.PpaassLogger;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
@@ -16,32 +17,38 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.socksx.SocksPortUnificationServerHandler;
 import io.netty.handler.codec.socksx.SocksVersion;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.AttributeKey;
 import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
 @Service
 class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
-    private final SocksAgentEntryHandler socksAgentEntryHandler;
+    private static final AttributeKey<ChannelProtocolCategory> CHANNEL_PROTOCOL_CATEGORY =
+            AttributeKey.valueOf("CHANNEL_PROTOCOL_TYPE");
+    private final SAEntryHandler saEntryHandler;
     private final AgentConfiguration agentConfiguration;
-    private final SocksAgentCleanupInactiveAgentChannelHandler socksAgentCleanupInactiveAgentChannelHandler;
-    private final HttpAgentEntryHandler httpAgentEntryHandler;
+    private final SAResourceCleanupHandler saResourceCleanupHandler;
+    private final HAResourceCleanupHandler haResourceCleanupHandler;
+    private final HAEntryHandler haEntryHandler;
 
     public DetectProtocolHandler(
-            SocksAgentEntryHandler socksAgentEntryHandler,
-            HttpAgentEntryHandler httpAgentEntryHandler,
+            SAEntryHandler saEntryHandler,
+            HAEntryHandler haEntryHandler,
             AgentConfiguration agentConfiguration,
-            SocksAgentCleanupInactiveAgentChannelHandler socksAgentCleanupInactiveAgentChannelHandler
+            SAResourceCleanupHandler saResourceCleanupHandler,
+            HAResourceCleanupHandler haResourceCleanupHandler
     ) {
-        this.socksAgentEntryHandler = socksAgentEntryHandler;
-        this.httpAgentEntryHandler = httpAgentEntryHandler;
+        this.saEntryHandler = saEntryHandler;
+        this.haEntryHandler = haEntryHandler;
         this.agentConfiguration = agentConfiguration;
-        this.socksAgentCleanupInactiveAgentChannelHandler = socksAgentCleanupInactiveAgentChannelHandler;
+        this.saResourceCleanupHandler = saResourceCleanupHandler;
+        this.haResourceCleanupHandler = haResourceCleanupHandler;
     }
 
     @Override
     public void channelRead(ChannelHandlerContext agentChannelContext, Object msg) throws Exception {
         var agentChannel = agentChannelContext.channel();
-        var channelProtocolType = agentChannel.attr(IAgentConst.CHANNEL_PROTOCOL_CATEGORY).get();
+        var channelProtocolType = agentChannel.attr(CHANNEL_PROTOCOL_CATEGORY).get();
         if (channelProtocolType != null) {
             PpaassLogger.INSTANCE
                     .debug(() -> "Incoming request protocol is: {}, agent channel = {}",
@@ -70,21 +77,21 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
                             () -> "Incoming request is a socks request, agent channel = {}",
                             () -> new Object[]{
                                     agentChannel.id().asLongText()});
-            agentChannel.attr(IAgentConst.CHANNEL_PROTOCOL_CATEGORY)
-                    .setIfAbsent(ChannelProtocolCategory.SOCKS);
+            agentChannel.attr(CHANNEL_PROTOCOL_CATEGORY)
+                    .set(ChannelProtocolCategory.SOCKS);
             agentChannelPipeline
                     .addBefore(IAgentConst.LAST_INBOUND_HANDLER, SocksPortUnificationServerHandler.class.getName(),
                             new SocksPortUnificationServerHandler());
-            agentChannelPipeline.addBefore(IAgentConst.LAST_INBOUND_HANDLER, SocksAgentEntryHandler.class.getName(),
-                    socksAgentEntryHandler);
+            agentChannelPipeline.addBefore(IAgentConst.LAST_INBOUND_HANDLER, SAEntryHandler.class.getName(),
+                    saEntryHandler);
             agentChannelPipeline.addBefore(IAgentConst.LAST_INBOUND_HANDLER, IdleStateHandler.class.getName(),
                     new IdleStateHandler(0,
                             0,
                             this.agentConfiguration.getAgentChannelAllIdleSeconds()));
             agentChannelPipeline
                     .addBefore(IAgentConst.LAST_INBOUND_HANDLER,
-                            SocksAgentCleanupInactiveAgentChannelHandler.class.getName(),
-                            this.socksAgentCleanupInactiveAgentChannelHandler);
+                            SAResourceCleanupHandler.class.getName(),
+                            this.saResourceCleanupHandler);
             agentChannelPipeline.remove(this);
             agentChannelContext.fireChannelRead(messageBuf);
             return;
@@ -94,12 +101,20 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
                         () -> "Incoming request is a http request, agent channel = {}",
                         () -> new Object[]{
                                 agentChannel.id().asLongText()});
-        agentChannel.attr(IAgentConst.CHANNEL_PROTOCOL_CATEGORY)
-                .setIfAbsent(ChannelProtocolCategory.HTTP);
+        agentChannel.attr(CHANNEL_PROTOCOL_CATEGORY)
+                .set(ChannelProtocolCategory.HTTP);
         agentChannelPipeline.addLast(HttpServerCodec.class.getName(), new HttpServerCodec());
         agentChannelPipeline.addLast(HttpObjectAggregator.class.getName(),
                 new HttpObjectAggregator(Integer.MAX_VALUE, true));
-        agentChannelPipeline.addLast(this.httpAgentEntryHandler);
+        agentChannelPipeline.addLast(this.haEntryHandler);
+        agentChannelPipeline.addBefore(IAgentConst.LAST_INBOUND_HANDLER, IdleStateHandler.class.getName(),
+                new IdleStateHandler(0,
+                        0,
+                        this.agentConfiguration.getAgentChannelAllIdleSeconds()));
+        agentChannelPipeline
+                .addBefore(IAgentConst.LAST_INBOUND_HANDLER,
+                        HAResourceCleanupHandler.class.getName(),
+                        this.haResourceCleanupHandler);
         agentChannelPipeline.remove(this);
         agentChannelContext.fireChannelRead(messageBuf);
     }

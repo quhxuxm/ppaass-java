@@ -1,6 +1,5 @@
-package com.ppaass.agent.business.http;
+package com.ppaass.agent.business.ha;
 
-import com.ppaass.agent.business.http.bo.HttpConnectionInfo;
 import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.protocol.common.util.UUIDUtil;
 import com.ppaass.protocol.vpn.message.AgentMessage;
@@ -16,7 +15,7 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpRequestEncoder;
 import org.springframework.web.util.UriComponentsBuilder;
 
-class HttpAgentUtil {
+class HAUtil {
     private static final String HTTP_SCHEMA = "http://";
     private static final String HTTPS_SCHEMA = "https://";
     private static final String SCHEMA_AND_HOST_SEP = "://";
@@ -24,12 +23,12 @@ class HttpAgentUtil {
     private static final String SLASH = "/";
     private static final int DEFAULT_HTTP_PORT = 80;
     private static final int DEFAULT_HTTPS_PORT = 443;
-    static final HttpAgentUtil INSTANCE = new HttpAgentUtil();
+    static final HAUtil INSTANCE = new HAUtil();
 
-    private HttpAgentUtil() {
+    private HAUtil() {
     }
 
-    public HttpConnectionInfo parseConnectionInfo(String uri) {
+    public HAConnectionInfo parseConnectionInfo(String uri) {
         if (uri.startsWith(HTTP_SCHEMA)) {
             var uriComponentsBuilder = UriComponentsBuilder.fromUriString(uri);
             var uriComponents = uriComponentsBuilder.build();
@@ -41,7 +40,7 @@ class HttpAgentUtil {
             if (targetHost == null) {
                 targetHost = "";
             }
-            return new HttpConnectionInfo(
+            return new HAConnectionInfo(
                     targetHost,
                     port,
                     false,
@@ -59,7 +58,7 @@ class HttpAgentUtil {
             if (targetHost == null) {
                 targetHost = "";
             }
-            return new HttpConnectionInfo(
+            return new HAConnectionInfo(
                     targetHost,
                     port,
                     true,
@@ -85,12 +84,12 @@ class HttpAgentUtil {
             try {
                 port = Integer.parseInt(hostNameAndPortParts[1]);
             } catch (NumberFormatException e) {
-                PpaassLogger.INSTANCE.error(HttpAgentUtil.class,
+                PpaassLogger.INSTANCE.error(HAUtil.class,
                         () -> "Fail to parse port from request uri, uri = {}",
                         () -> new Object[]{uri});
             }
         }
-        return new HttpConnectionInfo(
+        return new HAConnectionInfo(
                 hostName,
                 port,
                 true,

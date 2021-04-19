@@ -1,7 +1,6 @@
-package com.ppaass.agent.business.socks;
+package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
-import com.ppaass.agent.business.socks.bo.SocksAgentUdpProtocolMessage;
 import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.protocol.common.util.UUIDUtil;
 import com.ppaass.protocol.vpn.message.AgentMessage;
@@ -16,28 +15,28 @@ import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
 @Service
-class SocksAgentSendUdpDataToProxyHandler extends SimpleChannelInboundHandler<SocksAgentUdpProtocolMessage> {
+class SASendUdpDataToProxyHandler extends SimpleChannelInboundHandler<SAUdpProtocolMessage> {
     private final AgentConfiguration agentConfiguration;
 
-    SocksAgentSendUdpDataToProxyHandler(AgentConfiguration agentConfiguration) {
+    SASendUdpDataToProxyHandler(AgentConfiguration agentConfiguration) {
         this.agentConfiguration = agentConfiguration;
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext agentUdpChannelContext,
-                                SocksAgentUdpProtocolMessage socks5UdpMessage)
+                                SAUdpProtocolMessage socks5UdpMessage)
             throws Exception {
         var agentUdpChannel = agentUdpChannelContext.channel();
         var udpConnectionInfo =
-                agentUdpChannel.attr(ISocksAgentConstant.SOCKS_UDP_CONNECTION_INFO).get();
+                agentUdpChannel.attr(ISAConstant.SOCKS_UDP_CONNECTION_INFO).get();
         udpConnectionInfo.setClientSenderHost(socks5UdpMessage.getUdpMessageSender().getHostName());
         udpConnectionInfo.setClientSenderPort(socks5UdpMessage.getUdpMessageSender().getPort());
         udpConnectionInfo.setClientRecipientHost(socks5UdpMessage.getTargetHost());
         udpConnectionInfo.setClientRecipientPort(socks5UdpMessage.getTargetPort());
-        agentUdpChannel.attr(ISocksAgentConstant.SOCKS_UDP_CONNECTION_INFO).set(udpConnectionInfo);
-        udpConnectionInfo.getAgentTcpChannel().attr(ISocksAgentConstant.SOCKS_UDP_CONNECTION_INFO)
+        agentUdpChannel.attr(ISAConstant.SOCKS_UDP_CONNECTION_INFO).set(udpConnectionInfo);
+        udpConnectionInfo.getAgentTcpChannel().attr(ISAConstant.SOCKS_UDP_CONNECTION_INFO)
                 .set(udpConnectionInfo);
-        udpConnectionInfo.getProxyTcpChannel().attr(ISocksAgentConstant.SOCKS_UDP_CONNECTION_INFO)
+        udpConnectionInfo.getProxyTcpChannel().attr(ISAConstant.SOCKS_UDP_CONNECTION_INFO)
                 .set(udpConnectionInfo);
         var data = socks5UdpMessage.getData();
         var agentMessageBody =

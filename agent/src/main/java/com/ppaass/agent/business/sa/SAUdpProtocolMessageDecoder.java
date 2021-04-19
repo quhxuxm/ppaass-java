@@ -1,6 +1,5 @@
-package com.ppaass.agent.business.socks;
+package com.ppaass.agent.business.sa;
 
-import com.ppaass.agent.business.socks.bo.SocksAgentUdpProtocolMessage;
 import com.ppaass.common.log.PpaassLogger;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
@@ -11,7 +10,7 @@ import io.netty.handler.codec.socksx.v5.Socks5AddressType;
 
 import java.util.List;
 
-class SocksAgentUdpProtocolMessageDecoder extends MessageToMessageDecoder<DatagramPacket> {
+class SAUdpProtocolMessageDecoder extends MessageToMessageDecoder<DatagramPacket> {
     @Override
     protected void decode(ChannelHandlerContext agentUdpChannelContext, DatagramPacket udpMessage, List<Object> out)
             throws Exception {
@@ -23,7 +22,7 @@ class SocksAgentUdpProtocolMessageDecoder extends MessageToMessageDecoder<Datagr
         var targetPort = udpMessageContent.readShort();
         var data = new byte[udpMessageContent.readableBytes()];
         udpMessageContent.readBytes(data);
-        var socks5UdpMessage = new SocksAgentUdpProtocolMessage(
+        var socks5UdpMessage = new SAUdpProtocolMessage(
                 udpMessage.sender(),
                 udpMessage.recipient(),
                 rsv,
@@ -33,7 +32,7 @@ class SocksAgentUdpProtocolMessageDecoder extends MessageToMessageDecoder<Datagr
                 targetPort,
                 data
         );
-        PpaassLogger.INSTANCE.debug(SocksAgentUdpProtocolMessageDecoder.class,
+        PpaassLogger.INSTANCE.debug(SAUdpProtocolMessageDecoder.class,
                 () -> "Decode socks5 udp message, agent channel = {}, proxy channel = {}, udp message:\n{}\n",
                 () -> new Object[]{
                         agentUdpChannelContext.channel().id().asLongText(),

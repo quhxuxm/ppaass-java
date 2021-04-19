@@ -1,4 +1,4 @@
-package com.ppaass.agent.business.socks;
+package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.common.handler.AgentMessageEncoder;
@@ -14,15 +14,15 @@ import io.netty.handler.codec.compression.Lz4FrameEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-class SocksAgentTcpChannelInitializer extends ChannelInitializer<Channel> {
+class SATcpChannelInitializer extends ChannelInitializer<Channel> {
     private final AgentConfiguration agentConfiguration;
-    private final SocksAgentReceiveProxyDataHandler socksAgentReceiveProxyDataHandler;
+    private final SAReceiveProxyDataHandler SAReceiveProxyDataHandler;
 
-    public SocksAgentTcpChannelInitializer(
+    public SATcpChannelInitializer(
             AgentConfiguration agentConfiguration,
-            SocksAgentReceiveProxyDataHandler socksAgentReceiveProxyDataHandler) {
+            SAReceiveProxyDataHandler SAReceiveProxyDataHandler) {
         this.agentConfiguration = agentConfiguration;
-        this.socksAgentReceiveProxyDataHandler = socksAgentReceiveProxyDataHandler;
+        this.SAReceiveProxyDataHandler = SAReceiveProxyDataHandler;
     }
 
     @Override
@@ -35,7 +35,7 @@ class SocksAgentTcpChannelInitializer extends ChannelInitializer<Channel> {
         }
         proxyChannelPipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
         proxyChannelPipeline.addLast(new ProxyMessageDecoder(agentConfiguration.getAgentPrivateKey()));
-        proxyChannelPipeline.addLast(this.socksAgentReceiveProxyDataHandler);
+        proxyChannelPipeline.addLast(this.SAReceiveProxyDataHandler);
         if (agentConfiguration.isProxyTcpCompressEnable()) {
             proxyChannelPipeline.addLast(new Lz4FrameEncoder());
         }

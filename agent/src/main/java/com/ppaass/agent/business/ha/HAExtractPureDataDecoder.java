@@ -1,4 +1,4 @@
-package com.ppaass.agent.business.http;
+package com.ppaass.agent.business.ha;
 
 import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.protocol.vpn.message.ProxyMessage;
@@ -9,17 +9,17 @@ import io.netty.handler.codec.MessageToMessageDecoder;
 
 import java.util.List;
 
-class HttpAgentExtractPureDataDecoder extends MessageToMessageDecoder<ProxyMessage> {
+class HAExtractPureDataDecoder extends MessageToMessageDecoder<ProxyMessage> {
     @Override
     protected void decode(ChannelHandlerContext proxyChannelContext, ProxyMessage proxyMessage, List<Object> out)
             throws Exception {
         var proxyChannel = proxyChannelContext.channel();
-        var connectionInfo = proxyChannel.attr(IHttpAgentConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).get();
+        var connectionInfo = proxyChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).get();
         if (connectionInfo == null) {
             PpaassLogger.INSTANCE.error(
                     () -> "Close proxy channel because of connection info not exist, proxy channel = {}",
                     () -> new Object[]{proxyChannel.id().asLongText()});
-            var channelPool = proxyChannel.attr(IHttpAgentConstant.IProxyChannelConstant.CHANNEL_POOL).get();
+            var channelPool = proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL).get();
             channelPool.returnObject(proxyChannel);
             return;
         }

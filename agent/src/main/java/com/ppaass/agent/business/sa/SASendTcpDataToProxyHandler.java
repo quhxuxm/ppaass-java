@@ -1,4 +1,4 @@
-package com.ppaass.agent.business.socks;
+package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.common.log.PpaassLogger;
@@ -16,10 +16,10 @@ import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
 @Service
-class SocksAgentSendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
+class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
     private final AgentConfiguration agentConfiguration;
 
-    SocksAgentSendTcpDataToProxyHandler(AgentConfiguration agentConfiguration) {
+    SASendTcpDataToProxyHandler(AgentConfiguration agentConfiguration) {
         this.agentConfiguration = agentConfiguration;
     }
 
@@ -27,14 +27,14 @@ class SocksAgentSendTcpDataToProxyHandler extends SimpleChannelInboundHandler<By
     public void channelInactive(ChannelHandlerContext agentChannelContext) throws Exception {
         var agentChannel = agentChannelContext.channel();
         var tcpConnectionInfo =
-                agentChannel.attr(ISocksAgentConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).get();
-        agentChannel.attr(ISocksAgentConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).set(null);
+                agentChannel.attr(ISAConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).get();
+        agentChannel.attr(ISAConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).set(null);
         if (tcpConnectionInfo == null) {
             return;
         }
         var proxyTcpChannel = tcpConnectionInfo.getProxyTcpChannel();
         var socksProxyTcpChannelPool =
-                proxyTcpChannel.attr(ISocksAgentConstant.IProxyChannelConstant.CHANNEL_POOL).get();
+                proxyTcpChannel.attr(ISAConstant.IProxyChannelConstant.CHANNEL_POOL).get();
         socksProxyTcpChannelPool.returnObject(proxyTcpChannel);
     }
 
@@ -42,7 +42,7 @@ class SocksAgentSendTcpDataToProxyHandler extends SimpleChannelInboundHandler<By
     protected void channelRead0(ChannelHandlerContext agentChannelContext, ByteBuf originalAgentData) throws Exception {
         var agentChannel = agentChannelContext.channel();
         var tcpConnectionInfo =
-                agentChannel.attr(ISocksAgentConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).get();
+                agentChannel.attr(ISAConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).get();
         if (tcpConnectionInfo == null) {
             PpaassLogger.INSTANCE.error(
                     () -> "Fail write agent original message to proxy because of no connection information attached, agent channel = {}",

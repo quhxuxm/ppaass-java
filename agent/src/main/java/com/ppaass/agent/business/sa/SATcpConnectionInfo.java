@@ -1,9 +1,9 @@
-package com.ppaass.agent.business.socks.bo;
+package com.ppaass.agent.business.sa;
 
 import io.netty.channel.Channel;
 import io.netty.handler.codec.socksx.v5.Socks5AddressType;
 
-public class SocksAgentTcpConnectionInfo {
+class SATcpConnectionInfo {
     private final String targetHost;
     private final int targetPort;
     private final Socks5AddressType targetAddressType;
@@ -12,10 +12,10 @@ public class SocksAgentTcpConnectionInfo {
     private final Channel proxyTcpChannel;
     private String targetChannelId;
 
-    public SocksAgentTcpConnectionInfo(String targetHost, int targetPort,
-                                       Socks5AddressType targetAddressType, String userToken,
-                                       Channel agentTcpChannel,
-                                       Channel proxyTcpChannel) {
+    public SATcpConnectionInfo(String targetHost, int targetPort,
+                               Socks5AddressType targetAddressType, String userToken,
+                               Channel agentTcpChannel,
+                               Channel proxyTcpChannel) {
         this.targetHost = targetHost;
         this.targetPort = targetPort;
         this.targetAddressType = targetAddressType;

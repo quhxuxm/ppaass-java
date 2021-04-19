@@ -1,4 +1,4 @@
-package com.ppaass.agent.business.socks;
+package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.common.log.PpaassLogger;
@@ -12,13 +12,13 @@ import org.apache.commons.pool2.impl.GenericObjectPool;
 
 import java.util.concurrent.TimeUnit;
 
-class SocksAgentPooledProxyChannelFactory implements PooledObjectFactory<Channel> {
+class SAPooledProxyChannelFactory implements PooledObjectFactory<Channel> {
     private final Bootstrap socksProxyTcpChannelBootstrap;
     private final AgentConfiguration agentConfiguration;
     private GenericObjectPool<Channel> pool;
 
-    public SocksAgentPooledProxyChannelFactory(Bootstrap socksProxyTcpChannelBootstrap,
-                                               AgentConfiguration agentConfiguration) {
+    public SAPooledProxyChannelFactory(Bootstrap socksProxyTcpChannelBootstrap,
+                                       AgentConfiguration agentConfiguration) {
         this.socksProxyTcpChannelBootstrap = socksProxyTcpChannelBootstrap;
         this.agentConfiguration = agentConfiguration;
     }
@@ -36,7 +36,7 @@ class SocksAgentPooledProxyChannelFactory implements PooledObjectFactory<Channel
         proxyChannelConnectFuture
                 .get(this.agentConfiguration.getProxyChannelPoolAcquireTimeoutMillis(), TimeUnit.MILLISECONDS);
         var channel = proxyChannelConnectFuture.channel();
-        channel.attr(ISocksAgentConstant.IProxyChannelConstant.CHANNEL_POOL).set(this.pool);
+        channel.attr(ISAConstant.IProxyChannelConstant.CHANNEL_POOL).set(this.pool);
         PpaassLogger.INSTANCE.debug(() -> "Success create proxy channel object, proxy channel = {}.",
                 () -> new Object[]{channel.id().asLongText()});
         return new DefaultPooledObject<>(channel);
@@ -77,11 +77,11 @@ class SocksAgentPooledProxyChannelFactory implements PooledObjectFactory<Channel
     public void passivateObject(PooledObject<Channel> pooledObject) throws Exception {
         var proxyChannel = pooledObject.getObject();
         proxyChannel.flush();
-        var agentChannel = proxyChannel.attr(ISocksAgentConstant.IProxyChannelConstant.AGENT_CHANNEL).get();
+        var agentChannel = proxyChannel.attr(ISAConstant.IProxyChannelConstant.AGENT_CHANNEL).get();
         if (agentChannel != null) {
-            agentChannel.attr(ISocksAgentConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).set(null);
+            agentChannel.attr(ISAConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).set(null);
         }
-        proxyChannel.attr(ISocksAgentConstant.IProxyChannelConstant.AGENT_CHANNEL).set(null);
+        proxyChannel.attr(ISAConstant.IProxyChannelConstant.AGENT_CHANNEL).set(null);
         PpaassLogger.INSTANCE.debug(() -> "Passivate proxy channel object, proxy channel = {}.",
                 () -> new Object[]{proxyChannel.id().asLongText()});
     }

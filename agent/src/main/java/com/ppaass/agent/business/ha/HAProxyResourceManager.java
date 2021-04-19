@@ -1,4 +1,4 @@
-package com.ppaass.agent.business.http;
+package com.ppaass.agent.business.ha;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.IAgentResourceManager;
@@ -29,24 +29,24 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Service
-class HttpAgentProxyResourceManager implements IAgentResourceManager {
+class HAProxyResourceManager implements IAgentResourceManager {
     private final AgentConfiguration agentConfiguration;
     private Bootstrap proxyTcpChannelBootstrapForHttp;
     private Bootstrap proxyTcpChannelBootstrapForHttps;
     private GenericObjectPool<Channel> proxyTcpChannelPoolForHttp;
     private GenericObjectPool<Channel> proxyTcpChannelPoolForHttps;
     private final ReentrantReadWriteLock reentrantReadWriteLock;
-    private final HttpAgentSendPureDataToAgentHandler httpAgentSendPureDataToAgentHandler;
-    private final HttpAgentProxyMessageBodyTypeHandler httpAgentProxyMessageBodyTypeHandler;
+    private final HASendPureDataToAgentHandler HASendPureDataToAgentHandler;
+    private final HAProxyMessageBodyTypeHandler HAProxyMessageBodyTypeHandler;
 
-    public HttpAgentProxyResourceManager(
+    public HAProxyResourceManager(
             AgentConfiguration agentConfiguration,
-            HttpAgentSendPureDataToAgentHandler httpAgentSendPureDataToAgentHandler,
-            HttpAgentProxyMessageBodyTypeHandler httpAgentProxyMessageBodyTypeHandler) {
+            HASendPureDataToAgentHandler HASendPureDataToAgentHandler,
+            HAProxyMessageBodyTypeHandler HAProxyMessageBodyTypeHandler) {
 
         this.agentConfiguration = agentConfiguration;
-        this.httpAgentSendPureDataToAgentHandler = httpAgentSendPureDataToAgentHandler;
-        this.httpAgentProxyMessageBodyTypeHandler = httpAgentProxyMessageBodyTypeHandler;
+        this.HASendPureDataToAgentHandler = HASendPureDataToAgentHandler;
+        this.HAProxyMessageBodyTypeHandler = HAProxyMessageBodyTypeHandler;
         this.reentrantReadWriteLock = new ReentrantReadWriteLock();
     }
 
@@ -136,11 +136,11 @@ class HttpAgentProxyResourceManager implements IAgentResourceManager {
                         4));
                 proxyChannelPipeline.addLast(new ProxyMessageDecoder(
                         agentConfiguration.getAgentPrivateKey()));
-                proxyChannelPipeline.addLast(httpAgentProxyMessageBodyTypeHandler);
-                proxyChannelPipeline.addLast(new HttpAgentExtractPureDataDecoder());
+                proxyChannelPipeline.addLast(HAProxyMessageBodyTypeHandler);
+                proxyChannelPipeline.addLast(new HAExtractPureDataDecoder());
                 proxyChannelPipeline.addLast(new HttpResponseDecoder());
                 proxyChannelPipeline.addLast(new HttpObjectAggregator(Integer.MAX_VALUE, true));
-                proxyChannelPipeline.addLast(httpAgentSendPureDataToAgentHandler);
+                proxyChannelPipeline.addLast(HASendPureDataToAgentHandler);
                 if (agentConfiguration.isProxyTcpCompressEnable()) {
                     proxyChannelPipeline.addLast(new Lz4FrameEncoder());
                 }
@@ -183,9 +183,9 @@ class HttpAgentProxyResourceManager implements IAgentResourceManager {
                         4));
                 proxyChannelPipeline.addLast(new ProxyMessageDecoder(
                         agentConfiguration.getAgentPrivateKey()));
-                proxyChannelPipeline.addLast(httpAgentProxyMessageBodyTypeHandler);
-                proxyChannelPipeline.addLast(new HttpAgentExtractPureDataDecoder());
-                proxyChannelPipeline.addLast(httpAgentSendPureDataToAgentHandler);
+                proxyChannelPipeline.addLast(HAProxyMessageBodyTypeHandler);
+                proxyChannelPipeline.addLast(new HAExtractPureDataDecoder());
+                proxyChannelPipeline.addLast(HASendPureDataToAgentHandler);
                 if (agentConfiguration.isProxyTcpCompressEnable()) {
                     proxyChannelPipeline.addLast(new Lz4FrameEncoder());
                 }
@@ -200,7 +200,7 @@ class HttpAgentProxyResourceManager implements IAgentResourceManager {
 
     private GenericObjectPool<Channel> createHttpOrHttpsProxyTcpChannelPool(Bootstrap bootstrap) {
         var socksAgentPooledProxyChannelFactory =
-                new HttpOrHttpsAgentPooledProxyChannelFactory(bootstrap, agentConfiguration);
+                new HAPooledProxyChannelFactory(bootstrap, agentConfiguration);
         var config = new GenericObjectPoolConfig<Channel>();
         config.setMaxIdle(agentConfiguration.getProxyChannelPoolMaxIdleSize());
         config.setMaxTotal(agentConfiguration.getProxyChannelPoolMaxTotalSize());

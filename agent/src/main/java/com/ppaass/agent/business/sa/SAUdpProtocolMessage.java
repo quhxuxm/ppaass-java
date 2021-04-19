@@ -1,10 +1,10 @@
-package com.ppaass.agent.business.socks.bo;
+package com.ppaass.agent.business.sa;
 
 import io.netty.handler.codec.socksx.v5.Socks5AddressType;
 
 import java.net.InetSocketAddress;
 
-public class SocksAgentUdpProtocolMessage {
+class SAUdpProtocolMessage {
     private final InetSocketAddress udpMessageSender;
     private final InetSocketAddress udpMessageRecipient;
     private final int rsv;
@@ -14,10 +14,10 @@ public class SocksAgentUdpProtocolMessage {
     private final int targetPort;
     private final byte[] data;
 
-    public SocksAgentUdpProtocolMessage(InetSocketAddress udpMessageSender, InetSocketAddress udpMessageRecipient,
-                                        int rsv,
-                                        byte frag, Socks5AddressType addressType, String targetHost, int targetPort,
-                                        byte[] data) {
+    public SAUdpProtocolMessage(InetSocketAddress udpMessageSender, InetSocketAddress udpMessageRecipient,
+                                int rsv,
+                                byte frag, Socks5AddressType addressType, String targetHost, int targetPort,
+                                byte[] data) {
         this.udpMessageSender = udpMessageSender;
         this.udpMessageRecipient = udpMessageRecipient;
         this.rsv = rsv;

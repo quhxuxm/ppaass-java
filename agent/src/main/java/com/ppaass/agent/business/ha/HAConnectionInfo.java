@@ -1,8 +1,8 @@
-package com.ppaass.agent.business.http.bo;
+package com.ppaass.agent.business.ha;
 
 import io.netty.channel.Channel;
 
-public class HttpConnectionInfo {
+class HAConnectionInfo {
     private final String targetHost;
     private final int targetPort;
     private final boolean isHttps;
@@ -13,7 +13,7 @@ public class HttpConnectionInfo {
     private Object httpMessageCarriedOnConnectTime;
     private final String uri;
 
-    public HttpConnectionInfo(String targetHost, int targetPort, boolean isHttps, String uri) {
+    public HAConnectionInfo(String targetHost, int targetPort, boolean isHttps, String uri) {
         this.targetHost = targetHost;
         this.targetPort = targetPort;
         this.isHttps = isHttps;
