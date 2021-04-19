@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Service
-public class SocksAgentProxyResourceManager implements IAgentResourceManager {
+class SocksAgentProxyResourceManager implements IAgentResourceManager {
     private final SocksAgentUdpChannelInitializer socksAgentUdpChannelInitializer;
     private final SocksAgentTcpChannelInitializer socksAgentTcpChannelInitializer;
     private final AgentConfiguration agentConfiguration;
@@ -127,17 +127,17 @@ public class SocksAgentProxyResourceManager implements IAgentResourceManager {
         config.setMinIdle(agentConfiguration.getProxyChannelPoolMinIdleSize());
         config.setBlockWhenExhausted(true);
         config.setEvictionPolicy(new DefaultEvictionPolicy<>());
-        config.setTestOnBorrow(false);
+        config.setTestOnBorrow(true);
         config.setTestOnReturn(false);
         config.setTestWhileIdle(true);
         config.setTimeBetweenEvictionRunsMillis(agentConfiguration.getProxyChannelPoolTimeBetweenEvictionRunsMillis());
         config.setJmxEnabled(false);
         var result = new GenericObjectPool<>(socksAgentPooledProxyChannelFactory, config);
-        var abandonedConfig = new AbandonedConfig();
-        abandonedConfig.setLogAbandoned(true);
-        abandonedConfig.setRemoveAbandonedOnMaintenance(true);
-        abandonedConfig.setRequireFullStackTrace(true);
-        result.setAbandonedConfig(abandonedConfig);
+//        var abandonedConfig = new AbandonedConfig();
+//        abandonedConfig.setLogAbandoned(true);
+//        abandonedConfig.setRemoveAbandonedOnMaintenance(true);
+//        abandonedConfig.setRequireFullStackTrace(true);
+//        result.setAbandonedConfig(abandonedConfig);
         socksAgentPooledProxyChannelFactory.attachPool(result);
         try {
             result.preparePool();

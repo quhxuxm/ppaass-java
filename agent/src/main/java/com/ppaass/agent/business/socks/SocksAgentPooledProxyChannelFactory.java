@@ -1,6 +1,7 @@
 package com.ppaass.agent.business.socks;
 
 import com.ppaass.agent.AgentConfiguration;
+import com.ppaass.agent.IAgentConst;
 import com.ppaass.common.log.PpaassLogger;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
@@ -32,11 +33,11 @@ class SocksAgentPooledProxyChannelFactory implements PooledObjectFactory<Channel
         PpaassLogger.INSTANCE.debug(() -> "Begin to create proxy channel object.");
         var proxyChannelConnectFuture = this.socksProxyTcpChannelBootstrap
                 .connect(this.agentConfiguration.getProxyHost(), this.agentConfiguration.getProxyPort())
-                .sync();
+                .syncUninterruptibly();
         proxyChannelConnectFuture
                 .get(this.agentConfiguration.getProxyChannelPoolAcquireTimeoutMillis(), TimeUnit.MILLISECONDS);
         var channel = proxyChannelConnectFuture.channel();
-        channel.attr(ISocksAgentConst.IProxyChannelAttr.CHANNEL_POOL).setIfAbsent(this.pool);
+        channel.attr(IAgentConst.ISocksAgentConst.IProxyChannelAttr.CHANNEL_POOL).set(this.pool);
         PpaassLogger.INSTANCE.debug(() -> "Success create proxy channel object, proxy channel = {}.",
                 () -> new Object[]{channel.id().asLongText()});
         return new DefaultPooledObject<>(channel);
@@ -48,12 +49,8 @@ class SocksAgentPooledProxyChannelFactory implements PooledObjectFactory<Channel
         PpaassLogger.INSTANCE.trace(() -> "Begin to destroy proxy channel object, proxy channel = {}.",
                 () -> new Object[]{proxyChannel.id().asLongText()});
         proxyChannel.flush();
-        try {
-            proxyChannel.close().sync();
-        } catch (Exception e) {
-            PpaassLogger.INSTANCE.debug(() -> "Fail to close proxy channel on destroy proxy channel = {}.",
-                    () -> new Object[]{proxyChannel.id().asLongText(), e});
-        }
+        proxyChannel.close().syncUninterruptibly();
+        proxyChannel.deregister().syncUninterruptibly();
         PpaassLogger.INSTANCE.debug(() -> "Success destroy proxy channel object, proxy channel = {}.",
                 () -> new Object[]{proxyChannel.id().asLongText()});
     }
@@ -81,7 +78,11 @@ class SocksAgentPooledProxyChannelFactory implements PooledObjectFactory<Channel
     public void passivateObject(PooledObject<Channel> pooledObject) throws Exception {
         var proxyChannel = pooledObject.getObject();
         proxyChannel.flush();
-        proxyChannel.attr(ISocksAgentConst.IProxyChannelAttr.AGENT_CHANNEL).set(null);
+        var agentChannel = proxyChannel.attr(IAgentConst.ISocksAgentConst.IProxyChannelAttr.AGENT_CHANNEL).get();
+        if (agentChannel != null) {
+            agentChannel.attr(IAgentConst.ISocksAgentConst.IAgentChannelAttr.TCP_CONNECTION_INFO).set(null);
+        }
+        proxyChannel.attr(IAgentConst.ISocksAgentConst.IProxyChannelAttr.AGENT_CHANNEL).set(null);
         PpaassLogger.INSTANCE.debug(() -> "Passivate proxy channel object, proxy channel = {}.",
                 () -> new Object[]{proxyChannel.id().asLongText()});
     }

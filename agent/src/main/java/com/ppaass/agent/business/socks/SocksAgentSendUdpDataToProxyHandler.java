@@ -1,6 +1,7 @@
 package com.ppaass.agent.business.socks;
 
 import com.ppaass.agent.AgentConfiguration;
+import com.ppaass.agent.IAgentConst;
 import com.ppaass.agent.business.socks.bo.SocksAgentUdpProtocolMessage;
 import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.protocol.common.util.UUIDUtil;
@@ -29,14 +30,16 @@ class SocksAgentSendUdpDataToProxyHandler extends SimpleChannelInboundHandler<So
             throws Exception {
         var agentUdpChannel = agentUdpChannelContext.channel();
         var udpConnectionInfo =
-                agentUdpChannel.attr(ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO).get();
+                agentUdpChannel.attr(IAgentConst.ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO).get();
         udpConnectionInfo.setClientSenderHost(socks5UdpMessage.getUdpMessageSender().getAddress().getHostAddress());
         udpConnectionInfo.setClientSenderPort(socks5UdpMessage.getUdpMessageSender().getPort());
         udpConnectionInfo.setClientRecipientHost(socks5UdpMessage.getTargetHost());
         udpConnectionInfo.setClientRecipientPort(socks5UdpMessage.getTargetPort());
-        agentUdpChannel.attr(ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO).set(udpConnectionInfo);
-        udpConnectionInfo.getAgentTcpChannel().attr(ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO).set(udpConnectionInfo);
-        udpConnectionInfo.getProxyTcpChannel().attr(ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO).set(udpConnectionInfo);
+        agentUdpChannel.attr(IAgentConst.ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO).set(udpConnectionInfo);
+        udpConnectionInfo.getAgentTcpChannel().attr(IAgentConst.ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO)
+                .set(udpConnectionInfo);
+        udpConnectionInfo.getProxyTcpChannel().attr(IAgentConst.ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO)
+                .set(udpConnectionInfo);
         var data = socks5UdpMessage.getData();
         var agentMessageBody =
                 new AgentMessageBody(
