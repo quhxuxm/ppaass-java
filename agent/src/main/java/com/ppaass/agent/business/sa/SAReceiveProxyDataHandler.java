@@ -62,7 +62,7 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
             case TCP_CONNECT_FAIL -> {
                 handleTcpConnectFail(proxyMessage, proxyChannel, agentChannel);
             }
-            case TCP_DATA_FAIL -> {
+            case TCP_DATA_FAIL, UDP_DATA_FAIL -> {
                 handleTcpDataFail(proxyMessage, proxyChannel, agentChannel);
             }
             case TCP_CONNECTION_CLOSE -> {
@@ -70,8 +70,6 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
             }
             case TCP_DATA_SUCCESS -> {
                 handleTcpDataSuccess(proxyMessage, proxyChannel, agentChannel);
-            }
-            case UDP_DATA_FAIL -> {
             }
             case UDP_DATA_SUCCESS -> {
                 handleUdpDataSuccess(proxyMessage, proxyChannel);
