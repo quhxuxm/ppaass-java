@@ -11,7 +11,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import io.netty.util.ReferenceCountUtil;
-import org.apache.commons.pool2.DestroyMode;
 import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
@@ -24,6 +23,20 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                           HAProxyResourceManager HAProxyResourceManager) {
         this.agentConfiguration = agentConfiguration;
         this.HAProxyResourceManager = HAProxyResourceManager;
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext agentChannelContext) throws Exception {
+        var agentChannel = agentChannelContext.channel();
+        var connectionInfo = agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
+        if (connectionInfo == null) {
+            return;
+        }
+        var proxyChannel = connectionInfo.getProxyChannel();
+        var channelPool =
+                proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
+                        .get();
+        channelPool.returnObject(proxyChannel);
     }
 
     @Override
@@ -84,13 +97,12 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                                                     httpsProxyTcpChannel.id().asLongText(),
                                                     proxyChannelWriteFuture.cause()
                                             });
-                                    httpsProxyTcpChannel.close().addListener(future -> {
-                                        var failResponse =
-                                                new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
-                                                        HttpResponseStatus.INTERNAL_SERVER_ERROR);
-                                        agentChannel.writeAndFlush(failResponse)
-                                                .addListener(ChannelFutureListener.CLOSE);
-                                    });
+                                    httpsProxyTcpChannel.close();
+                                    var failResponse =
+                                            new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                                                    HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                                    agentChannel.writeAndFlush(failResponse)
+                                            .addListener(ChannelFutureListener.CLOSE);
                                 });
                 return;
             }
@@ -128,9 +140,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                                             proxyChannel.id().asLongText(),
                                             proxyChannelWriteFuture.cause()
                                     });
-                            var channelPool =
-                                    proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL).get();
-                            channelPool.invalidateObject(proxyChannel, DestroyMode.ABANDONED);
+                            proxyChannel.close();
                             var failResponse =
                                     new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
                                             HttpResponseStatus.INTERNAL_SERVER_ERROR);
@@ -185,10 +195,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                                                 agentChannel.id().asLongText(), httpProxyTcpChannel.id().asLongText(),
                                                 proxyChannelWriteFuture.cause()
                                         });
-                                var channelPool =
-                                        httpProxyTcpChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
-                                                .get();
-                                channelPool.invalidateObject(httpProxyTcpChannel, DestroyMode.ABANDONED);
+                                httpProxyTcpChannel.close();
                                 var failResponse =
                                         new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
                                                 HttpResponseStatus.INTERNAL_SERVER_ERROR);
@@ -238,9 +245,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                                     agentChannel.id().asLongText(), httpsProxyTcpChannel.id().asLongText(),
                                     proxyChannelWriteFuture.cause()
                             });
-                    var channelPool =
-                            httpsProxyTcpChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL).get();
-                    channelPool.invalidateObject(httpsProxyTcpChannel, DestroyMode.ABANDONED);
+                    proxyChannelWriteFuture.channel().close();
                     var failResponse =
                             new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
                                     HttpResponseStatus.INTERNAL_SERVER_ERROR);

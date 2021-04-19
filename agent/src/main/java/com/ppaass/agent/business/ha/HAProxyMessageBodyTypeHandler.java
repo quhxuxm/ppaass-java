@@ -22,6 +22,15 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
     }
 
     @Override
+    public void channelInactive(ChannelHandlerContext proxyChannelContext) throws Exception {
+        var proxyChannel = proxyChannelContext.channel();
+        var channelPool =
+                proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
+                        .get();
+        channelPool.invalidateObject(proxyChannel, DestroyMode.ABANDONED);
+    }
+
+    @Override
     protected void channelRead0(ChannelHandlerContext proxyChannelContext, ProxyMessage proxyMessage) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
         var connectionInfo =
@@ -32,10 +41,6 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
                     () -> new Object[]{
                             proxyChannel.id().asLongText()
                     });
-            var channelPool =
-                    proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
-                            .get();
-            channelPool.returnObject(proxyChannel);
             return;
         }
         var agentChannel = connectionInfo.getAgentChannel();
@@ -46,10 +51,6 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
                         () -> new Object[]{
                                 connectionInfo.getUri(), agentChannel.id().asLongText(), proxyChannel.id().asLongText()
                         });
-                var channelPool =
-                        proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
-                                .get();
-                channelPool.returnObject(proxyChannel);
                 var failResponse =
                         new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
                 agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
@@ -82,10 +83,6 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
                                                 proxyChannel.id().asLongText(),
                                                 agentWriteChannelFuture.cause()
                                         });
-                                var channelPool =
-                                        proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
-                                                .get();
-                                channelPool.returnObject(proxyChannel);
                                 var failResponse =
                                         new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
                                                 HttpResponseStatus.INTERNAL_SERVER_ERROR);
@@ -116,10 +113,7 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
                                             proxyChannel.id().asLongText(),
                                             proxyWriteChannelFuture.cause()
                                     });
-                            var channelPool =
-                                    proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
-                                            .get();
-                            channelPool.invalidateObject(proxyChannel, DestroyMode.ABANDONED);
+                            proxyChannel.close();
                             var failResponse =
                                     new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
                                             HttpResponseStatus.INTERNAL_SERVER_ERROR);
@@ -131,10 +125,6 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
                 proxyChannelContext.fireChannelRead(proxyMessage);
             }
             case TCP_CONNECTION_CLOSE -> {
-                var channelPool =
-                        proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
-                                .get();
-                channelPool.returnObject(proxyChannel);
                 agentChannel.close();
             }
             case TCP_DATA_FAIL -> {
@@ -144,10 +134,6 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
                                 connectionInfo.getUri(), agentChannel.id().asLongText(),
                                 proxyChannel.id().asLongText()
                         });
-                var channelPool =
-                        proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
-                                .get();
-                channelPool.returnObject(proxyChannel);
                 var failResponse =
                         new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
                                 HttpResponseStatus.INTERNAL_SERVER_ERROR);
@@ -159,10 +145,7 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
                         () -> new Object[]{
                                 agentChannel.id().asLongText(), proxyChannel.id().asLongText()
                         });
-                var channelPool =
-                        proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
-                                .get();
-                channelPool.invalidateObject(proxyChannel, DestroyMode.ABANDONED);
+                proxyChannel.close();
                 var failResponse =
                         new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
                 agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);

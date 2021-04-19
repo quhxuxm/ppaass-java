@@ -19,8 +19,6 @@ class HAExtractPureDataDecoder extends MessageToMessageDecoder<ProxyMessage> {
             PpaassLogger.INSTANCE.error(
                     () -> "Close proxy channel because of connection info not exist, proxy channel = {}",
                     () -> new Object[]{proxyChannel.id().asLongText()});
-            var channelPool = proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL).get();
-            channelPool.returnObject(proxyChannel);
             return;
         }
         var agentChannel = connectionInfo.getAgentChannel();
