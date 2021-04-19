@@ -9,7 +9,6 @@ class HAConnectionInfo {
     private String userToken;
     private Channel proxyChannel;
     private Channel agentChannel;
-    private boolean isKeepAlive;
     private Object httpMessageCarriedOnConnectTime;
     private final String uri;
 
@@ -17,7 +16,6 @@ class HAConnectionInfo {
         this.targetHost = targetHost;
         this.targetPort = targetPort;
         this.isHttps = isHttps;
-        this.isKeepAlive = true;
         this.uri = uri;
     }
 
@@ -55,14 +53,6 @@ class HAConnectionInfo {
 
     public void setAgentChannel(Channel agentChannel) {
         this.agentChannel = agentChannel;
-    }
-
-    public boolean isKeepAlive() {
-        return isKeepAlive;
-    }
-
-    public void setKeepAlive(boolean keepAlive) {
-        isKeepAlive = keepAlive;
     }
 
     public Object getHttpMessageCarriedOnConnectTime() {

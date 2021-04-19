@@ -63,8 +63,6 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
         if (httpProxyInput instanceof FullHttpRequest) {
             var fullHttpRequest = (FullHttpRequest) httpProxyInput;
             var connectionHeader = fullHttpRequest.headers().get(HttpHeaderNames.CONNECTION);
-            var connectionKeepAlive =
-                    HttpHeaderValues.KEEP_ALIVE.contentEqualsIgnoreCase(connectionHeader);
             if (HttpMethod.CONNECT == fullHttpRequest.method()) {
                 //A HTTPS request to setup the connection
                 var connectionInfo =
@@ -89,7 +87,6 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                                         fullHttpRequest.uri(),
                                         agentChannel.id().asLongText()
                                 });
-                connectionInfo.setKeepAlive(connectionKeepAlive);
                 var httpsProxyTcpChannel =
                         this.HAProxyResourceManager.getProxyTcpChannelPoolForHttps().borrowObject();
                 connectionInfo.setAgentChannel(agentChannel);
@@ -181,7 +178,6 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                 agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
                 return;
             }
-            connectionInfo.setKeepAlive(connectionKeepAlive);
             PpaassLogger.INSTANCE.trace(HAEntryHandler.class,
                     () -> "A http FIRST request send to uri: [{}], agent channel = {}, http data:\n{}\n",
                     () -> new Object[]{
