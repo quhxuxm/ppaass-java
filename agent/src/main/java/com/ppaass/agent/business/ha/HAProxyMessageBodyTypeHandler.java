@@ -22,6 +22,14 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
     }
 
     @Override
+    public void exceptionCaught(ChannelHandlerContext proxyChannelContext, Throwable cause) throws Exception {
+        var proxyChannel = proxyChannelContext.channel();
+        PpaassLogger.INSTANCE.error(() -> "Proxy channel exception happen, proxy channel = {}",
+                () -> new Object[]{proxyChannel.id().asLongText(), cause});
+        proxyChannel.close();
+    }
+
+    @Override
     public void channelInactive(ChannelHandlerContext proxyChannelContext) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
         var connectionInfo = proxyChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).get();

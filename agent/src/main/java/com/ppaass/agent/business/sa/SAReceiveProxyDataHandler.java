@@ -31,10 +31,6 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
         var proxyChannel = proxyChannelContext.channel();
         PpaassLogger.INSTANCE.error(() -> "Proxy channel exception happen, proxy channel = {}",
                 () -> new Object[]{proxyChannel.id().asLongText(), cause});
-        var agentChannel = proxyChannel.attr(ISAConstant.IProxyChannelConstant.AGENT_CHANNEL).get();
-        if (agentChannel != null) {
-            agentChannel.close();
-        }
         proxyChannel.close();
     }
 

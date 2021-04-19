@@ -43,10 +43,18 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
             return;
         }
         var proxyChannel = connectionInfo.getProxyChannel();
-        var channelPool =
-                proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
-                        .get();
-        channelPool.returnObject(proxyChannel);
+        try {
+            var channelPool =
+                    proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
+                            .get();
+            channelPool.returnObject(proxyChannel);
+        } catch (Exception e) {
+            PpaassLogger.INSTANCE
+                    .error(() -> "Fail to return proxy channel to pool because of exception, proxy channel = {}",
+                            () -> new Object[]{
+                                    proxyChannel.id().asLongText(), e
+                            });
+        }
     }
 
     @Override
