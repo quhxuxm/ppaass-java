@@ -26,6 +26,7 @@ import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Service
@@ -43,7 +44,6 @@ class HAProxyResourceManager implements IAgentResourceManager {
             AgentConfiguration agentConfiguration,
             HASendPureDataToAgentHandler haSendPureDataToAgentHandler,
             HAProxyMessageBodyTypeHandler haProxyMessageBodyTypeHandler) {
-
         this.agentConfiguration = agentConfiguration;
         this.haSendPureDataToAgentHandler = haSendPureDataToAgentHandler;
         this.haProxyMessageBodyTypeHandler = haProxyMessageBodyTypeHandler;
@@ -73,8 +73,17 @@ class HAProxyResourceManager implements IAgentResourceManager {
             this.reentrantReadWriteLock.writeLock().lock();
             this.proxyTcpChannelBootstrapForHttp = this.createProxyTcpChannelBootstrapForHttp();
             this.proxyTcpChannelBootstrapForHttps = this.createProxyTcpChannelBootstrapForHttps();
-            this.proxyTcpChannelPoolForHttp = this.createHttpOrHttpsProxyTcpChannelPool(this.proxyTcpChannelBootstrapForHttp);
-            this.proxyTcpChannelPoolForHttps = this.createHttpOrHttpsProxyTcpChannelPool(this.proxyTcpChannelBootstrapForHttps);
+            Executors.newSingleThreadExecutor().submit(() -> {
+                try {
+                    this.reentrantReadWriteLock.writeLock().lock();
+                    this.proxyTcpChannelPoolForHttp =
+                            this.createHttpOrHttpsProxyTcpChannelPool(this.proxyTcpChannelBootstrapForHttp);
+                    this.proxyTcpChannelPoolForHttps =
+                            this.createHttpOrHttpsProxyTcpChannelPool(this.proxyTcpChannelBootstrapForHttps);
+                } finally {
+                    this.reentrantReadWriteLock.writeLock().unlock();
+                }
+            });
         } finally {
             this.reentrantReadWriteLock.writeLock().unlock();
         }
@@ -107,7 +116,7 @@ class HAProxyResourceManager implements IAgentResourceManager {
     }
 
     private Bootstrap createProxyTcpChannelBootstrapForHttp() {
-        var proxyTcpLoopGroup=new NioEventLoopGroup(agentConfiguration.getProxyTcpThreadNumber());
+        var proxyTcpLoopGroup = new NioEventLoopGroup(agentConfiguration.getProxyTcpThreadNumber());
         Bootstrap result = new Bootstrap();
         result.group(proxyTcpLoopGroup);
         result.channel(NioSocketChannel.class);
@@ -154,7 +163,7 @@ class HAProxyResourceManager implements IAgentResourceManager {
     }
 
     private Bootstrap createProxyTcpChannelBootstrapForHttps() {
-        var proxyTcpLoopGroup=new NioEventLoopGroup(agentConfiguration.getProxyTcpThreadNumber());
+        var proxyTcpLoopGroup = new NioEventLoopGroup(agentConfiguration.getProxyTcpThreadNumber());
         Bootstrap result = new Bootstrap();
         result.group(proxyTcpLoopGroup);
         result.channel(NioSocketChannel.class);

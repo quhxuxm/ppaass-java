@@ -16,6 +16,7 @@ import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Service
@@ -61,7 +62,14 @@ class SAProxyResourceManager implements IAgentResourceManager {
             this.reentrantReadWriteLock.writeLock().lock();
             this.proxyTcpChannelBootstrap = this.createProxyTcpChannelBootstrap();
             this.proxyUdpChannelBootstrap = this.createProxyUdpChannelBootstrap();
-            this.proxyTcpChannelPool = this.createSocksProxyTcpChannelPool(this.proxyTcpChannelBootstrap);
+            Executors.newSingleThreadExecutor().submit(() -> {
+                try {
+                    this.reentrantReadWriteLock.writeLock().lock();
+                    this.proxyTcpChannelPool = this.createSocksProxyTcpChannelPool(this.proxyTcpChannelBootstrap);
+                } finally {
+                    this.reentrantReadWriteLock.writeLock().unlock();
+                }
+            });
         } finally {
             this.reentrantReadWriteLock.writeLock().unlock();
         }
