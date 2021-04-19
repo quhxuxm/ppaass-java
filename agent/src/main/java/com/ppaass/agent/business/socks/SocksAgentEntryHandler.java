@@ -1,7 +1,6 @@
 package com.ppaass.agent.business.socks;
 
 import com.ppaass.agent.AgentConfiguration;
-import com.ppaass.agent.IAgentConst;
 import com.ppaass.agent.business.socks.bo.SocksAgentTcpConnectionInfo;
 import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.protocol.common.util.UUIDUtil;
@@ -132,7 +131,7 @@ public class SocksAgentEntryHandler extends SimpleChannelInboundHandler<SocksMes
                 agentConfiguration.getUserToken(),
                 agentChannel,
                 proxyChannel);
-        agentChannel.attr(IAgentConst.ISocksAgentConst.IAgentChannelAttr.TCP_CONNECTION_INFO)
+        agentChannel.attr(ISocksAgentConstant.IAgentChannelConstant.TCP_CONNECTION_INFO)
                 .set(tcpConnectionInfo);
         var agentMessageBody = new AgentMessageBody(
                 UUIDUtil.INSTANCE.generateUuid(),
@@ -159,7 +158,7 @@ public class SocksAgentEntryHandler extends SimpleChannelInboundHandler<SocksMes
         PpaassLogger.INSTANCE.trace(
                 () -> "Send TCP_CONNECT from agent to proxy [BEGIN] , agent channel = {}, proxy channel = {}",
                 () -> new Object[]{proxyChannel.id().asLongText()});
-        proxyChannel.attr(IAgentConst.ISocksAgentConst.IProxyChannelAttr.AGENT_CHANNEL).set(agentChannel);
+        proxyChannel.attr(ISocksAgentConstant.IProxyChannelConstant.AGENT_CHANNEL).set(agentChannel);
         proxyChannel.writeAndFlush(agentMessage)
                 .addListener((ChannelFutureListener) proxyWriteChannelFuture -> {
                     if (proxyWriteChannelFuture.isSuccess()) {

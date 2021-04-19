@@ -11,7 +11,6 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import org.apache.commons.pool2.impl.AbandonedConfig;
 import org.apache.commons.pool2.impl.DefaultEvictionPolicy;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -70,10 +69,17 @@ class SocksAgentProxyResourceManager implements IAgentResourceManager {
 
     public void destroyResources() {
         try {
-            this.proxyUdpChannelBootstrap.config().group().shutdownGracefully();
-            this.proxyTcpChannelBootstrap.config().group().shutdownGracefully();
-            this.proxyTcpChannelPool.close();
-            this.proxyTcpChannelPool.clear();
+            this.reentrantReadWriteLock.writeLock().lock();
+            if (this.proxyUdpChannelBootstrap != null) {
+                this.proxyUdpChannelBootstrap.config().group().shutdownGracefully();
+            }
+            if (this.proxyTcpChannelBootstrap != null) {
+                this.proxyTcpChannelBootstrap.config().group().shutdownGracefully();
+            }
+            if (this.proxyTcpChannelPool != null) {
+                this.proxyTcpChannelPool.close();
+                this.proxyTcpChannelPool.clear();
+            }
             this.proxyTcpChannelBootstrap = null;
             this.proxyUdpChannelBootstrap = null;
             this.proxyTcpChannelPool = null;
@@ -133,11 +139,6 @@ class SocksAgentProxyResourceManager implements IAgentResourceManager {
         config.setTimeBetweenEvictionRunsMillis(agentConfiguration.getProxyChannelPoolTimeBetweenEvictionRunsMillis());
         config.setJmxEnabled(false);
         var result = new GenericObjectPool<>(socksAgentPooledProxyChannelFactory, config);
-//        var abandonedConfig = new AbandonedConfig();
-//        abandonedConfig.setLogAbandoned(true);
-//        abandonedConfig.setRemoveAbandonedOnMaintenance(true);
-//        abandonedConfig.setRequireFullStackTrace(true);
-//        result.setAbandonedConfig(abandonedConfig);
         socksAgentPooledProxyChannelFactory.attachPool(result);
         try {
             result.preparePool();

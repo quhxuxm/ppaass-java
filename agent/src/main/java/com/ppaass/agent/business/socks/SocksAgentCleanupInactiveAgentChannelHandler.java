@@ -1,6 +1,5 @@
 package com.ppaass.agent.business.socks;
 
-import com.ppaass.agent.IAgentConst;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -23,7 +22,7 @@ public class SocksAgentCleanupInactiveAgentChannelHandler extends ChannelInbound
             return;
         }
         var agentChannel = agentChannelContext.channel();
-        agentChannel.attr(IAgentConst.ISocksAgentConst.IAgentChannelAttr.TCP_CONNECTION_INFO).set(null);
+        agentChannel.attr(ISocksAgentConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).set(null);
         agentChannel.close();
     }
 }

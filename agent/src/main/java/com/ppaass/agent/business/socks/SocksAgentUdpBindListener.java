@@ -54,11 +54,11 @@ class SocksAgentUdpBindListener implements ChannelFutureListener {
                 agentUdpChannel,
                 this.proxyTcpChannel
         );
-        this.agentTcpChannel.attr(IAgentConst.ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO)
+        this.agentTcpChannel.attr(ISocksAgentConstant.SOCKS_UDP_CONNECTION_INFO)
                 .set(udpConnectionInfo);
-        this.proxyTcpChannel.attr(IAgentConst.ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO)
+        this.proxyTcpChannel.attr(ISocksAgentConstant.SOCKS_UDP_CONNECTION_INFO)
                 .set(udpConnectionInfo);
-        agentUdpChannel.attr(IAgentConst.ISocksAgentConst.SOCKS_UDP_CONNECTION_INFO)
+        agentUdpChannel.attr(ISocksAgentConstant.SOCKS_UDP_CONNECTION_INFO)
                 .set(udpConnectionInfo);
         this.agentTcpChannel.writeAndFlush(new DefaultSocks5CommandResponse(
                 Socks5CommandStatus.SUCCESS,

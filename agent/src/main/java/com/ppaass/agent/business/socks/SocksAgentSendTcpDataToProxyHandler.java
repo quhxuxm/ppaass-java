@@ -1,7 +1,6 @@
 package com.ppaass.agent.business.socks;
 
 import com.ppaass.agent.AgentConfiguration;
-import com.ppaass.agent.IAgentConst;
 import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.protocol.common.util.UUIDUtil;
 import com.ppaass.protocol.vpn.message.AgentMessage;
@@ -28,14 +27,14 @@ class SocksAgentSendTcpDataToProxyHandler extends SimpleChannelInboundHandler<By
     public void channelInactive(ChannelHandlerContext agentChannelContext) throws Exception {
         var agentChannel = agentChannelContext.channel();
         var tcpConnectionInfo =
-                agentChannel.attr(IAgentConst.ISocksAgentConst.IAgentChannelAttr.TCP_CONNECTION_INFO).get();
-        agentChannel.attr(IAgentConst.ISocksAgentConst.IAgentChannelAttr.TCP_CONNECTION_INFO).set(null);
+                agentChannel.attr(ISocksAgentConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).get();
+        agentChannel.attr(ISocksAgentConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).set(null);
         if (tcpConnectionInfo == null) {
             return;
         }
         var proxyTcpChannel = tcpConnectionInfo.getProxyTcpChannel();
         var socksProxyTcpChannelPool =
-                proxyTcpChannel.attr(IAgentConst.ISocksAgentConst.IProxyChannelAttr.CHANNEL_POOL).get();
+                proxyTcpChannel.attr(ISocksAgentConstant.IProxyChannelConstant.CHANNEL_POOL).get();
         socksProxyTcpChannelPool.returnObject(proxyTcpChannel);
     }
 
@@ -43,7 +42,7 @@ class SocksAgentSendTcpDataToProxyHandler extends SimpleChannelInboundHandler<By
     protected void channelRead0(ChannelHandlerContext agentChannelContext, ByteBuf originalAgentData) throws Exception {
         var agentChannel = agentChannelContext.channel();
         var tcpConnectionInfo =
-                agentChannel.attr(IAgentConst.ISocksAgentConst.IAgentChannelAttr.TCP_CONNECTION_INFO).get();
+                agentChannel.attr(ISocksAgentConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).get();
         if (tcpConnectionInfo == null) {
             PpaassLogger.INSTANCE.error(
                     () -> "Fail write agent original message to proxy because of no connection information attached, agent channel = {}",

@@ -1,6 +1,7 @@
-package com.ppaass.agent.business.socks;
+package com.ppaass.agent.business.http;
 
 import com.ppaass.agent.AgentConfiguration;
+import com.ppaass.agent.IAgentConst;
 import com.ppaass.common.log.PpaassLogger;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
@@ -12,14 +13,14 @@ import org.apache.commons.pool2.impl.GenericObjectPool;
 
 import java.util.concurrent.TimeUnit;
 
-class SocksAgentPooledProxyChannelFactory implements PooledObjectFactory<Channel> {
-    private final Bootstrap socksProxyTcpChannelBootstrap;
+class HttpOrHttpsAgentPooledProxyChannelFactory implements PooledObjectFactory<Channel> {
+    private final Bootstrap bootstrap;
     private final AgentConfiguration agentConfiguration;
     private GenericObjectPool<Channel> pool;
 
-    public SocksAgentPooledProxyChannelFactory(Bootstrap socksProxyTcpChannelBootstrap,
-                                               AgentConfiguration agentConfiguration) {
-        this.socksProxyTcpChannelBootstrap = socksProxyTcpChannelBootstrap;
+    public HttpOrHttpsAgentPooledProxyChannelFactory(Bootstrap bootstrap,
+                                                     AgentConfiguration agentConfiguration) {
+        this.bootstrap = bootstrap;
         this.agentConfiguration = agentConfiguration;
     }
 
@@ -30,13 +31,13 @@ class SocksAgentPooledProxyChannelFactory implements PooledObjectFactory<Channel
     @Override
     public PooledObject<Channel> makeObject() throws Exception {
         PpaassLogger.INSTANCE.debug(() -> "Begin to create proxy channel object.");
-        var proxyChannelConnectFuture = this.socksProxyTcpChannelBootstrap
+        var proxyChannelConnectFuture = this.bootstrap
                 .connect(this.agentConfiguration.getProxyHost(), this.agentConfiguration.getProxyPort())
                 .syncUninterruptibly();
         proxyChannelConnectFuture
                 .get(this.agentConfiguration.getProxyChannelPoolAcquireTimeoutMillis(), TimeUnit.MILLISECONDS);
         var channel = proxyChannelConnectFuture.channel();
-        channel.attr(ISocksAgentConstant.IProxyChannelConstant.CHANNEL_POOL).set(this.pool);
+        channel.attr(IHttpAgentConstant.IProxyChannelConstant.CHANNEL_POOL).set(this.pool);
         PpaassLogger.INSTANCE.debug(() -> "Success create proxy channel object, proxy channel = {}.",
                 () -> new Object[]{channel.id().asLongText()});
         return new DefaultPooledObject<>(channel);
@@ -77,11 +78,12 @@ class SocksAgentPooledProxyChannelFactory implements PooledObjectFactory<Channel
     public void passivateObject(PooledObject<Channel> pooledObject) throws Exception {
         var proxyChannel = pooledObject.getObject();
         proxyChannel.flush();
-        var agentChannel = proxyChannel.attr(ISocksAgentConstant.IProxyChannelConstant.AGENT_CHANNEL).get();
-        if (agentChannel != null) {
-            agentChannel.attr(ISocksAgentConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).set(null);
+        var httpConnectionInfo = proxyChannel.attr(IHttpAgentConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).get();
+        if (httpConnectionInfo != null) {
+            httpConnectionInfo.getAgentChannel().attr(IHttpAgentConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO)
+                    .set(null);
         }
-        proxyChannel.attr(ISocksAgentConstant.IProxyChannelConstant.AGENT_CHANNEL).set(null);
+        proxyChannel.attr(IHttpAgentConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).set(null);
         PpaassLogger.INSTANCE.debug(() -> "Passivate proxy channel object, proxy channel = {}.",
                 () -> new Object[]{proxyChannel.id().asLongText()});
     }
