@@ -3,7 +3,6 @@ package com.ppaass.agent.business.ha;
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.common.log.PpaassLogger;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.PooledObjectFactory;
@@ -59,8 +58,7 @@ class HAPooledProxyChannelFactory implements PooledObjectFactory<Channel> {
         var proxyChannel = pooledObject.getObject();
         PpaassLogger.INSTANCE.trace(() -> "Begin to validate proxy channel object, proxy channel = {}.",
                 () -> new Object[]{proxyChannel.id().asLongText()});
-        var resultFuture = proxyChannel.writeAndFlush(Unpooled.EMPTY_BUFFER).syncUninterruptibly();
-        var validStatus = resultFuture.isSuccess();
+        var validStatus = proxyChannel.isActive();
         PpaassLogger.INSTANCE.trace(() -> "Proxy channel valid status = {}, proxy channel = {}.",
                 () -> new Object[]{validStatus, proxyChannel.id().asLongText()});
         return validStatus;
