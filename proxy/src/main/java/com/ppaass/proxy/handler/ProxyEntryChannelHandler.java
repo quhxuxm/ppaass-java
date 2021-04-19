@@ -33,6 +33,18 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         this.proxyConfiguration = proxyConfiguration;
     }
 
+    @Override
+    public void channelInactive(ChannelHandlerContext proxyChannelContext) throws Exception {
+        var proxyChannel = proxyChannelContext.channel();
+        proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).set(null);
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext proxyChannelContext, Throwable cause) throws Exception {
+        var proxyChannel = proxyChannelContext.channel();
+        proxyChannel.close();
+    }
+
     private void handleTcpConnect(ChannelHandlerContext proxyChannelContext, AgentMessage agentMessage) {
         var proxyChannel = proxyChannelContext.channel();
         PpaassLogger.INSTANCE.debug(() -> "Begin to create TCP connection for: {}", () -> new Object[]{agentMessage});
