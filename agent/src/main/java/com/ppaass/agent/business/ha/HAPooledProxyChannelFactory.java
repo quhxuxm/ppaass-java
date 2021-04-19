@@ -47,7 +47,7 @@ class HAPooledProxyChannelFactory implements PooledObjectFactory<Channel> {
         PpaassLogger.INSTANCE.trace(() -> "Begin to destroy proxy channel object, proxy channel = {}.",
                 () -> new Object[]{proxyChannel.id().asLongText()});
         proxyChannel.flush();
-        proxyChannel.close().syncUninterruptibly();
+        proxyChannel.close();
         PpaassLogger.INSTANCE.debug(() -> "Success destroy proxy channel object, proxy channel = {}.",
                 () -> new Object[]{proxyChannel.id().asLongText()});
     }
