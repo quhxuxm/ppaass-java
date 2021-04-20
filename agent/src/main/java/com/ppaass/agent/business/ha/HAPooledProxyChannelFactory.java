@@ -43,6 +43,7 @@ class HAPooledProxyChannelFactory implements PooledObjectFactory<Channel> {
         }
         var channel = proxyChannelConnectFuture.channel();
         channel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL).set(this.pool);
+        channel.attr(IHAConstant.IProxyChannelConstant.CLOSED_ALREADY).set(false);
         PpaassLogger.INSTANCE.debug(() -> "Success create proxy channel object, proxy channel = {}.",
                 () -> new Object[]{channel.id().asLongText()});
         return new DefaultPooledObject<>(channel);
@@ -53,8 +54,13 @@ class HAPooledProxyChannelFactory implements PooledObjectFactory<Channel> {
         var proxyChannel = pooledObject.getObject();
         PpaassLogger.INSTANCE.trace(() -> "Begin to destroy proxy channel object, proxy channel = {}.",
                 () -> new Object[]{proxyChannel.id().asLongText()});
-        proxyChannel.flush();
-        proxyChannel.close().syncUninterruptibly();
+        var closedAlready = proxyChannel.attr(IHAConstant.IProxyChannelConstant.CLOSED_ALREADY).get();
+        if (!closedAlready) {
+            proxyChannel.flush();
+            proxyChannel.close().syncUninterruptibly();
+            PpaassLogger.INSTANCE.debug(() -> "Channel still not close, invoke close on channel, proxy channel = {}.",
+                    () -> new Object[]{proxyChannel.id().asLongText()});
+        }
         PpaassLogger.INSTANCE.debug(() -> "Success destroy proxy channel object, proxy channel = {}.",
                 () -> new Object[]{proxyChannel.id().asLongText()});
     }

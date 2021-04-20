@@ -14,6 +14,8 @@ interface IHAConstant {
                 AttributeKey.valueOf("HTTP_CONNECTION_INFO");
         AttributeKey<GenericObjectPool<Channel>> CHANNEL_POOL =
                 AttributeKey.valueOf("CHANNEL_POOL");
+        AttributeKey<Boolean> CLOSED_ALREADY =
+                AttributeKey.valueOf("CLOSED_ALREADY");
     }
 
     String CONNECTION_ESTABLISHED = "Connection Established";

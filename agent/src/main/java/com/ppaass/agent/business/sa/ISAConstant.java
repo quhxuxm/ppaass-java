@@ -15,6 +15,8 @@ interface ISAConstant {
                 AttributeKey.valueOf("AGENT_CHANNEL");
         AttributeKey<GenericObjectPool<Channel>> CHANNEL_POOL =
                 AttributeKey.valueOf("CHANNEL_POOL");
+        AttributeKey<Boolean> CLOSED_ALREADY =
+                AttributeKey.valueOf("CLOSED_ALREADY");
     }
 
     String LOCAL_IP_ADDRESS = "0.0.0.0";

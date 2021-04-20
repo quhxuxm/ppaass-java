@@ -44,6 +44,7 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
             agentChannel.close();
         }
         var channelPool = proxyChannel.attr(ISAConstant.IProxyChannelConstant.CHANNEL_POOL).get();
+        proxyChannel.attr(ISAConstant.IProxyChannelConstant.CLOSED_ALREADY).set(true);
         channelPool.invalidateObject(proxyChannel, DestroyMode.ABANDONED);
     }
 

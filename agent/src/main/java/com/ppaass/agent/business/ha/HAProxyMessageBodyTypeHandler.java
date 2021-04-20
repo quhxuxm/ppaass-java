@@ -39,6 +39,7 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
         var channelPool =
                 proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
                         .get();
+        proxyChannel.attr(IHAConstant.IProxyChannelConstant.CLOSED_ALREADY).set(true);
         channelPool.invalidateObject(proxyChannel, DestroyMode.ABANDONED);
     }
 
