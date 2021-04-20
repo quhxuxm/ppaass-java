@@ -3,6 +3,7 @@ package com.ppaass.agent.business.ha;
 import io.netty.channel.Channel;
 
 class HAConnectionInfo {
+    private boolean onConnecting;
     private final String targetHost;
     private final int targetPort;
     private final boolean isHttps;
@@ -17,6 +18,15 @@ class HAConnectionInfo {
         this.targetPort = targetPort;
         this.isHttps = isHttps;
         this.uri = uri;
+        this.onConnecting = false;
+    }
+
+    public void setOnConnecting(boolean onConnecting) {
+        this.onConnecting = onConnecting;
+    }
+
+    public boolean isOnConnecting() {
+        return onConnecting;
     }
 
     public String getTargetHost() {

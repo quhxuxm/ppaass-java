@@ -46,6 +46,12 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                             () -> new Object[]{agentChannel.id().asLongText()});
             return;
         }
+        if (connectionInfo.isHttps()) {
+            PpaassLogger.INSTANCE
+                    .debug(() -> "Agent channel become inactive, but it is for HTTPS, so will not return the proxy channel, agent channel = {}",
+                            () -> new Object[]{agentChannel.id().asLongText()});
+            return;
+        }
         var proxyChannel = connectionInfo.getProxyChannel();
         try {
             var channelPool =
@@ -60,7 +66,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                             });
         }
         PpaassLogger.INSTANCE
-                .debug(() -> "Agent channel become inactive, agent channel = {}",
+                .debug(() -> "Agent channel become inactive, and it is not for HTTPS, agent channel = {}",
                         () -> new Object[]{agentChannel.id().asLongText()});
     }
 
@@ -98,6 +104,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                 connectionInfo.setAgentChannel(agentChannel);
                 connectionInfo.setProxyChannel(httpsProxyTcpChannel);
                 connectionInfo.setUserToken(agentConfiguration.getUserToken());
+                connectionInfo.setOnConnecting(true);
                 httpsProxyTcpChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO)
                         .set(connectionInfo);
                 agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).set(connectionInfo);
@@ -236,6 +243,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
             agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
             return;
         }
+        connectionInfo.setOnConnecting(false);
         var httpsProxyTcpChannel = connectionInfo.getProxyChannel();
         PpaassLogger.INSTANCE.trace(HAEntryHandler.class,
                 () -> "HTTPS DATA send to uri: [{}], agent channel = {}, https data:\n{}\n",
