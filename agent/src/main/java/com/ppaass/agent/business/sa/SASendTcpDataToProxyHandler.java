@@ -39,7 +39,7 @@ class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
             socksProxyTcpChannelPool.returnObject(proxyTcpChannel);
         } catch (Exception e) {
             PpaassLogger.INSTANCE
-                    .error(() -> "Fail to return proxy channel to pool because of exception, proxy channel = {}",
+                    .debug(() -> "Fail to return proxy channel to pool because of exception, proxy channel = {}",
                             () -> new Object[]{
                                     proxyTcpChannel.id().asLongText(), e
                             });

@@ -17,12 +17,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
     private final AgentConfiguration agentConfiguration;
-    private final HAProxyResourceManager HAProxyResourceManager;
+    private final HAProxyResourceManager haProxyResourceManager;
 
     public HAEntryHandler(AgentConfiguration agentConfiguration,
-                          HAProxyResourceManager HAProxyResourceManager) {
+                          HAProxyResourceManager haProxyResourceManager) {
         this.agentConfiguration = agentConfiguration;
-        this.HAProxyResourceManager = HAProxyResourceManager;
+        this.haProxyResourceManager = haProxyResourceManager;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
             channelPool.returnObject(proxyChannel);
         } catch (Exception e) {
             PpaassLogger.INSTANCE
-                    .error(() -> "Fail to return proxy channel to pool because of exception, proxy channel = {}",
+                    .debug(() -> "Fail to return proxy channel to pool because of exception, proxy channel = {}",
                             () -> new Object[]{
                                     proxyChannel.id().asLongText(), e
                             });
@@ -88,7 +88,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                                         agentChannel.id().asLongText()
                                 });
                 var httpsProxyTcpChannel =
-                        this.HAProxyResourceManager.getProxyTcpChannelPoolForHttps().borrowObject();
+                        this.haProxyResourceManager.getProxyTcpChannelPoolForHttps().borrowObject();
                 connectionInfo.setAgentChannel(agentChannel);
                 connectionInfo.setProxyChannel(httpsProxyTcpChannel);
                 connectionInfo.setUserToken(agentConfiguration.getUserToken());
@@ -185,7 +185,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                             agentChannel.id().asLongText(),
                             ByteBufUtil.prettyHexDump(fullHttpRequest.content())
                     });
-            var httpProxyTcpChannel = this.HAProxyResourceManager.getProxyTcpChannelPoolForHttp().borrowObject();
+            var httpProxyTcpChannel = this.haProxyResourceManager.getProxyTcpChannelPoolForHttp().borrowObject();
             connectionInfo.setAgentChannel(agentChannel);
             connectionInfo.setProxyChannel(httpProxyTcpChannel);
             connectionInfo.setUserToken(agentConfiguration.getUserToken());
