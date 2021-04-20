@@ -15,9 +15,14 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 @Service
 @ChannelHandler.Sharable
 public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
+    private final static ScheduledExecutorService DELAY_CLOSE_EXECUTOR = Executors.newScheduledThreadPool(128);
     private final ProxyConfiguration proxyConfiguration;
 
     public ReceiveTargetTcpDataChannelHandler(ProxyConfiguration proxyConfiguration) {
@@ -48,38 +53,38 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
                     () -> new Object[]{
                             targetChannel.id().asLongText()
                     });
-            targetChannel.close();
             return;
         }
         var proxyChannel = targetTcpInfo.getProxyTcpChannel();
-        var proxyMessageBody =
-                new ProxyMessageBody(
-                        UUIDUtil.INSTANCE.generateUuid(),
-                        proxyConfiguration.getProxyInstanceId(),
-                        targetTcpInfo.getUserToken(),
-                        targetTcpInfo.getSourceHost(),
-                        targetTcpInfo.getSourcePort(),
-                        targetTcpInfo.getTargetHost(),
-                        targetTcpInfo.getTargetPort(),
-                        ProxyMessageBodyType.TCP_CONNECTION_CLOSE,
-                        targetTcpInfo.getAgentChannelId(),
-                        targetTcpInfo.getTargetChannelId(),
-                        null);
-        var proxyMessage = new ProxyMessage(
-                UUIDUtil.INSTANCE.generateUuidInBytes(),
-                EncryptionType.choose(),
-                proxyMessageBody);
-        proxyChannel.writeAndFlush(proxyMessage).addListener(future -> {
-            proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).set(null);
-            if (future.isSuccess()) {
-                PpaassLogger.INSTANCE.debug(() -> "Success to write TCP_CONNECTION_CLOSE to agent, tcp info:\n{}\n",
+        DELAY_CLOSE_EXECUTOR.schedule(() -> {
+            var proxyMessageBody =
+                    new ProxyMessageBody(
+                            UUIDUtil.INSTANCE.generateUuid(),
+                            proxyConfiguration.getProxyInstanceId(),
+                            targetTcpInfo.getUserToken(),
+                            targetTcpInfo.getSourceHost(),
+                            targetTcpInfo.getSourcePort(),
+                            targetTcpInfo.getTargetHost(),
+                            targetTcpInfo.getTargetPort(),
+                            ProxyMessageBodyType.TCP_CONNECTION_CLOSE,
+                            targetTcpInfo.getAgentChannelId(),
+                            targetTcpInfo.getTargetChannelId(),
+                            null);
+            var proxyMessage = new ProxyMessage(
+                    UUIDUtil.INSTANCE.generateUuidInBytes(),
+                    EncryptionType.choose(),
+                    proxyMessageBody);
+            proxyChannel.writeAndFlush(proxyMessage).addListener(future -> {
+                proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).set(null);
+                if (future.isSuccess()) {
+                    PpaassLogger.INSTANCE.debug(() -> "Success to write TCP_CONNECTION_CLOSE to agent, tcp info:\n{}\n",
+                            () -> new Object[]{targetTcpInfo});
+                    return;
+                }
+                PpaassLogger.INSTANCE.error(() -> "Fail to write TCP_CONNECTION_CLOSE to agent, tcp info:\n{}\n",
                         () -> new Object[]{targetTcpInfo});
-                return;
-            }
-            PpaassLogger.INSTANCE.error(() -> "Fail to write TCP_CONNECTION_CLOSE to agent, tcp info:\n{}\n",
-                    () -> new Object[]{targetTcpInfo});
-            targetChannel.close();
-        });
+            });
+        }, 20, TimeUnit.SECONDS);
     }
 
     @Override
