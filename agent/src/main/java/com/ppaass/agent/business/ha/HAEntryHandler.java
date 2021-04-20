@@ -36,7 +36,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext agentChannelContext) throws Exception {
+    public void channelInactive(ChannelHandlerContext agentChannelContext) {
         var agentChannel = agentChannelContext.channel();
         var connectionInfo = agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
         agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).set(null);
@@ -46,12 +46,12 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                             () -> new Object[]{agentChannel.id().asLongText()});
             return;
         }
-        if (connectionInfo.isHttps()) {
-            PpaassLogger.INSTANCE
-                    .debug(() -> "Agent channel become inactive, but it is for HTTPS, so will not return the proxy channel, agent channel = {}",
-                            () -> new Object[]{agentChannel.id().asLongText()});
-            return;
-        }
+//        if (connectionInfo.isHttps()) {
+//            PpaassLogger.INSTANCE
+//                    .debug(() -> "Agent channel become inactive, but it is for HTTPS, so will not return the proxy channel, agent channel = {}",
+//                            () -> new Object[]{agentChannel.id().asLongText()});
+//            return;
+//        }
         var proxyChannel = connectionInfo.getProxyChannel();
         try {
             var channelPool =
