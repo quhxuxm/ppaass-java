@@ -127,7 +127,7 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
                     UUIDUtil.INSTANCE.generateUuidInBytes(),
                     EncryptionType.choose(),
                     proxyMessageBody);
-            proxyChannel.writeAndFlush(proxyMessage)
+            proxyChannel.writeAndFlush(proxyMessage).syncUninterruptibly()
                     .addListener((ChannelFutureListener) proxyChannelFuture -> {
                         if (proxyChannelFuture.isSuccess()) {
                             PpaassLogger.INSTANCE.debug(
