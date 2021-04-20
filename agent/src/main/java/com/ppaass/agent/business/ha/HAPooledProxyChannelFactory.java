@@ -1,6 +1,7 @@
 package com.ppaass.agent.business.ha;
 
 import com.ppaass.agent.AgentConfiguration;
+import com.ppaass.common.exception.PpaassException;
 import com.ppaass.common.log.PpaassLogger;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -34,6 +35,12 @@ class HAPooledProxyChannelFactory implements PooledObjectFactory<Channel> {
                 .syncUninterruptibly();
         proxyChannelConnectFuture
                 .get(this.agentConfiguration.getProxyChannelPoolAcquireTimeoutMillis(), TimeUnit.MILLISECONDS);
+        if (!proxyChannelConnectFuture.isSuccess()) {
+            PpaassLogger.INSTANCE.error(() -> "Fail to create proxy channel because of exception.",
+                    () -> new Object[]{proxyChannelConnectFuture.cause()});
+            throw new PpaassException("Fail to create proxy channel because of exception.",
+                    proxyChannelConnectFuture.cause());
+        }
         var channel = proxyChannelConnectFuture.channel();
         channel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL).set(this.pool);
         PpaassLogger.INSTANCE.debug(() -> "Success create proxy channel object, proxy channel = {}.",
@@ -47,7 +54,7 @@ class HAPooledProxyChannelFactory implements PooledObjectFactory<Channel> {
         PpaassLogger.INSTANCE.trace(() -> "Begin to destroy proxy channel object, proxy channel = {}.",
                 () -> new Object[]{proxyChannel.id().asLongText()});
         proxyChannel.flush();
-        proxyChannel.close();
+        proxyChannel.close().syncUninterruptibly();
         PpaassLogger.INSTANCE.debug(() -> "Success destroy proxy channel object, proxy channel = {}.",
                 () -> new Object[]{proxyChannel.id().asLongText()});
     }
@@ -74,7 +81,14 @@ class HAPooledProxyChannelFactory implements PooledObjectFactory<Channel> {
     public void passivateObject(PooledObject<Channel> pooledObject) throws Exception {
         var proxyChannel = pooledObject.getObject();
         proxyChannel.flush();
+        var connectionInfo = proxyChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).get();
         proxyChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).set(null);
+        if (connectionInfo != null) {
+            PpaassLogger.INSTANCE.debug(() -> "Passivate proxy channel object, proxy channel = {}, agent channel = {}.",
+                    () -> new Object[]{proxyChannel.id().asLongText(),
+                            connectionInfo.getAgentChannel().id().asLongText()});
+            return;
+        }
         PpaassLogger.INSTANCE.debug(() -> "Passivate proxy channel object, proxy channel = {}.",
                 () -> new Object[]{proxyChannel.id().asLongText()});
     }

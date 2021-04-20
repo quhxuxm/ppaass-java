@@ -39,7 +39,11 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
     public void channelInactive(ChannelHandlerContext agentChannelContext) throws Exception {
         var agentChannel = agentChannelContext.channel();
         var connectionInfo = agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
+        agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).set(null);
         if (connectionInfo == null) {
+            PpaassLogger.INSTANCE
+                    .debug(() -> "No connection info attached to agent channel, skip the step to return proxy channel, agent channel = {}",
+                            () -> new Object[]{agentChannel.id().asLongText()});
             return;
         }
         var proxyChannel = connectionInfo.getProxyChannel();
@@ -55,6 +59,9 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                                     proxyChannel.id().asLongText(), e
                             });
         }
+        PpaassLogger.INSTANCE
+                .debug(() -> "Agent channel become inactive, agent channel = {}",
+                        () -> new Object[]{agentChannel.id().asLongText()});
     }
 
     @Override
@@ -62,7 +69,6 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
         var agentChannel = agentChannelContext.channel();
         if (httpProxyInput instanceof FullHttpRequest) {
             var fullHttpRequest = (FullHttpRequest) httpProxyInput;
-            var connectionHeader = fullHttpRequest.headers().get(HttpHeaderNames.CONNECTION);
             if (HttpMethod.CONNECT == fullHttpRequest.method()) {
                 //A HTTPS request to setup the connection
                 var connectionInfo =

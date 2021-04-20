@@ -1,6 +1,7 @@
 package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
+import com.ppaass.common.exception.PpaassException;
 import com.ppaass.common.log.PpaassLogger;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -34,6 +35,12 @@ class SAPooledProxyChannelFactory implements PooledObjectFactory<Channel> {
                 .syncUninterruptibly();
         proxyChannelConnectFuture
                 .get(this.agentConfiguration.getProxyChannelPoolAcquireTimeoutMillis(), TimeUnit.MILLISECONDS);
+        if (!proxyChannelConnectFuture.isSuccess()) {
+            PpaassLogger.INSTANCE.error(() -> "Fail to create proxy channel because of exception.",
+                    () -> new Object[]{proxyChannelConnectFuture.cause()});
+            throw new PpaassException("Fail to create proxy channel because of exception.",
+                    proxyChannelConnectFuture.cause());
+        }
         var channel = proxyChannelConnectFuture.channel();
         channel.attr(ISAConstant.IProxyChannelConstant.CHANNEL_POOL).set(this.pool);
         PpaassLogger.INSTANCE.debug(() -> "Success create proxy channel object, proxy channel = {}.",
@@ -74,7 +81,14 @@ class SAPooledProxyChannelFactory implements PooledObjectFactory<Channel> {
     public void passivateObject(PooledObject<Channel> pooledObject) throws Exception {
         var proxyChannel = pooledObject.getObject();
         proxyChannel.flush();
+        var agentChannel = proxyChannel.attr(ISAConstant.IProxyChannelConstant.AGENT_CHANNEL).get();
         proxyChannel.attr(ISAConstant.IProxyChannelConstant.AGENT_CHANNEL).set(null);
+        if (agentChannel != null) {
+            PpaassLogger.INSTANCE.debug(() -> "Passivate proxy channel object, proxy channel = {}, agent channel = {}.",
+                    () -> new Object[]{proxyChannel.id().asLongText(),
+                            agentChannel.id().asLongText()});
+            return;
+        }
         PpaassLogger.INSTANCE.debug(() -> "Passivate proxy channel object, proxy channel = {}.",
                 () -> new Object[]{proxyChannel.id().asLongText()});
     }

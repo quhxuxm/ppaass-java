@@ -117,7 +117,7 @@ class SAProxyResourceManager implements IAgentResourceManager {
                 agentConfiguration.getProxyTcpConnectionTimeout());
         result.option(ChannelOption.SO_KEEPALIVE, true);
         result.option(ChannelOption.AUTO_READ, true);
-        result.option(ChannelOption.AUTO_CLOSE, true);
+        result.option(ChannelOption.AUTO_CLOSE, false);
         result.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
         result.option(ChannelOption.TCP_NODELAY, true);
         result.option(ChannelOption.SO_REUSEADDR, true);

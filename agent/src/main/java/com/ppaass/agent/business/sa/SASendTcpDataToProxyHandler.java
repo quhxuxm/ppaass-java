@@ -30,6 +30,9 @@ class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
                 agentChannel.attr(ISAConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).get();
         agentChannel.attr(ISAConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).set(null);
         if (tcpConnectionInfo == null) {
+            PpaassLogger.INSTANCE
+                    .debug(() -> "No connection info attached to agent channel, skip the step to return proxy channel, agent channel = {}",
+                            () -> new Object[]{agentChannel.id().asLongText()});
             return;
         }
         var proxyTcpChannel = tcpConnectionInfo.getProxyTcpChannel();
@@ -44,6 +47,9 @@ class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
                                     proxyTcpChannel.id().asLongText(), e
                             });
         }
+        PpaassLogger.INSTANCE
+                .debug(() -> "Agent channel become inactive, agent channel = {}",
+                        () -> new Object[]{agentChannel.id().asLongText()});
     }
 
     @Override
