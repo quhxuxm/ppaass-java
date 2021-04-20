@@ -37,11 +37,14 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
     @Override
     public void channelInactive(ChannelHandlerContext proxyChannelContext) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
-        PpaassLogger.INSTANCE.error(() -> "Proxy channel closed, proxy channel = {}",
-                () -> new Object[]{proxyChannel.id().asLongText()});
         var agentChannel = proxyChannel.attr(ISAConstant.IProxyChannelConstant.AGENT_CHANNEL).get();
         if (agentChannel != null) {
+            PpaassLogger.INSTANCE.error(() -> "Proxy channel closed, proxy channel = {}, agent channel = {}",
+                    () -> new Object[]{proxyChannel.id().asLongText(), agentChannel.id().asLongText()});
             agentChannel.close();
+        } else {
+            PpaassLogger.INSTANCE.error(() -> "Proxy channel closed, proxy channel = {}",
+                    () -> new Object[]{proxyChannel.id().asLongText()});
         }
         var channelPool = proxyChannel.attr(ISAConstant.IProxyChannelConstant.CHANNEL_POOL).get();
         proxyChannel.attr(ISAConstant.IProxyChannelConstant.CLOSED_ALREADY).set(true);

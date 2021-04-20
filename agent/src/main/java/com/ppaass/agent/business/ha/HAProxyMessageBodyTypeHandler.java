@@ -34,7 +34,13 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
         var proxyChannel = proxyChannelContext.channel();
         var connectionInfo = proxyChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).get();
         if (connectionInfo != null) {
+            PpaassLogger.INSTANCE.error(() -> "Proxy channel closed, proxy channel = {}, agent channel = {}",
+                    () -> new Object[]{proxyChannel.id().asLongText(),
+                            connectionInfo.getAgentChannel().id().asLongText()});
             connectionInfo.getAgentChannel().close();
+        } else {
+            PpaassLogger.INSTANCE.error(() -> "Proxy channel closed, proxy channel = {}",
+                    () -> new Object[]{proxyChannel.id().asLongText()});
         }
         var channelPool =
                 proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
