@@ -85,7 +85,7 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
                 PpaassLogger.INSTANCE.error(() -> "Fail to write TCP_CONNECTION_CLOSE to agent, tcp info:\n{}\n",
                         () -> new Object[]{targetTcpInfo});
             });
-        }, 20, TimeUnit.SECONDS);
+        }, 5, TimeUnit.SECONDS);
     }
 
     @Override

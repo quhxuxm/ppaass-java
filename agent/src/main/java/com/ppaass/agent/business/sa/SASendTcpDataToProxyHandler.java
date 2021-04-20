@@ -14,9 +14,14 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 @ChannelHandler.Sharable
 @Service
 class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
+    private final static ScheduledExecutorService DELAY_CLOSE_EXECUTOR = Executors.newScheduledThreadPool(128);
     private final AgentConfiguration agentConfiguration;
 
     SASendTcpDataToProxyHandler(AgentConfiguration agentConfiguration) {
@@ -35,18 +40,20 @@ class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
                             () -> new Object[]{agentChannel.id().asLongText()});
             return;
         }
-        var proxyTcpChannel = tcpConnectionInfo.getProxyTcpChannel();
-        var socksProxyTcpChannelPool =
-                proxyTcpChannel.attr(ISAConstant.IProxyChannelConstant.CHANNEL_POOL).get();
-        try {
-            socksProxyTcpChannelPool.returnObject(proxyTcpChannel);
-        } catch (Exception e) {
-            PpaassLogger.INSTANCE
-                    .debug(() -> "Fail to return proxy channel to pool because of exception, proxy channel = {}",
-                            () -> new Object[]{
-                                    proxyTcpChannel.id().asLongText(), e
-                            });
-        }
+        DELAY_CLOSE_EXECUTOR.schedule(() -> {
+            var proxyTcpChannel = tcpConnectionInfo.getProxyTcpChannel();
+            var socksProxyTcpChannelPool =
+                    proxyTcpChannel.attr(ISAConstant.IProxyChannelConstant.CHANNEL_POOL).get();
+            try {
+                socksProxyTcpChannelPool.returnObject(proxyTcpChannel);
+            } catch (Exception e) {
+                PpaassLogger.INSTANCE
+                        .debug(() -> "Fail to return proxy channel to pool because of exception, proxy channel = {}",
+                                () -> new Object[]{
+                                        proxyTcpChannel.id().asLongText(), e
+                                });
+            }
+        }, 5, TimeUnit.SECONDS);
         PpaassLogger.INSTANCE
                 .debug(() -> "Agent channel become inactive, agent channel = {}",
                         () -> new Object[]{agentChannel.id().asLongText()});
