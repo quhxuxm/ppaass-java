@@ -40,27 +40,7 @@
         </logger>
         <logger name="com.ppaass"
                 additivity="false"
-                level="info">
-            <appender-ref ref="FILE_APPENDER"/>
-        </logger>
-        <logger name="com.ppaass.agent.business.sa"
-                additivity="false"
-                level="debug">
-            <appender-ref ref="FILE_APPENDER"/>
-        </logger>
-        <logger name="com.ppaass.agent.business.ha"
-                additivity="false"
-                level="debug">
-            <appender-ref ref="FILE_APPENDER"/>
-        </logger>
-        <logger name="com.ppaass.agent.business.sa.SAPooledProxyChannelFactory"
-                additivity="false"
-                level="trace">
-            <appender-ref ref="FILE_APPENDER"/>
-        </logger>
-        <logger name="com.ppaass.agent.business.ha.HAPooledProxyChannelFactory"
-                additivity="false"
-                level="trace">
+                level="error">
             <appender-ref ref="FILE_APPENDER"/>
         </logger>
         <Root level="error">
