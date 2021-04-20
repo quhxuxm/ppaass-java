@@ -54,7 +54,7 @@ class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
                                         proxyTcpChannel.id().asLongText(), e
                                 });
             }
-        }, 10, TimeUnit.SECONDS);
+        }, this.agentConfiguration.getDelayCloseTimeSeconds(), TimeUnit.SECONDS);
         PpaassLogger.INSTANCE
                 .debug(() -> "Agent channel become inactive, agent channel = {}",
                         () -> new Object[]{agentChannel.id().asLongText()});

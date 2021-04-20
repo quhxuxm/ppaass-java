@@ -22,7 +22,8 @@ import java.util.concurrent.TimeUnit;
 @Service
 @ChannelHandler.Sharable
 public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
-    private final static ScheduledExecutorService DELAY_CLOSE_EXECUTOR = Executors.newScheduledThreadPool(128);
+    private final static ScheduledExecutorService DELAY_CLOSE_EXECUTOR =
+            Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() * 2);
     private final ProxyConfiguration proxyConfiguration;
     private static final int TARGET_DATA_MAX_FRAME_LENGTH = 1024 * 1024 * 100;
 
@@ -85,7 +86,7 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
                 PpaassLogger.INSTANCE.error(() -> "Fail to write TCP_CONNECTION_CLOSE to agent, tcp info:\n{}\n",
                         () -> new Object[]{targetTcpInfo});
             });
-        }, 5, TimeUnit.SECONDS);
+        }, this.proxyConfiguration.getDelayCloseTimeSeconds(), TimeUnit.SECONDS);
     }
 
     @Override

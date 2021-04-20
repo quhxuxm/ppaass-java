@@ -58,6 +58,7 @@ public class ProxyConfiguration {
     private Resource agentPublicKeyFile;
     private byte[] proxyPrivateKey;
     private byte[] agentPublicKey;
+    private int delayCloseTimeSeconds;
 
     public ProxyConfiguration() {
         this.proxyInstanceId = UUIDUtil.INSTANCE.generateUuid();
@@ -401,6 +402,14 @@ public class ProxyConfiguration {
 
     public int getTargetUdpReceiveTimeout() {
         return targetUdpReceiveTimeout;
+    }
+
+    public void setDelayCloseTimeSeconds(int delayCloseTimeSeconds) {
+        this.delayCloseTimeSeconds = delayCloseTimeSeconds;
+    }
+
+    public int getDelayCloseTimeSeconds() {
+        return delayCloseTimeSeconds;
     }
 
     @PostConstruct
