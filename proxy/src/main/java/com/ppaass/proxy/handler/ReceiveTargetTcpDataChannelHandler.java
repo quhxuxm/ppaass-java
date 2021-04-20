@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
     private final static ScheduledExecutorService DELAY_CLOSE_EXECUTOR = Executors.newScheduledThreadPool(128);
     private final ProxyConfiguration proxyConfiguration;
-    private static int TARGET_DATA_MAX_FRAME_LENGTH = 1024 * 1024 * 10;
+    private static final int TARGET_DATA_MAX_FRAME_LENGTH = 1024 * 1024 * 100;
 
     public ReceiveTargetTcpDataChannelHandler(ProxyConfiguration proxyConfiguration) {
         this.proxyConfiguration = proxyConfiguration;
