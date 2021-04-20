@@ -1,6 +1,7 @@
 package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
+import com.ppaass.common.constant.ICommonConstant;
 import com.ppaass.common.handler.AgentMessageEncoder;
 import com.ppaass.common.handler.PrintExceptionHandler;
 import com.ppaass.common.handler.ProxyMessageDecoder;
@@ -14,11 +15,11 @@ import io.netty.handler.codec.compression.Lz4FrameEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-class SATcpChannelInitializer extends ChannelInitializer<Channel> {
+class SAProxyTcpChannelInitializer extends ChannelInitializer<Channel> {
     private final AgentConfiguration agentConfiguration;
     private final SAReceiveProxyDataHandler SAReceiveProxyDataHandler;
 
-    public SATcpChannelInitializer(
+    public SAProxyTcpChannelInitializer(
             AgentConfiguration agentConfiguration,
             SAReceiveProxyDataHandler SAReceiveProxyDataHandler) {
         this.agentConfiguration = agentConfiguration;
@@ -33,13 +34,15 @@ class SATcpChannelInitializer extends ChannelInitializer<Channel> {
         if (agentConfiguration.isProxyTcpCompressEnable()) {
             proxyChannelPipeline.addLast(new Lz4FrameDecoder());
         }
-        proxyChannelPipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
+        proxyChannelPipeline.addLast(
+                new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER,
+                        0, ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER));
         proxyChannelPipeline.addLast(new ProxyMessageDecoder(agentConfiguration.getAgentPrivateKey()));
         proxyChannelPipeline.addLast(this.SAReceiveProxyDataHandler);
         if (agentConfiguration.isProxyTcpCompressEnable()) {
             proxyChannelPipeline.addLast(new Lz4FrameEncoder());
         }
-        proxyChannelPipeline.addLast(new LengthFieldPrepender(4));
+        proxyChannelPipeline.addLast(new LengthFieldPrepender(ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER));
         proxyChannelPipeline.addLast(new AgentMessageEncoder(agentConfiguration.getProxyPublicKey()));
         proxyChannelPipeline.addLast(PrintExceptionHandler.INSTANCE);
     }

@@ -22,7 +22,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @Service
 class SAProxyResourceManager implements IAgentResourceManager {
     private final SAUdpChannelInitializer SAUdpChannelInitializer;
-    private final SATcpChannelInitializer SATcpChannelInitializer;
+    private final SAProxyTcpChannelInitializer SAProxyTcpChannelInitializer;
     private final AgentConfiguration agentConfiguration;
     private Bootstrap proxyUdpChannelBootstrap;
     private Bootstrap proxyTcpChannelBootstrap;
@@ -31,10 +31,10 @@ class SAProxyResourceManager implements IAgentResourceManager {
 
     public SAProxyResourceManager(
             SAUdpChannelInitializer SAUdpChannelInitializer,
-            SATcpChannelInitializer SATcpChannelInitializer,
+            SAProxyTcpChannelInitializer SAProxyTcpChannelInitializer,
             AgentConfiguration agentConfiguration) {
         this.SAUdpChannelInitializer = SAUdpChannelInitializer;
-        this.SATcpChannelInitializer = SATcpChannelInitializer;
+        this.SAProxyTcpChannelInitializer = SAProxyTcpChannelInitializer;
         this.agentConfiguration = agentConfiguration;
         this.reentrantReadWriteLock = new ReentrantReadWriteLock();
     }
@@ -128,7 +128,7 @@ class SAProxyResourceManager implements IAgentResourceManager {
         result.option(ChannelOption.SO_SNDBUF,
                 agentConfiguration.getProxyTcpSoSndbuf());
         result.remoteAddress(agentConfiguration.getProxyHost(), agentConfiguration.getProxyPort());
-        result.handler(this.SATcpChannelInitializer);
+        result.handler(this.SAProxyTcpChannelInitializer);
         return result;
     }
 

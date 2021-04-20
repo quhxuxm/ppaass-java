@@ -1,5 +1,6 @@
 package com.ppaass.proxy;
 
+import com.ppaass.common.constant.ICommonConstant;
 import com.ppaass.common.handler.AgentMessageDecoder;
 import com.ppaass.common.handler.PrintExceptionHandler;
 import com.ppaass.common.handler.ProxyMessageEncoder;
@@ -137,7 +138,9 @@ class ProxyConfigure {
                     proxyChannel.pipeline().addLast(new Lz4FrameDecoder());
                 }
                 proxyChannel.pipeline().addLast(
-                        new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
+                        new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0,
+                                ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER, 0,
+                                ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER));
                 proxyChannel.pipeline().addLast(
                         new AgentMessageDecoder(proxyConfiguration.getProxyPrivateKey()));
                 proxyChannel.pipeline().addLast(proxyEntryChannelHandler);
@@ -145,7 +148,8 @@ class ProxyConfigure {
                     proxyChannel.pipeline().addLast(new Lz4FrameEncoder());
                 }
                 //Outbound
-                proxyChannel.pipeline().addLast(new LengthFieldPrepender(4));
+                proxyChannel.pipeline()
+                        .addLast(new LengthFieldPrepender(ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER));
                 proxyChannel.pipeline().addLast(
                         new ProxyMessageEncoder(proxyConfiguration.getAgentPublicKey()));
                 proxyChannel.pipeline().addLast(LAST_INBOUND_HANDLER, PrintExceptionHandler.INSTANCE);

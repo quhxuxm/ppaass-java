@@ -2,6 +2,7 @@ package com.ppaass.agent.business.ha;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.IAgentResourceManager;
+import com.ppaass.common.constant.ICommonConstant;
 import com.ppaass.common.exception.PpaassException;
 import com.ppaass.common.handler.AgentMessageEncoder;
 import com.ppaass.common.handler.PrintExceptionHandler;
@@ -141,8 +142,8 @@ class HAProxyResourceManager implements IAgentResourceManager {
                     proxyChannelPipeline.addLast(new Lz4FrameDecoder());
                 }
                 proxyChannelPipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE,
-                        0, 4, 0,
-                        4));
+                        0, ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER, 0,
+                        ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER));
                 proxyChannelPipeline.addLast(new ProxyMessageDecoder(
                         agentConfiguration.getAgentPrivateKey()));
                 proxyChannelPipeline.addLast(haProxyMessageBodyTypeHandler);
@@ -153,7 +154,7 @@ class HAProxyResourceManager implements IAgentResourceManager {
                 if (agentConfiguration.isProxyTcpCompressEnable()) {
                     proxyChannelPipeline.addLast(new Lz4FrameEncoder());
                 }
-                proxyChannelPipeline.addLast(new LengthFieldPrepender(4));
+                proxyChannelPipeline.addLast(new LengthFieldPrepender(ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER));
                 proxyChannelPipeline.addLast(new AgentMessageEncoder(
                         agentConfiguration.getProxyPublicKey()));
                 proxyChannelPipeline.addLast(PrintExceptionHandler.INSTANCE);
@@ -188,8 +189,8 @@ class HAProxyResourceManager implements IAgentResourceManager {
                     proxyChannelPipeline.addLast(new Lz4FrameDecoder());
                 }
                 proxyChannelPipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE,
-                        0, 4, 0,
-                        4));
+                        0, ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER, 0,
+                        ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER));
                 proxyChannelPipeline.addLast(new ProxyMessageDecoder(
                         agentConfiguration.getAgentPrivateKey()));
                 proxyChannelPipeline.addLast(haProxyMessageBodyTypeHandler);
@@ -198,7 +199,7 @@ class HAProxyResourceManager implements IAgentResourceManager {
                 if (agentConfiguration.isProxyTcpCompressEnable()) {
                     proxyChannelPipeline.addLast(new Lz4FrameEncoder());
                 }
-                proxyChannelPipeline.addLast(new LengthFieldPrepender(4));
+                proxyChannelPipeline.addLast(new LengthFieldPrepender(ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER));
                 proxyChannelPipeline.addLast(new AgentMessageEncoder(
                         agentConfiguration.getProxyPublicKey()));
                 proxyChannelPipeline.addLast(PrintExceptionHandler.INSTANCE);
