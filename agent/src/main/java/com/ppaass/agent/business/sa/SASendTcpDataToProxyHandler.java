@@ -21,7 +21,8 @@ import java.util.concurrent.TimeUnit;
 @ChannelHandler.Sharable
 @Service
 class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
-    private static final ScheduledExecutorService DELAY_CLOSE_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
+    private static final ScheduledExecutorService DELAY_CLOSE_EXECUTOR =
+            Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() * 2);
     private final AgentConfiguration agentConfiguration;
 
     SASendTcpDataToProxyHandler(AgentConfiguration agentConfiguration) {

@@ -20,7 +20,8 @@ import java.util.concurrent.TimeUnit;
 @ChannelHandler.Sharable
 @Service
 public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
-    private static final ScheduledExecutorService DELAY_CLOSE_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
+    private static final ScheduledExecutorService DELAY_CLOSE_EXECUTOR =
+            Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() * 2);
     private final AgentConfiguration agentConfiguration;
     private final HAProxyResourceManager haProxyResourceManager;
 
