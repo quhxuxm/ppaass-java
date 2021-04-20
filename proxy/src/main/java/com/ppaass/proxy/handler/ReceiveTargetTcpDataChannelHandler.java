@@ -102,13 +102,13 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
             return;
         }
         var proxyChannel = targetTcpInfo.getProxyTcpChannel();
-        int targetDataTotalLength = targetOriginalMessageBuf.readableBytes();
-        int frameLength = TARGET_DATA_MAX_FRAME_LENGTH;
-        if (targetDataTotalLength < frameLength) {
-            frameLength = targetDataTotalLength;
-        }
-        final byte[] originalDataByteArray = new byte[frameLength];
         while (targetOriginalMessageBuf.isReadable()) {
+            int targetDataTotalLength = targetOriginalMessageBuf.readableBytes();
+            int frameLength = TARGET_DATA_MAX_FRAME_LENGTH;
+            if (targetDataTotalLength < frameLength) {
+                frameLength = targetDataTotalLength;
+            }
+            final byte[] originalDataByteArray = new byte[frameLength];
             targetOriginalMessageBuf.readBytes(originalDataByteArray);
             var proxyMessageBody =
                     new ProxyMessageBody(
