@@ -206,7 +206,7 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
                         proxyMessage
                 });
         if (agentTcpChannel == null) {
-            PpaassLogger.INSTANCE.error(
+            PpaassLogger.INSTANCE.debug(
                     () -> "No agent channel attached to proxy channel, ignore the TCP_CONNECTION_CLOSE,  proxy channel = {}, proxy message:\n{}\n",
                     () -> new Object[]{
                             proxyChannel.id().asLongText(),
@@ -214,7 +214,7 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
                     });
             return;
         }
-        PpaassLogger.INSTANCE.info(
+        PpaassLogger.INSTANCE.debug(
                 () -> "Remove agent channel from agent channel map on proxy channel as receive TCP_CONNECTION_CLOSE, agent channel={}, proxy channel={}, proxy message:\n{}\n",
                 () -> new Object[]{
                         agentTcpChannel.id().asLongText(),
@@ -246,7 +246,7 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
             agentTcpChannel.close();
             return;
         }
-        PpaassLogger.INSTANCE.info(
+        PpaassLogger.INSTANCE.debug(
                 () -> "Close agent channel on receive TCP_CONNECTION_CLOSE, agent channel = {},  proxy channel = {}",
                 () -> new Object[]{
                         agentTcpChannel.id().asLongText(),

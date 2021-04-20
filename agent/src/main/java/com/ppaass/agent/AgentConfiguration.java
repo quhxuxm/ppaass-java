@@ -54,7 +54,6 @@ public class AgentConfiguration {
     private int proxyChannelPoolMaxTotalSize;
     private int proxyChannelPoolMinIdleSize;
     private int proxyChannelPoolAcquireTimeoutMillis;
-    private int proxyChannelPoolTimeBetweenEvictionRunsMillis;
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private static class AgentDynamicConfiguration {
@@ -393,14 +392,6 @@ public class AgentConfiguration {
 
     public void setProxyChannelPoolAcquireTimeoutMillis(int proxyChannelPoolAcquireTimeoutMillis) {
         this.proxyChannelPoolAcquireTimeoutMillis = proxyChannelPoolAcquireTimeoutMillis;
-    }
-
-    public void setProxyChannelPoolTimeBetweenEvictionRunsMillis(int proxyChannelPoolTimeBetweenEvictionRunsMillis) {
-        this.proxyChannelPoolTimeBetweenEvictionRunsMillis = proxyChannelPoolTimeBetweenEvictionRunsMillis;
-    }
-
-    public int getProxyChannelPoolTimeBetweenEvictionRunsMillis() {
-        return proxyChannelPoolTimeBetweenEvictionRunsMillis;
     }
 
     public void setAgentChannelAllIdleSeconds(int agentChannelAllIdleSeconds) {
