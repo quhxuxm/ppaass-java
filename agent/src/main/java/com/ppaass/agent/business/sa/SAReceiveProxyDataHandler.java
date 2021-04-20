@@ -388,8 +388,18 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
                             proxyChannel.id().asLongText(),
                             proxyMessage
                     });
+            Socks5AddressType responseAddrType;
+            if (NetUtil.isValidIpV4Address(proxyMessage.getBody().getTargetHost())) {
+                responseAddrType = Socks5AddressType.IPv4;
+            } else {
+                if (NetUtil.isValidIpV6Address(proxyMessage.getBody().getTargetHost())) {
+                    responseAddrType = Socks5AddressType.IPv6;
+                } else {
+                    responseAddrType = Socks5AddressType.DOMAIN;
+                }
+            }
             agentTcpChannel.writeAndFlush(
-                    new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE, Socks5AddressType.IPv4,
+                    new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE, responseAddrType,
                             proxyMessage.getBody().getTargetHost(), proxyMessage.getBody().getTargetPort()))
                     .addListener(ChannelFutureListener.CLOSE);
             return;
@@ -403,8 +413,18 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
                             proxyChannel.id().asLongText(),
                             proxyMessage
                     });
+            Socks5AddressType responseAddrType;
+            if (NetUtil.isValidIpV4Address(proxyMessage.getBody().getTargetHost())) {
+                responseAddrType = Socks5AddressType.IPv4;
+            } else {
+                if (NetUtil.isValidIpV6Address(proxyMessage.getBody().getTargetHost())) {
+                    responseAddrType = Socks5AddressType.IPv6;
+                } else {
+                    responseAddrType = Socks5AddressType.DOMAIN;
+                }
+            }
             agentTcpChannel.writeAndFlush(
-                    new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE, Socks5AddressType.IPv4,
+                    new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE, responseAddrType,
                             proxyMessage.getBody().getTargetHost(), proxyMessage.getBody().getTargetPort()))
                     .addListener(ChannelFutureListener.CLOSE);
             return;

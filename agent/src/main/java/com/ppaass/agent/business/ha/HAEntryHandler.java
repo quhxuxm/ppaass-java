@@ -13,14 +13,9 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.ReferenceCountUtil;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 @ChannelHandler.Sharable
 @Service
 public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
-    private final static ScheduledExecutorService DELAY_CLOSE_EXECUTOR = Executors.newScheduledThreadPool(128);
     private final AgentConfiguration agentConfiguration;
     private final HAProxyResourceManager haProxyResourceManager;
 
@@ -57,21 +52,19 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
 //                            () -> new Object[]{agentChannel.id().asLongText()});
 //            return;
 //        }
-        DELAY_CLOSE_EXECUTOR.schedule(() -> {
-            var proxyChannel = connectionInfo.getProxyChannel();
-            try {
-                var channelPool =
-                        proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
-                                .get();
-                channelPool.returnObject(proxyChannel);
-            } catch (Exception e) {
-                PpaassLogger.INSTANCE
-                        .debug(() -> "Fail to return proxy channel to pool because of exception, proxy channel = {}",
-                                () -> new Object[]{
-                                        proxyChannel.id().asLongText(), e
-                                });
-            }
-        }, 5, TimeUnit.SECONDS);
+        var proxyChannel = connectionInfo.getProxyChannel();
+        try {
+            var channelPool =
+                    proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
+                            .get();
+            channelPool.returnObject(proxyChannel);
+        } catch (Exception e) {
+            PpaassLogger.INSTANCE
+                    .debug(() -> "Fail to return proxy channel to pool because of exception, proxy channel = {}",
+                            () -> new Object[]{
+                                    proxyChannel.id().asLongText(), e
+                            });
+        }
         PpaassLogger.INSTANCE
                 .debug(() -> "Agent channel become inactive, and it is not for HTTPS, agent channel = {}",
                         () -> new Object[]{agentChannel.id().asLongText()});
