@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
     private final static ScheduledExecutorService DELAY_CLOSE_EXECUTOR = Executors.newScheduledThreadPool(128);
     private final ProxyConfiguration proxyConfiguration;
+    private static int TARGET_DATA_MAX_FRAME_LENGTH = 1024 * 1024 * 10;
 
     public ReceiveTargetTcpDataChannelHandler(ProxyConfiguration proxyConfiguration) {
         this.proxyConfiguration = proxyConfiguration;
@@ -101,42 +102,49 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
             return;
         }
         var proxyChannel = targetTcpInfo.getProxyTcpChannel();
-        final byte[] originalDataByteArray = new byte[targetOriginalMessageBuf.readableBytes()];
-        targetOriginalMessageBuf.readBytes(originalDataByteArray);
-        var proxyMessageBody =
-                new ProxyMessageBody(
-                        UUIDUtil.INSTANCE.generateUuid(),
-                        proxyConfiguration.getProxyInstanceId(),
-                        targetTcpInfo.getUserToken(),
-                        targetTcpInfo.getSourceHost(),
-                        targetTcpInfo.getSourcePort(),
-                        targetTcpInfo.getTargetHost(),
-                        targetTcpInfo.getTargetPort(),
-                        ProxyMessageBodyType.TCP_DATA_SUCCESS,
-                        targetTcpInfo.getAgentChannelId(),
-                        targetTcpInfo.getTargetChannelId(),
-                        originalDataByteArray);
-        var proxyMessage = new ProxyMessage(
-                UUIDUtil.INSTANCE.generateUuidInBytes(),
-                EncryptionType.choose(),
-                proxyMessageBody);
-        proxyChannel.writeAndFlush(proxyMessage)
-                .addListener((ChannelFutureListener) proxyChannelFuture -> {
-                    if (proxyChannelFuture.isSuccess()) {
-                        PpaassLogger.INSTANCE.debug(
-                                () -> "Success to write target data to agent, tcp info: \n{}\n",
+        int targetDataTotalLength = targetOriginalMessageBuf.readableBytes();
+        int frameLength = TARGET_DATA_MAX_FRAME_LENGTH;
+        if (targetDataTotalLength < frameLength) {
+            frameLength = targetDataTotalLength;
+        }
+        final byte[] originalDataByteArray = new byte[frameLength];
+        while (targetOriginalMessageBuf.isReadable()) {
+            targetOriginalMessageBuf.readBytes(originalDataByteArray);
+            var proxyMessageBody =
+                    new ProxyMessageBody(
+                            UUIDUtil.INSTANCE.generateUuid(),
+                            proxyConfiguration.getProxyInstanceId(),
+                            targetTcpInfo.getUserToken(),
+                            targetTcpInfo.getSourceHost(),
+                            targetTcpInfo.getSourcePort(),
+                            targetTcpInfo.getTargetHost(),
+                            targetTcpInfo.getTargetPort(),
+                            ProxyMessageBodyType.TCP_DATA_SUCCESS,
+                            targetTcpInfo.getAgentChannelId(),
+                            targetTcpInfo.getTargetChannelId(),
+                            originalDataByteArray);
+            var proxyMessage = new ProxyMessage(
+                    UUIDUtil.INSTANCE.generateUuidInBytes(),
+                    EncryptionType.choose(),
+                    proxyMessageBody);
+            proxyChannel.writeAndFlush(proxyMessage)
+                    .addListener((ChannelFutureListener) proxyChannelFuture -> {
+                        if (proxyChannelFuture.isSuccess()) {
+                            PpaassLogger.INSTANCE.debug(
+                                    () -> "Success to write target data to agent, tcp info: \n{}\n",
+                                    () -> new Object[]{
+                                            targetTcpInfo
+                                    });
+                            return;
+                        }
+                        PpaassLogger.INSTANCE.error(
+                                () -> "Fail to write target data to agent because of exception, tcp info: \n{}\n",
                                 () -> new Object[]{
                                         targetTcpInfo
                                 });
-                        return;
-                    }
-                    PpaassLogger.INSTANCE.error(
-                            () -> "Fail to write target data to agent because of exception, tcp info: \n{}\n",
-                            () -> new Object[]{
-                                    targetTcpInfo
-                            });
-                    targetChannel.close();
-                    proxyChannel.close();
-                });
+                        targetChannel.close();
+                        proxyChannel.close();
+                    });
+        }
     }
 }
