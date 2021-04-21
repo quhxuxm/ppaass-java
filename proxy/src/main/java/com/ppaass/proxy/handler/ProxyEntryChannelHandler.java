@@ -1,5 +1,6 @@
 package com.ppaass.proxy.handler;
 
+import com.ppaass.common.exception.PpaassException;
 import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.protocol.common.util.UUIDUtil;
 import com.ppaass.protocol.vpn.message.*;
@@ -7,23 +8,20 @@ import com.ppaass.proxy.IProxyConstant;
 import com.ppaass.proxy.ProxyConfiguration;
 import com.ppaass.proxy.handler.bo.TargetTcpInfo;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.util.Arrays;
 
 @Service
 @ChannelHandler.Sharable
 public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentMessage> {
+    private static final int UDP_PACKET_MAX_LENGTH = 64 * 1024;
     private final Bootstrap targetTcpBootstrap;
     private final ProxyConfiguration proxyConfiguration;
 
@@ -297,37 +295,20 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         try {
             targetUdpSocket.setSoTimeout(this.proxyConfiguration.getTargetUdpReceiveTimeout());
             targetUdpSocket.send(udpPackage);
-            var receiveDataPacketBuf = new byte[1024 * 64];
-            DatagramPacket receiveDataPacket = new DatagramPacket(receiveDataPacketBuf, receiveDataPacketBuf.length);
+            var receiveDataPacketBuf = new byte[UDP_PACKET_MAX_LENGTH];
+            DatagramPacket receiveDataPacket = new DatagramPacket(receiveDataPacketBuf, UDP_PACKET_MAX_LENGTH);
             targetUdpSocket.receive(receiveDataPacket);
-            ByteBuf pureReceivedData = Unpooled.wrappedBuffer(receiveDataPacket.getData());
-            byte[] proxyMessageData = new byte[receiveDataPacket.getLength()];
-            pureReceivedData.readBytes(proxyMessageData);
-            var proxyMessageBody =
-                    new ProxyMessageBody(
-                            UUIDUtil.INSTANCE.generateUuid(),
-                            proxyConfiguration.getProxyInstanceId(),
-                            agentMessage.getBody().getUserToken(),
-                            agentMessage.getBody().getSourceHost(),
-                            agentMessage.getBody().getSourcePort(),
-                            agentMessage.getBody().getTargetHost(),
-                            agentMessage.getBody().getTargetPort(),
-                            ProxyMessageBodyType.UDP_DATA_SUCCESS,
-                            agentMessage.getBody().getAgentChannelId(),
-                            null,
-                            proxyMessageData);
-            var proxyMessage =
-                    new ProxyMessage(
-                            UUIDUtil.INSTANCE.generateUuidInBytes(),
-                            EncryptionType.choose(),
-                            proxyMessageBody);
-            proxyTcpChannel.writeAndFlush(proxyMessage).addListener(future -> {
-                if (future.isSuccess()) {
-                    return;
-                }
-                proxyTcpChannel.close();
-            });
-        } catch (IOException e) {
+            int currentReceivedDataLength = receiveDataPacket.getLength();
+            byte[] proxyMessageData = Arrays.copyOf(receiveDataPacket.getData(), currentReceivedDataLength);
+            sendUdpDataToAgent(agentMessage, proxyTcpChannel, proxyMessageData);
+            while (currentReceivedDataLength >= UDP_PACKET_MAX_LENGTH) {
+                DatagramPacket nextReceiveDataPacket = new DatagramPacket(receiveDataPacketBuf, UDP_PACKET_MAX_LENGTH);
+                targetUdpSocket.receive(nextReceiveDataPacket);
+                currentReceivedDataLength = nextReceiveDataPacket.getLength();
+                byte[] nextProxyMessageData = Arrays.copyOf(nextReceiveDataPacket.getData(), currentReceivedDataLength);
+                sendUdpDataToAgent(agentMessage, proxyTcpChannel, nextProxyMessageData);
+            }
+        } catch (Exception e) {
             var failProxyMessageBody = new ProxyMessageBody(UUIDUtil.INSTANCE.generateUuid(),
                     proxyConfiguration.getProxyInstanceId(),
                     agentMessage.getBody().getUserToken(),
@@ -363,6 +344,42 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         } finally {
             targetUdpSocket.close();
         }
+    }
+
+    private void sendUdpDataToAgent(AgentMessage agentMessage, Channel proxyTcpChannel,
+                                    byte[] proxyMessageData) {
+        var proxyMessageBody =
+                new ProxyMessageBody(
+                        UUIDUtil.INSTANCE.generateUuid(),
+                        proxyConfiguration.getProxyInstanceId(),
+                        agentMessage.getBody().getUserToken(),
+                        agentMessage.getBody().getSourceHost(),
+                        agentMessage.getBody().getSourcePort(),
+                        agentMessage.getBody().getTargetHost(),
+                        agentMessage.getBody().getTargetPort(),
+                        ProxyMessageBodyType.UDP_DATA_SUCCESS,
+                        agentMessage.getBody().getAgentChannelId(),
+                        null,
+                        proxyMessageData);
+        var proxyMessage =
+                new ProxyMessage(
+                        UUIDUtil.INSTANCE.generateUuidInBytes(),
+                        EncryptionType.choose(),
+                        proxyMessageBody);
+        proxyTcpChannel.writeAndFlush(proxyMessage).syncUninterruptibly().addListener(future -> {
+            if (future.isSuccess()) {
+                return;
+            }
+            proxyTcpChannel.close();
+            PpaassLogger.INSTANCE
+                    .error(() -> "Fail to send udp data to agent because of exception happen when write data to agent, proxy channel = {}.",
+                            () -> new Object[]{
+                                    proxyTcpChannel.id().asLongText(),
+                                    future.cause()});
+            throw new PpaassException(
+                    "Fail to send udp data to agent because of exception happen when write data to agent.",
+                    future.cause());
+        });
     }
 
     @Override
