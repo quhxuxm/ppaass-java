@@ -30,10 +30,16 @@ class SAPooledProxyChannelFactory implements PooledObjectFactory<Channel> {
     @Override
     public PooledObject<Channel> makeObject() throws Exception {
         PpaassLogger.INSTANCE.debug(() -> "Begin to create proxy channel object.");
+        int totalObjNumber = this.pool.getNumIdle() + this.pool.getNumActive();
+        while (totalObjNumber >= this.pool.getMaxTotal()) {
+            synchronized (SAPooledProxyChannelFactory.class) {
+                this.pool.wait(1000);
+            }
+            totalObjNumber = this.pool.getNumIdle() + this.pool.getNumActive();
+        }
         var proxyChannelConnectFuture = this.socksProxyTcpChannelBootstrap
-                .connect(this.agentConfiguration.getProxyHost(), this.agentConfiguration.getProxyPort())
-                .syncUninterruptibly();
-        proxyChannelConnectFuture
+                .connect(this.agentConfiguration.getProxyHost(), this.agentConfiguration.getProxyPort());
+        proxyChannelConnectFuture.syncUninterruptibly()
                 .get(this.agentConfiguration.getProxyChannelPoolAcquireTimeoutMillis(), TimeUnit.MILLISECONDS);
         if (!proxyChannelConnectFuture.isSuccess()) {
             PpaassLogger.INSTANCE.error(() -> "Fail to create proxy channel because of exception.",
@@ -56,10 +62,10 @@ class SAPooledProxyChannelFactory implements PooledObjectFactory<Channel> {
                 () -> new Object[]{proxyChannel.id().asLongText()});
         var closedAlready = proxyChannel.attr(ISAConstant.IProxyChannelConstant.CLOSED_ALREADY).get();
         if (!closedAlready) {
-            proxyChannel.flush();
-            proxyChannel.close().syncUninterruptibly();
             PpaassLogger.INSTANCE.debug(() -> "Channel still not close, invoke close on channel, proxy channel = {}.",
                     () -> new Object[]{proxyChannel.id().asLongText()});
+            proxyChannel.flush();
+            proxyChannel.close().syncUninterruptibly();
         }
         PpaassLogger.INSTANCE.debug(() -> "Success destroy proxy channel object, proxy channel = {}.",
                 () -> new Object[]{proxyChannel.id().asLongText()});
@@ -81,6 +87,11 @@ class SAPooledProxyChannelFactory implements PooledObjectFactory<Channel> {
         var proxyChannel = pooledObject.getObject();
         PpaassLogger.INSTANCE.trace(() -> "Activate proxy channel object, proxy channel = {}.",
                 () -> new Object[]{proxyChannel.id().asLongText()});
+        if (!proxyChannel.isActive()) {
+            PpaassLogger.INSTANCE.error(() -> "Proxy channel is not active, proxy channel = {}",
+                    () -> new Object[]{proxyChannel.id().asLongText()});
+            throw new PpaassException("Proxy channel is not active");
+        }
     }
 
     @Override
