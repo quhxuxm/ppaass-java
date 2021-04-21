@@ -44,14 +44,6 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
     @Override
     public void channelInactive(ChannelHandlerContext agentChannelContext) {
         var agentChannel = agentChannelContext.channel();
-        var connectionInfo = agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
-        agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).set(null);
-        if (connectionInfo == null) {
-            PpaassLogger.INSTANCE
-                    .debug(() -> "No connection info attached to agent channel, skip the step to return proxy channel, agent channel = {}",
-                            () -> new Object[]{agentChannel.id().asLongText()});
-            return;
-        }
 //        if (connectionInfo.isHttps()) {
 //            PpaassLogger.INSTANCE
 //                    .debug(() -> "Agent channel become inactive, but it is for HTTPS, so will not return the proxy channel, agent channel = {}",
@@ -59,6 +51,14 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
 //            return;
 //        }
         DELAY_CLOSE_EXECUTOR.schedule(() -> {
+            var connectionInfo = agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
+            agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).set(null);
+            if (connectionInfo == null) {
+                PpaassLogger.INSTANCE
+                        .debug(() -> "No connection info attached to agent channel, skip the step to return proxy channel, agent channel = {}",
+                                () -> new Object[]{agentChannel.id().asLongText()});
+                return;
+            }
             var proxyChannel = connectionInfo.getProxyChannel();
             try {
                 var channelPool =

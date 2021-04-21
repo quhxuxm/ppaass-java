@@ -228,11 +228,11 @@ class HAProxyResourceManager implements IAgentResourceManager {
         config.setNumTestsPerEvictionRun(-1);
         config.setJmxEnabled(false);
         var result = new GenericObjectPool<>(socksAgentPooledProxyChannelFactory, config);
-//        var abandonedConfig = new AbandonedConfig();
-//        abandonedConfig.setRemoveAbandonedOnMaintenance(true);
-//        abandonedConfig.setRemoveAbandonedOnBorrow(true);
-//        abandonedConfig.setRemoveAbandonedTimeout(1);
-//        result.setAbandonedConfig(abandonedConfig);
+        var abandonedConfig = new AbandonedConfig();
+        abandonedConfig.setRemoveAbandonedOnMaintenance(true);
+        abandonedConfig.setRemoveAbandonedOnBorrow(true);
+        abandonedConfig.setRemoveAbandonedTimeout(Integer.MAX_VALUE);
+        result.setAbandonedConfig(abandonedConfig);
         socksAgentPooledProxyChannelFactory.attachPool(result);
         try {
             result.preparePool();

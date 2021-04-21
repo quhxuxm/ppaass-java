@@ -48,17 +48,17 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
     @Override
     public void channelInactive(ChannelHandlerContext targetChannelContext) {
         var targetChannel = targetChannelContext.channel();
-        var targetTcpInfo = targetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO).get();
-        if (targetTcpInfo == null) {
-            PpaassLogger.INSTANCE.error(
-                    () -> "Fail to transfer data from target to proxy because of no tcp info attached, target channel = {}.",
-                    () -> new Object[]{
-                            targetChannel.id().asLongText()
-                    });
-            return;
-        }
-        var proxyChannel = targetTcpInfo.getProxyTcpChannel();
         DELAY_CLOSE_EXECUTOR.schedule(() -> {
+            var targetTcpInfo = targetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO).get();
+            if (targetTcpInfo == null) {
+                PpaassLogger.INSTANCE.error(
+                        () -> "Fail to transfer data from target to proxy because of no tcp info attached, target channel = {}.",
+                        () -> new Object[]{
+                                targetChannel.id().asLongText()
+                        });
+                return;
+            }
+            var proxyChannel = targetTcpInfo.getProxyTcpChannel();
             var proxyMessageBody =
                     new ProxyMessageBody(
                             UUIDUtil.INSTANCE.generateUuid(),

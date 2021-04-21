@@ -32,16 +32,16 @@ class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
     @Override
     public void channelInactive(ChannelHandlerContext agentChannelContext) throws Exception {
         var agentChannel = agentChannelContext.channel();
-        var tcpConnectionInfo =
-                agentChannel.attr(ISAConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).get();
-        agentChannel.attr(ISAConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).set(null);
-        if (tcpConnectionInfo == null) {
-            PpaassLogger.INSTANCE
-                    .debug(() -> "No connection info attached to agent channel, skip the step to return proxy channel, agent channel = {}",
-                            () -> new Object[]{agentChannel.id().asLongText()});
-            return;
-        }
         DELAY_CLOSE_EXECUTOR.schedule(() -> {
+            var tcpConnectionInfo =
+                    agentChannel.attr(ISAConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).get();
+            agentChannel.attr(ISAConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).set(null);
+            if (tcpConnectionInfo == null) {
+                PpaassLogger.INSTANCE
+                        .debug(() -> "No connection info attached to agent channel, skip the step to return proxy channel, agent channel = {}",
+                                () -> new Object[]{agentChannel.id().asLongText()});
+                return;
+            }
             var proxyTcpChannel = tcpConnectionInfo.getProxyTcpChannel();
             var socksProxyTcpChannelPool =
                     proxyTcpChannel.attr(ISAConstant.IProxyChannelConstant.CHANNEL_POOL).get();
