@@ -220,7 +220,7 @@ class HAProxyResourceManager implements IAgentResourceManager {
         config.setEvictionPolicy(new DefaultEvictionPolicy<>());
         config.setFairness(true);
         config.setTestWhileIdle(true);
-        config.setTimeBetweenEvictionRunsMillis(5000);
+        config.setTimeBetweenEvictionRunsMillis(-1);
         config.setMinEvictableIdleTimeMillis(-1);
         config.setSoftMinEvictableIdleTimeMillis(-1);
         config.setJmxEnabled(false);
