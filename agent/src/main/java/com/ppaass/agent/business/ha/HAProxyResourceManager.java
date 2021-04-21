@@ -222,9 +222,9 @@ class HAProxyResourceManager implements IAgentResourceManager {
         config.setTestOnCreate(false);
         config.setTestOnReturn(true);
         config.setEvictionPolicy(new ProxyTcpChannelPoolEvictionPolicy());
-        config.setTimeBetweenEvictionRunsMillis(5000);
+        config.setTimeBetweenEvictionRunsMillis(agentConfiguration.getProxyChannelTimeBetweenEvictionRunsMillis());
         config.setMinEvictableIdleTimeMillis(-1);
-        config.setSoftMinEvictableIdleTimeMillis(5000);
+        config.setSoftMinEvictableIdleTimeMillis(agentConfiguration.getProxyChannelSoftMinEvictableIdleTimeMillis());
         config.setNumTestsPerEvictionRun(-1);
         config.setJmxEnabled(false);
         var result = new GenericObjectPool<>(socksAgentPooledProxyChannelFactory, config);

@@ -56,6 +56,8 @@ public class AgentConfiguration {
     private int proxyChannelPoolAcquireTimeoutMillis;
     private int proxyChannelPoolDestroyTimeoutMillis;
     private int delayCloseTimeSeconds;
+    private int proxyChannelTimeBetweenEvictionRunsMillis;
+    private int proxyChannelSoftMinEvictableIdleTimeMillis;
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private static class AgentDynamicConfiguration {
@@ -418,6 +420,22 @@ public class AgentConfiguration {
 
     public int getProxyChannelPoolDestroyTimeoutMillis() {
         return proxyChannelPoolDestroyTimeoutMillis;
+    }
+
+    public void setProxyChannelSoftMinEvictableIdleTimeMillis(int proxyChannelSoftMinEvictableIdleTimeMillis) {
+        this.proxyChannelSoftMinEvictableIdleTimeMillis = proxyChannelSoftMinEvictableIdleTimeMillis;
+    }
+
+    public int getProxyChannelSoftMinEvictableIdleTimeMillis() {
+        return proxyChannelSoftMinEvictableIdleTimeMillis;
+    }
+
+    public void setProxyChannelTimeBetweenEvictionRunsMillis(int proxyChannelTimeBetweenEvictionRunsMillis) {
+        this.proxyChannelTimeBetweenEvictionRunsMillis = proxyChannelTimeBetweenEvictionRunsMillis;
+    }
+
+    public int getProxyChannelTimeBetweenEvictionRunsMillis() {
+        return proxyChannelTimeBetweenEvictionRunsMillis;
     }
 
     public void save() {
