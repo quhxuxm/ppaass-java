@@ -15,17 +15,11 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 @Service
 @ChannelHandler.Sharable
 public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
-    private final static ScheduledExecutorService DELAY_CLOSE_EXECUTOR =
-            Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() * 2);
     private final ProxyConfiguration proxyConfiguration;
-    private static final int TARGET_DATA_MAX_FRAME_LENGTH = 1024 * 1024 * 100;
+    private static final int TARGET_DATA_MAX_FRAME_LENGTH = 1024 * 1024 * 10;
 
     public ReceiveTargetTcpDataChannelHandler(ProxyConfiguration proxyConfiguration) {
         this.proxyConfiguration = proxyConfiguration;
@@ -48,45 +42,43 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
     @Override
     public void channelInactive(ChannelHandlerContext targetChannelContext) {
         var targetChannel = targetChannelContext.channel();
-        DELAY_CLOSE_EXECUTOR.schedule(() -> {
-            var targetTcpInfo = targetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO).get();
-            if (targetTcpInfo == null) {
-                PpaassLogger.INSTANCE.error(
-                        () -> "Fail to transfer data from target to proxy because of no tcp info attached, target channel = {}.",
-                        () -> new Object[]{
-                                targetChannel.id().asLongText()
-                        });
+        var targetTcpInfo = targetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO).get();
+        if (targetTcpInfo == null) {
+            PpaassLogger.INSTANCE.error(
+                    () -> "Fail to transfer data from target to proxy because of no tcp info attached, target channel = {}.",
+                    () -> new Object[]{
+                            targetChannel.id().asLongText()
+                    });
+            return;
+        }
+        var proxyChannel = targetTcpInfo.getProxyTcpChannel();
+        var proxyMessageBody =
+                new ProxyMessageBody(
+                        UUIDUtil.INSTANCE.generateUuid(),
+                        proxyConfiguration.getProxyInstanceId(),
+                        targetTcpInfo.getUserToken(),
+                        targetTcpInfo.getSourceHost(),
+                        targetTcpInfo.getSourcePort(),
+                        targetTcpInfo.getTargetHost(),
+                        targetTcpInfo.getTargetPort(),
+                        ProxyMessageBodyType.TCP_CONNECTION_CLOSE,
+                        targetTcpInfo.getAgentChannelId(),
+                        targetTcpInfo.getTargetChannelId(),
+                        null);
+        var proxyMessage = new ProxyMessage(
+                UUIDUtil.INSTANCE.generateUuidInBytes(),
+                EncryptionType.choose(),
+                proxyMessageBody);
+        proxyChannel.writeAndFlush(proxyMessage).addListener(future -> {
+            proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).set(null);
+            if (future.isSuccess()) {
+                PpaassLogger.INSTANCE.debug(() -> "Success to write TCP_CONNECTION_CLOSE to agent, tcp info:\n{}\n",
+                        () -> new Object[]{targetTcpInfo});
                 return;
             }
-            var proxyChannel = targetTcpInfo.getProxyTcpChannel();
-            var proxyMessageBody =
-                    new ProxyMessageBody(
-                            UUIDUtil.INSTANCE.generateUuid(),
-                            proxyConfiguration.getProxyInstanceId(),
-                            targetTcpInfo.getUserToken(),
-                            targetTcpInfo.getSourceHost(),
-                            targetTcpInfo.getSourcePort(),
-                            targetTcpInfo.getTargetHost(),
-                            targetTcpInfo.getTargetPort(),
-                            ProxyMessageBodyType.TCP_CONNECTION_CLOSE,
-                            targetTcpInfo.getAgentChannelId(),
-                            targetTcpInfo.getTargetChannelId(),
-                            null);
-            var proxyMessage = new ProxyMessage(
-                    UUIDUtil.INSTANCE.generateUuidInBytes(),
-                    EncryptionType.choose(),
-                    proxyMessageBody);
-            proxyChannel.writeAndFlush(proxyMessage).addListener(future -> {
-                proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).set(null);
-                if (future.isSuccess()) {
-                    PpaassLogger.INSTANCE.debug(() -> "Success to write TCP_CONNECTION_CLOSE to agent, tcp info:\n{}\n",
-                            () -> new Object[]{targetTcpInfo});
-                    return;
-                }
-                PpaassLogger.INSTANCE.error(() -> "Fail to write TCP_CONNECTION_CLOSE to agent, tcp info:\n{}\n",
-                        () -> new Object[]{targetTcpInfo});
-            });
-        }, this.proxyConfiguration.getDelayCloseTimeSeconds(), TimeUnit.SECONDS);
+            PpaassLogger.INSTANCE.error(() -> "Fail to write TCP_CONNECTION_CLOSE to agent, tcp info:\n{}\n",
+                    () -> new Object[]{targetTcpInfo});
+        });
     }
 
     @Override

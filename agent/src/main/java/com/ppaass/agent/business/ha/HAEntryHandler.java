@@ -13,15 +13,9 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.ReferenceCountUtil;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 @ChannelHandler.Sharable
 @Service
 public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
-    private static final ScheduledExecutorService DELAY_CLOSE_EXECUTOR =
-            Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() * 2);
     private final AgentConfiguration agentConfiguration;
     private final HAProxyResourceManager haProxyResourceManager;
 
@@ -44,35 +38,27 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
     @Override
     public void channelInactive(ChannelHandlerContext agentChannelContext) {
         var agentChannel = agentChannelContext.channel();
-//        if (connectionInfo.isHttps()) {
-//            PpaassLogger.INSTANCE
-//                    .debug(() -> "Agent channel become inactive, but it is for HTTPS, so will not return the proxy channel, agent channel = {}",
-//                            () -> new Object[]{agentChannel.id().asLongText()});
-//            return;
-//        }
-        DELAY_CLOSE_EXECUTOR.schedule(() -> {
-            var connectionInfo = agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
-            agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).set(null);
-            if (connectionInfo == null) {
-                PpaassLogger.INSTANCE
-                        .debug(() -> "No connection info attached to agent channel, skip the step to return proxy channel, agent channel = {}",
-                                () -> new Object[]{agentChannel.id().asLongText()});
-                return;
-            }
-            var proxyChannel = connectionInfo.getProxyChannel();
-            try {
-                var channelPool =
-                        proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
-                                .get();
-                channelPool.returnObject(proxyChannel);
-            } catch (Exception e) {
-                PpaassLogger.INSTANCE
-                        .debug(() -> "Fail to return proxy channel to pool because of exception, proxy channel = {}",
-                                () -> new Object[]{
-                                        proxyChannel.id().asLongText(), e
-                                });
-            }
-        }, this.agentConfiguration.getDelayCloseTimeSeconds(), TimeUnit.SECONDS);
+        var connectionInfo = agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
+        if (connectionInfo == null) {
+            PpaassLogger.INSTANCE
+                    .debug(() -> "No connection info attached to agent channel, skip the step to return proxy channel, agent channel = {}",
+                            () -> new Object[]{agentChannel.id().asLongText()});
+            return;
+        }
+        var proxyChannel = connectionInfo.getProxyChannel();
+        try {
+            var channelPool =
+                    proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
+                            .get();
+            channelPool.returnObject(proxyChannel);
+        } catch (Exception e) {
+            PpaassLogger.INSTANCE
+                    .debug(() -> "Fail to return proxy channel to pool because of exception, proxy channel = {}",
+                            () -> new Object[]{
+                                    proxyChannel.id().asLongText(), e
+                            });
+        }
+        agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).set(null);
         PpaassLogger.INSTANCE
                 .debug(() -> "Agent channel become inactive, and it is not for HTTPS, agent channel = {}",
                         () -> new Object[]{agentChannel.id().asLongText()});

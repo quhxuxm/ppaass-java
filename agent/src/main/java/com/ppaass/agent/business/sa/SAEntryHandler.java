@@ -88,7 +88,7 @@ public class SAEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
                 this.processProxyConnect(agentChannel, proxyChannel, socks5CommandRequest);
             } catch (Exception e) {
                 PpaassLogger.INSTANCE
-                        .error(() -> "Fail to borrow proxy tcp channel connection from pool because of exception.",
+                        .error(() -> "Fail to create proxy tcp channel connection because of exception.",
                                 () -> new Object[]{e});
                 agentChannel.writeAndFlush(new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE,
                         socks5CommandRequest.dstAddrType())).addListener(ChannelFutureListener.CLOSE);
@@ -103,10 +103,19 @@ public class SAEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
                                     agentChannel.id().asLongText()
                             });
             agentChannel.config().setOption(ChannelOption.SO_KEEPALIVE, true);
-            this.saProxyResourceManager.getProxyUdpChannelBootstrap().bind(0)
-                    .addListener(new SAUdpBindListener(agentChannel,
-                            this.saProxyResourceManager.getProxyTcpChannelPool().borrowObject(),
-                            agentConfiguration, socks5CommandRequest));
+            try {
+                var proxyTcpChannel = this.saProxyResourceManager.getProxyTcpChannelPool().borrowObject();
+                this.saProxyResourceManager.getProxyUdpChannelBootstrap().bind(0)
+                        .addListener(new SAUdpBindListener(agentChannel,
+                                proxyTcpChannel,
+                                agentConfiguration, socks5CommandRequest));
+            } catch (Exception e) {
+                PpaassLogger.INSTANCE
+                        .error(() -> "Fail to bind udp channel to proxy tcp channel because of exception.",
+                                () -> new Object[]{e});
+                agentChannel.writeAndFlush(new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE,
+                        socks5CommandRequest.dstAddrType())).addListener(ChannelFutureListener.CLOSE);
+            }
             return;
         }
         PpaassLogger.INSTANCE
@@ -121,8 +130,8 @@ public class SAEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
     private void processProxyConnect(Channel agentChannel, Channel proxyChannel,
                                      Socks5CommandRequest socks5CommandRequest) {
         PpaassLogger.INSTANCE.debug(
-                () -> "Success connect to proxy, agent channel = {}",
-                () -> new Object[]{agentChannel.id().asLongText()});
+                () -> "Success connect to proxy, agent channel = {}, proxy channel = {}",
+                () -> new Object[]{agentChannel.id().asLongText(), proxyChannel.id().asLongText()});
         var tcpConnectionInfo = new SATcpConnectionInfo(
                 socks5CommandRequest.dstAddr(),
                 socks5CommandRequest.dstPort(),

@@ -14,15 +14,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 @ChannelHandler.Sharable
 @Service
 class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
-    private static final ScheduledExecutorService DELAY_CLOSE_EXECUTOR =
-            Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() * 2);
     private final AgentConfiguration agentConfiguration;
 
     SASendTcpDataToProxyHandler(AgentConfiguration agentConfiguration) {
@@ -32,31 +26,26 @@ class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
     @Override
     public void channelInactive(ChannelHandlerContext agentChannelContext) throws Exception {
         var agentChannel = agentChannelContext.channel();
-        DELAY_CLOSE_EXECUTOR.schedule(() -> {
-            var tcpConnectionInfo =
-                    agentChannel.attr(ISAConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).get();
-            agentChannel.attr(ISAConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).set(null);
-            if (tcpConnectionInfo == null) {
-                PpaassLogger.INSTANCE
-                        .debug(() -> "No connection info attached to agent channel, skip the step to return proxy channel, agent channel = {}",
-                                () -> new Object[]{agentChannel.id().asLongText()});
-                return;
-            }
-            var proxyTcpChannel = tcpConnectionInfo.getProxyTcpChannel();
-            var socksProxyTcpChannelPool =
-                    proxyTcpChannel.attr(ISAConstant.IProxyChannelConstant.CHANNEL_POOL).get();
-            try {
-                socksProxyTcpChannelPool.returnObject(proxyTcpChannel);
-            } catch (Exception e) {
-                PpaassLogger.INSTANCE
-                        .debug(() -> "Fail to return proxy channel to pool because of exception, proxy channel = {}",
-                                () -> new Object[]{
-                                        proxyTcpChannel.id().asLongText(), e
-                                });
-            }
-        }, this.agentConfiguration.getDelayCloseTimeSeconds(), TimeUnit.SECONDS);
         PpaassLogger.INSTANCE
-                .debug(() -> "Agent channel become inactive, agent channel = {}",
+                .debug(() -> "Begin to unregister agent channel, agent channel = {}",
+                        () -> new Object[]{agentChannel.id().asLongText()});
+        var tcpConnectionInfo =
+                agentChannel.attr(ISAConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).get();
+        var proxyTcpChannel = tcpConnectionInfo.getProxyTcpChannel();
+        var socksProxyTcpChannelPool =
+                proxyTcpChannel.attr(ISAConstant.IProxyChannelConstant.CHANNEL_POOL).get();
+        try {
+            socksProxyTcpChannelPool.returnObject(proxyTcpChannel);
+        } catch (Exception e) {
+            PpaassLogger.INSTANCE
+                    .debug(() -> "Fail to return proxy channel to pool because of exception, proxy channel = {}",
+                            () -> new Object[]{
+                                    proxyTcpChannel.id().asLongText(), e
+                            });
+        }
+        agentChannel.attr(ISAConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).set(null);
+        PpaassLogger.INSTANCE
+                .debug(() -> "Agent channel success unregistered, agent channel = {}",
                         () -> new Object[]{agentChannel.id().asLongText()});
     }
 

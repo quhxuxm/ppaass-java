@@ -140,6 +140,7 @@ class SAProxyResourceManager implements IAgentResourceManager {
         config.setMaxIdle(agentConfiguration.getProxyChannelPoolMaxIdleSize());
         config.setMaxTotal(agentConfiguration.getProxyChannelPoolMaxTotalSize());
         config.setMinIdle(agentConfiguration.getProxyChannelPoolMinIdleSize());
+        config.setMaxWaitMillis(agentConfiguration.getProxyChannelPoolAcquireTimeoutMillis());
         config.setBlockWhenExhausted(true);
         config.setTestWhileIdle(true);
         config.setTestOnBorrow(true);

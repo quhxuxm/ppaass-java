@@ -4,9 +4,8 @@ import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.ChannelProtocolCategory;
 import com.ppaass.agent.IAgentConst;
 import com.ppaass.agent.business.ha.HAEntryHandler;
-import com.ppaass.agent.business.ha.HAResourceCleanupHandler;
 import com.ppaass.agent.business.sa.SAEntryHandler;
-import com.ppaass.agent.business.sa.SAResourceCleanupHandler;
+import com.ppaass.common.handler.ChannelCleanupHandler;
 import com.ppaass.common.log.PpaassLogger;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
@@ -27,22 +26,16 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
             AttributeKey.valueOf("CHANNEL_PROTOCOL_TYPE");
     private final SAEntryHandler saEntryHandler;
     private final AgentConfiguration agentConfiguration;
-    private final SAResourceCleanupHandler saResourceCleanupHandler;
-    private final HAResourceCleanupHandler haResourceCleanupHandler;
     private final HAEntryHandler haEntryHandler;
 
     public DetectProtocolHandler(
             SAEntryHandler saEntryHandler,
             HAEntryHandler haEntryHandler,
-            AgentConfiguration agentConfiguration,
-            SAResourceCleanupHandler saResourceCleanupHandler,
-            HAResourceCleanupHandler haResourceCleanupHandler
+            AgentConfiguration agentConfiguration
     ) {
         this.saEntryHandler = saEntryHandler;
         this.haEntryHandler = haEntryHandler;
         this.agentConfiguration = agentConfiguration;
-        this.saResourceCleanupHandler = saResourceCleanupHandler;
-        this.haResourceCleanupHandler = haResourceCleanupHandler;
     }
 
     @Override
@@ -90,8 +83,8 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
                             this.agentConfiguration.getAgentChannelAllIdleSeconds()));
             agentChannelPipeline
                     .addBefore(IAgentConst.LAST_INBOUND_HANDLER,
-                            SAResourceCleanupHandler.class.getName(),
-                            this.saResourceCleanupHandler);
+                            ChannelCleanupHandler.class.getName(),
+                            ChannelCleanupHandler.INSTANCE);
             agentChannelPipeline.remove(this);
             agentChannelContext.fireChannelRead(messageBuf);
             return;
@@ -113,8 +106,8 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
                         this.agentConfiguration.getAgentChannelAllIdleSeconds()));
         agentChannelPipeline
                 .addBefore(IAgentConst.LAST_INBOUND_HANDLER,
-                        HAResourceCleanupHandler.class.getName(),
-                        this.haResourceCleanupHandler);
+                        ChannelCleanupHandler.class.getName(),
+                        ChannelCleanupHandler.INSTANCE);
         agentChannelPipeline.remove(this);
         agentChannelContext.fireChannelRead(messageBuf);
     }
