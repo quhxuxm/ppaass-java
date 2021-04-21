@@ -54,6 +54,7 @@ public class AgentConfiguration {
     private int proxyChannelPoolMaxTotalSize;
     private int proxyChannelPoolMinIdleSize;
     private int proxyChannelPoolAcquireTimeoutMillis;
+    private int proxyChannelPoolDestroyTimeoutMillis;
     private int delayCloseTimeSeconds;
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -409,6 +410,14 @@ public class AgentConfiguration {
 
     public int getDelayCloseTimeSeconds() {
         return delayCloseTimeSeconds;
+    }
+
+    public void setProxyChannelPoolDestroyTimeoutMillis(int proxyChannelPoolDestroyTimeoutMillis) {
+        this.proxyChannelPoolDestroyTimeoutMillis = proxyChannelPoolDestroyTimeoutMillis;
+    }
+
+    public int getProxyChannelPoolDestroyTimeoutMillis() {
+        return proxyChannelPoolDestroyTimeoutMillis;
     }
 
     public void save() {
