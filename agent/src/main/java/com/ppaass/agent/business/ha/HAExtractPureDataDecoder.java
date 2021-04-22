@@ -14,19 +14,11 @@ class HAExtractPureDataDecoder extends MessageToMessageDecoder<ProxyMessage> {
     protected void decode(ChannelHandlerContext proxyChannelContext, ProxyMessage proxyMessage, List<Object> out)
             throws Exception {
         var proxyChannel = proxyChannelContext.channel();
-        var connectionInfo = proxyChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).get();
-        if (connectionInfo == null) {
-            PpaassLogger.INSTANCE.error(
-                    () -> "Ignore proxy channel message, because of connection info not exist, proxy channel = {}",
-                    () -> new Object[]{proxyChannel.id().asLongText()});
-            return;
-        }
-        var agentChannel = connectionInfo.getAgentChannel();
         var originalDataByteBuffer = Unpooled.wrappedBuffer(proxyMessage.getBody().getData());
         PpaassLogger.INSTANCE.trace(
                 () -> "Receive original proxy data, agent channel = {}, proxy channel = {}, original proxy data: \n{}\n",
                 () -> new Object[]{
-                        agentChannel.id().asLongText(), proxyChannel.id().asLongText(),
+                        proxyMessage.getBody().getAgentChannelId(), proxyChannel.id().asLongText(),
                         ByteBufUtil.prettyHexDump(originalDataByteBuffer)
                 });
         out.add(originalDataByteBuffer);

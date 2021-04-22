@@ -5,10 +5,7 @@ import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.protocol.vpn.message.AgentMessageBodyType;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.netty.util.ReferenceCountUtil;
 import org.springframework.stereotype.Service;
@@ -65,6 +62,15 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     @Override
+    public void channelUnregistered(ChannelHandlerContext agentChannelContext) throws Exception {
+        var agentChannel = agentChannelContext.channel();
+        var httpConnectionInfo = agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
+        var proxyTcpChannel = httpConnectionInfo.getProxyChannel();
+        var agentChannelsOnProxyChannel = proxyTcpChannel.attr(IHAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
+        agentChannelsOnProxyChannel.remove(agentChannel.id().asLongText());
+    }
+
+    @Override
     protected void channelRead0(ChannelHandlerContext agentChannelContext, Object httpProxyInput) throws Exception {
         var agentChannel = agentChannelContext.channel();
         if (httpProxyInput instanceof FullHttpRequest) {
@@ -93,17 +99,33 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                                         fullHttpRequest.uri(),
                                         agentChannel.id().asLongText()
                                 });
-                var httpsProxyTcpChannel =
-                        this.haProxyResourceManager.getProxyTcpChannelPoolForHttps().borrowObject();
-                connectionInfo.setAgentChannel(agentChannel);
+                Channel httpsProxyTcpChannel;
+                try {
+                    httpsProxyTcpChannel = this.haProxyResourceManager.getProxyTcpChannelPoolForHttps().borrowObject();
+                } catch (Exception e) {
+                    PpaassLogger.INSTANCE
+                            .error(() -> "Fail to create proxy tcp channel connection because of exception, max connection number:{}, idle connection number:{}, active connection number:{}, target host={}, target port={}.",
+                                    () -> new Object[]{
+                                            this.haProxyResourceManager.getProxyTcpChannelPoolForHttps().getMaxTotal(),
+                                            this.haProxyResourceManager.getProxyTcpChannelPoolForHttps().getNumIdle(),
+                                            this.haProxyResourceManager.getProxyTcpChannelPoolForHttps().getNumActive(),
+                                            connectionInfo.getTargetHost(),
+                                            connectionInfo.getTargetPort(),
+                                            e});
+                    var failResponse =
+                            new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                                    HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                    agentChannel.writeAndFlush(failResponse)
+                            .addListener(ChannelFutureListener.CLOSE);
+                    return;
+                }
                 connectionInfo.setProxyChannel(httpsProxyTcpChannel);
-                connectionInfo.setUserToken(agentConfiguration.getUserToken());
-                connectionInfo.setOnConnecting(true);
-                httpsProxyTcpChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO)
-                        .set(connectionInfo);
+                var agentChannelsOnProxyChannel =
+                        httpsProxyTcpChannel.attr(IHAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
+                agentChannelsOnProxyChannel.putIfAbsent(agentChannel.id().asLongText(), agentChannel);
                 agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).set(connectionInfo);
                 HAUtil.INSTANCE
-                        .writeAgentMessageToProxy(AgentMessageBodyType.TCP_CONNECT, connectionInfo.getUserToken(),
+                        .writeAgentMessageToProxy(AgentMessageBodyType.TCP_CONNECT, agentConfiguration.getUserToken(),
                                 agentConfiguration.getAgentInstanceId(), httpsProxyTcpChannel,
                                 null, agentConfiguration.getAgentSourceAddress(), agentConfiguration.getTcpPort(),
                                 connectionInfo.getTargetHost(), connectionInfo.getTargetPort(),
@@ -142,7 +164,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                         });
                 HAUtil.INSTANCE.writeAgentMessageToProxy(
                         AgentMessageBodyType.TCP_DATA,
-                        connectionInfo.getUserToken(),
+                        agentConfiguration.getUserToken(),
                         agentConfiguration.getAgentInstanceId(),
                         connectionInfo.getProxyChannel(),
                         httpProxyInput,
@@ -192,15 +214,34 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                             agentChannel.id().asLongText(),
                             ByteBufUtil.prettyHexDump(fullHttpRequest.content())
                     });
-            var httpProxyTcpChannel = this.haProxyResourceManager.getProxyTcpChannelPoolForHttp().borrowObject();
-            connectionInfo.setAgentChannel(agentChannel);
+            Channel httpProxyTcpChannel;
+            try {
+                httpProxyTcpChannel = this.haProxyResourceManager.getProxyTcpChannelPoolForHttp().borrowObject();
+            } catch (Exception e) {
+                var finalConnectionInfo = connectionInfo;
+                PpaassLogger.INSTANCE
+                        .error(() -> "Fail to create proxy tcp channel connection because of exception, max connection number:{}, idle connection number:{}, active connection number:{}, target host={}, target port={}.",
+                                () -> new Object[]{
+                                        this.haProxyResourceManager.getProxyTcpChannelPoolForHttp().getMaxTotal(),
+                                        this.haProxyResourceManager.getProxyTcpChannelPoolForHttp().getNumIdle(),
+                                        this.haProxyResourceManager.getProxyTcpChannelPoolForHttp().getNumActive(),
+                                        finalConnectionInfo.getTargetHost(),
+                                        finalConnectionInfo.getTargetPort(),
+                                        e});
+                var failResponse =
+                        new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                                HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
+                return;
+            }
             connectionInfo.setProxyChannel(httpProxyTcpChannel);
-            connectionInfo.setUserToken(agentConfiguration.getUserToken());
             connectionInfo.setHttpMessageCarriedOnConnectTime(fullHttpRequest);
-            httpProxyTcpChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).set(connectionInfo);
+            var agentChannelsOnProxyChannel =
+                    httpProxyTcpChannel.attr(IHAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
+            agentChannelsOnProxyChannel.putIfAbsent(agentChannel.id().asLongText(), agentChannel);
             agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).set(connectionInfo);
             HAUtil.INSTANCE
-                    .writeAgentMessageToProxy(AgentMessageBodyType.TCP_CONNECT, connectionInfo.getUserToken(),
+                    .writeAgentMessageToProxy(AgentMessageBodyType.TCP_CONNECT, agentConfiguration.getUserToken(),
                             agentConfiguration.getAgentInstanceId(), httpProxyTcpChannel,
                             null, agentConfiguration.getAgentSourceAddress(),
                             agentConfiguration.getTcpPort(), connectionInfo.getTargetHost(),
@@ -237,7 +278,6 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
             agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
             return;
         }
-        connectionInfo.setOnConnecting(false);
         var httpsProxyTcpChannel = connectionInfo.getProxyChannel();
         PpaassLogger.INSTANCE.trace(HAEntryHandler.class,
                 () -> "HTTPS DATA send to uri: [{}], agent channel = {}, https data:\n{}\n",
@@ -248,7 +288,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                 });
         HAUtil.INSTANCE.writeAgentMessageToProxy(
                 AgentMessageBodyType.TCP_DATA,
-                connectionInfo.getUserToken(), agentConfiguration.getAgentInstanceId(),
+                agentConfiguration.getUserToken(), agentConfiguration.getAgentInstanceId(),
                 connectionInfo.getProxyChannel(),
                 httpProxyInput,
                 agentConfiguration.getAgentSourceAddress(),

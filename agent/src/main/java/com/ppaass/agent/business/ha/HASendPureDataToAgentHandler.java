@@ -18,14 +18,8 @@ class HASendPureDataToAgentHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext proxyChannelContext, Object msg) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
-        var connectionInfo = proxyChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).get();
-        if (connectionInfo == null) {
-            PpaassLogger.INSTANCE.error(
-                    () -> "Close proxy channel because of connection info not exist, proxy channel = {}",
-                    () -> new Object[]{proxyChannel.id().asLongText()});
-            return;
-        }
-        var agentChannel = connectionInfo.getAgentChannel();
+        var agentChannel = proxyChannel.attr(IHAConstant.IProxyChannelConstant.AGENT_CHANNEL_TO_SEND_PURE_DATA).get();
+        proxyChannel.attr(IHAConstant.IProxyChannelConstant.AGENT_CHANNEL_TO_SEND_PURE_DATA).set(null);
         agentChannel.writeAndFlush(msg).addListener((ChannelFutureListener) agentChannelFuture -> {
             if (agentChannelFuture.isSuccess()) {
                 return;

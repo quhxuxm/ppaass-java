@@ -3,30 +3,30 @@ package com.ppaass.agent.business.ha;
 import io.netty.channel.Channel;
 
 class HAConnectionInfo {
-    private boolean onConnecting;
     private final String targetHost;
     private final int targetPort;
-    private final boolean isHttps;
-    private String userToken;
-    private Channel proxyChannel;
-    private Channel agentChannel;
-    private Object httpMessageCarriedOnConnectTime;
     private final String uri;
+    private final boolean isHttps;
+    private Object httpMessageCarriedOnConnectTime;
+    private Channel proxyChannel;
 
-    public HAConnectionInfo(String targetHost, int targetPort, boolean isHttps, String uri) {
+    public HAConnectionInfo(String uri, String targetHost, int targetPort, boolean isHttps) {
         this.targetHost = targetHost;
         this.targetPort = targetPort;
         this.isHttps = isHttps;
         this.uri = uri;
-        this.onConnecting = false;
     }
 
-    public void setOnConnecting(boolean onConnecting) {
-        this.onConnecting = onConnecting;
+    public String getUri() {
+        return uri;
     }
 
-    public boolean isOnConnecting() {
-        return onConnecting;
+    public void setProxyChannel(Channel proxyChannel) {
+        this.proxyChannel = proxyChannel;
+    }
+
+    public Channel getProxyChannel() {
+        return proxyChannel;
     }
 
     public String getTargetHost() {
@@ -41,39 +41,11 @@ class HAConnectionInfo {
         return isHttps;
     }
 
-    public String getUserToken() {
-        return userToken;
-    }
-
-    public void setUserToken(String userToken) {
-        this.userToken = userToken;
-    }
-
-    public Channel getProxyChannel() {
-        return proxyChannel;
-    }
-
-    public void setProxyChannel(Channel proxyChannel) {
-        this.proxyChannel = proxyChannel;
-    }
-
-    public Channel getAgentChannel() {
-        return agentChannel;
-    }
-
-    public void setAgentChannel(Channel agentChannel) {
-        this.agentChannel = agentChannel;
-    }
-
     public Object getHttpMessageCarriedOnConnectTime() {
         return httpMessageCarriedOnConnectTime;
     }
 
     public void setHttpMessageCarriedOnConnectTime(Object httpMessageCarriedOnConnectTime) {
         this.httpMessageCarriedOnConnectTime = httpMessageCarriedOnConnectTime;
-    }
-
-    public String getUri() {
-        return uri;
     }
 }

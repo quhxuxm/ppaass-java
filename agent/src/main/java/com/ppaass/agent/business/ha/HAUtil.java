@@ -41,10 +41,10 @@ class HAUtil {
                 targetHost = "";
             }
             return new HAConnectionInfo(
+                    uri,
                     targetHost,
                     port,
-                    false,
-                    uri
+                    false
             );
         }
         if (uri.startsWith(HTTPS_SCHEMA)) {
@@ -59,10 +59,10 @@ class HAUtil {
                 targetHost = "";
             }
             return new HAConnectionInfo(
+                    uri,
                     targetHost,
                     port,
-                    true,
-                    uri
+                    true
             );
         }
         //For CONNECT method, only HTTPS will do this method.
@@ -90,10 +90,10 @@ class HAUtil {
             }
         }
         return new HAConnectionInfo(
+                uri,
                 hostName,
                 port,
-                true,
-                uri
+                true
         );
     }
 

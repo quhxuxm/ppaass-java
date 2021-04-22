@@ -53,8 +53,8 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
     protected void channelRead0(ChannelHandlerContext proxyChannelContext, ProxyMessage proxyMessage) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
         var agentChannelsOnProxyChannel = proxyChannel.attr(ISAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
-        var agentChannelIdInProxyMessage = proxyMessage.getBody().getAgentChannelId();
-        if (!agentChannelsOnProxyChannel.containsKey(agentChannelIdInProxyMessage)) {
+        var agentChannel = agentChannelsOnProxyChannel.get(proxyMessage.getBody().getAgentChannelId());
+        if (agentChannel == null) {
             PpaassLogger.INSTANCE.error(
                     () -> "The agent channel id in proxy message is not for current proxy channel, discard the proxy message, proxy channel = {}, proxy message:\n{}\n",
                     () -> new Object[]{
@@ -63,7 +63,6 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
                     });
             return;
         }
-        var agentChannel = agentChannelsOnProxyChannel.get(agentChannelIdInProxyMessage);
         switch (proxyMessage.getBody().getBodyType()) {
             case TCP_CONNECT_SUCCESS -> {
                 handleTcpConnectSuccess(proxyMessage, proxyChannel, agentChannel);

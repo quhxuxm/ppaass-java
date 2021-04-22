@@ -32,16 +32,10 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
     @Override
     public void channelInactive(ChannelHandlerContext proxyChannelContext) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
-        var connectionInfo = proxyChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).get();
-        if (connectionInfo != null) {
-            PpaassLogger.INSTANCE.error(() -> "Proxy channel closed, proxy channel = {}, agent channel = {}",
-                    () -> new Object[]{proxyChannel.id().asLongText(),
-                            connectionInfo.getAgentChannel().id().asLongText()});
-            connectionInfo.getAgentChannel().close();
-        } else {
-            PpaassLogger.INSTANCE.error(() -> "Proxy channel closed, proxy channel = {}",
-                    () -> new Object[]{proxyChannel.id().asLongText()});
-        }
+        var agentChannelsOnProxyChannel = proxyChannel.attr(IHAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
+        agentChannelsOnProxyChannel.forEach((agentChannelId, agentChannel) -> {
+            agentChannel.close();
+        });
         var channelPool =
                 proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
                         .get();
@@ -52,28 +46,18 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
     @Override
     protected void channelRead0(ChannelHandlerContext proxyChannelContext, ProxyMessage proxyMessage) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
-        var connectionInfo =
-                proxyChannel.attr(IHAConstant.IProxyChannelConstant.HTTP_CONNECTION_INFO).get();
-        if (connectionInfo == null) {
+        var agentChannelsOnProxyChannel = proxyChannel.attr(IHAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
+        var agentChannel = agentChannelsOnProxyChannel.get(proxyMessage.getBody().getAgentChannelId());
+        if (agentChannel == null) {
             PpaassLogger.INSTANCE.error(
-                    () -> "No agent channel attached to proxy channel, ignore the proxy message, proxy channel = {}, proxy message:\n{}\n",
+                    () -> "The agent channel id in proxy message is not for current proxy channel, discard the proxy message, proxy channel = {}, proxy message:\n{}\n",
                     () -> new Object[]{
                             proxyChannel.id().asLongText(),
                             proxyMessage
                     });
             return;
         }
-        var agentChannel = connectionInfo.getAgentChannel();
-        if (!(agentChannel.id().asLongText().equals(proxyMessage.getBody().getAgentChannelId()))) {
-            PpaassLogger.INSTANCE.error(
-                    () -> "Attached agent channel is not for current proxy message, discard the proxy message, agent channel={}, proxy channel = {}, proxy message:\n{}\n",
-                    () -> new Object[]{
-                            agentChannel.id(),
-                            proxyChannel.id().asLongText(),
-                            proxyMessage
-                    });
-            return;
-        }
+        var connectionInfo = agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
         switch (proxyMessage.getBody().getBodyType()) {
             case TCP_CONNECT_FAIL -> {
                 PpaassLogger.INSTANCE.error(
@@ -123,7 +107,7 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
                 //HTTP
                 HAUtil.INSTANCE.writeAgentMessageToProxy(
                         AgentMessageBodyType.TCP_DATA,
-                        connectionInfo.getUserToken(),
+                        agentConfiguration.getUserToken(),
                         agentConfiguration.getAgentInstanceId(),
                         proxyChannel,
                         connectionInfo.getHttpMessageCarriedOnConnectTime(),
@@ -152,6 +136,7 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
                 );
             }
             case TCP_DATA_SUCCESS -> {
+                proxyChannel.attr(IHAConstant.IProxyChannelConstant.AGENT_CHANNEL_TO_SEND_PURE_DATA).set(agentChannel);
                 proxyChannelContext.fireChannelRead(proxyMessage);
             }
             case TCP_CONNECTION_CLOSE -> {
