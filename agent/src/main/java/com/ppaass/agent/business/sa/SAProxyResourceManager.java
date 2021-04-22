@@ -22,8 +22,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Service
 class SAProxyResourceManager implements IAgentResourceManager {
-    private final SAUdpChannelInitializer SAUdpChannelInitializer;
-    private final SAProxyTcpChannelInitializer SAProxyTcpChannelInitializer;
+    private final SAUdpChannelInitializer saUdpChannelInitializer;
+    private final SAProxyTcpChannelInitializer saProxyTcpChannelInitializer;
     private final AgentConfiguration agentConfiguration;
     private Bootstrap proxyUdpChannelBootstrap;
     private Bootstrap proxyTcpChannelBootstrap;
@@ -31,11 +31,11 @@ class SAProxyResourceManager implements IAgentResourceManager {
     private final ReentrantReadWriteLock reentrantReadWriteLock;
 
     public SAProxyResourceManager(
-            SAUdpChannelInitializer SAUdpChannelInitializer,
-            SAProxyTcpChannelInitializer SAProxyTcpChannelInitializer,
+            SAUdpChannelInitializer saUdpChannelInitializer,
+            SAProxyTcpChannelInitializer saProxyTcpChannelInitializer,
             AgentConfiguration agentConfiguration) {
-        this.SAUdpChannelInitializer = SAUdpChannelInitializer;
-        this.SAProxyTcpChannelInitializer = SAProxyTcpChannelInitializer;
+        this.saUdpChannelInitializer = saUdpChannelInitializer;
+        this.saProxyTcpChannelInitializer = saProxyTcpChannelInitializer;
         this.agentConfiguration = agentConfiguration;
         this.reentrantReadWriteLock = new ReentrantReadWriteLock();
     }
@@ -105,7 +105,7 @@ class SAProxyResourceManager implements IAgentResourceManager {
                 .channel(NioDatagramChannel.class)
                 .option(ChannelOption.SO_BROADCAST, true)
                 .option(ChannelOption.AUTO_READ, true)
-                .handler(this.SAUdpChannelInitializer);
+                .handler(this.saUdpChannelInitializer);
         return result;
     }
 
@@ -129,7 +129,7 @@ class SAProxyResourceManager implements IAgentResourceManager {
         result.option(ChannelOption.SO_SNDBUF,
                 agentConfiguration.getProxyTcpSoSndbuf());
         result.remoteAddress(agentConfiguration.getProxyHost(), agentConfiguration.getProxyPort());
-        result.handler(this.SAProxyTcpChannelInitializer);
+        result.handler(this.saProxyTcpChannelInitializer);
         return result;
     }
 
