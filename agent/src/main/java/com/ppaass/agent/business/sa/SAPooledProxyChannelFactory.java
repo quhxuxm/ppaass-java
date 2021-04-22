@@ -75,6 +75,9 @@ class SAPooledProxyChannelFactory implements PooledObjectFactory<Channel> {
                         () -> new Object[]{proxyChannel.id().asLongText(), e});
             }
         }
+        proxyChannel.attr(ISAConstant.IProxyChannelConstant.AGENT_CHANNELS).set(null);
+        proxyChannel.attr(ISAConstant.IProxyChannelConstant.CLOSED_ALREADY).set(null);
+        proxyChannel.attr(ISAConstant.IProxyChannelConstant.CHANNEL_POOL).set(null);
         PpaassLogger.INSTANCE.debug(() -> "Success destroy proxy channel object, proxy channel = {}.",
                 () -> new Object[]{proxyChannel.id().asLongText()});
     }
