@@ -56,7 +56,9 @@ class SAUdpBindListener implements ChannelFutureListener {
                 .set(udpConnectionInfo);
         this.proxyTcpChannel.attr(ISAConstant.SOCKS_UDP_CONNECTION_INFO)
                 .set(udpConnectionInfo);
-        this.proxyTcpChannel.attr(ISAConstant.IProxyChannelConstant.AGENT_CHANNEL).set(agentUdpChannel);
+        var agentChannelsOnProxyChannel =
+                this.proxyTcpChannel.attr(ISAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
+        agentChannelsOnProxyChannel.putIfAbsent(agentUdpChannel.id().asLongText(), agentUdpChannel);
         agentUdpChannel.attr(ISAConstant.SOCKS_UDP_CONNECTION_INFO)
                 .set(udpConnectionInfo);
         this.agentTcpChannel.writeAndFlush(new DefaultSocks5CommandResponse(

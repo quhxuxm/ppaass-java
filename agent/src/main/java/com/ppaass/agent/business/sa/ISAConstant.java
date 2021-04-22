@@ -4,15 +4,21 @@ import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 
+import java.util.concurrent.ConcurrentMap;
+
 interface ISAConstant {
     interface IAgentChannelConstant {
-        AttributeKey<SATcpConnectionInfo> TCP_CONNECTION_INFO =
-                AttributeKey.valueOf("TCP_CONNECTION_INFO");
+        AttributeKey<Channel> PROXY_CHANNEL =
+                AttributeKey.valueOf("PROXY_CHANNEL");
+        AttributeKey<String> TARGET_HOST =
+                AttributeKey.valueOf("TARGET_HOST");
+        AttributeKey<Integer> TARGET_PORT =
+                AttributeKey.valueOf("TARGET_PORT");
     }
 
     interface IProxyChannelConstant {
-        AttributeKey<Channel> AGENT_CHANNEL =
-                AttributeKey.valueOf("AGENT_CHANNEL");
+        AttributeKey<ConcurrentMap<String, Channel>> AGENT_CHANNELS =
+                AttributeKey.valueOf("AGENT_CHANNELS");
         AttributeKey<GenericObjectPool<Channel>> CHANNEL_POOL =
                 AttributeKey.valueOf("CHANNEL_POOL");
         AttributeKey<Boolean> CLOSED_ALREADY =

@@ -29,9 +29,9 @@ class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
         PpaassLogger.INSTANCE
                 .debug(() -> "Begin to unregister agent channel, agent channel = {}",
                         () -> new Object[]{agentChannel.id().asLongText()});
-        var tcpConnectionInfo =
-                agentChannel.attr(ISAConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).get();
-        var proxyTcpChannel = tcpConnectionInfo.getProxyTcpChannel();
+        var proxyTcpChannel =
+                agentChannel.attr(ISAConstant.IAgentChannelConstant.PROXY_CHANNEL).get();
+        var agentChannelsOnProxyChannel = proxyTcpChannel.attr(ISAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
         var socksProxyTcpChannelPool =
                 proxyTcpChannel.attr(ISAConstant.IProxyChannelConstant.CHANNEL_POOL).get();
         try {
@@ -43,37 +43,41 @@ class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
                                     proxyTcpChannel.id().asLongText(), e
                             });
         }
-        agentChannel.attr(ISAConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).set(null);
+//        agentChannelsOnProxyChannel.remove(agentChannel.id().asLongText());
+        agentChannel.attr(ISAConstant.IAgentChannelConstant.PROXY_CHANNEL).set(null);
         PpaassLogger.INSTANCE
                 .debug(() -> "Agent channel success unregistered, agent channel = {}",
                         () -> new Object[]{agentChannel.id().asLongText()});
     }
 
     @Override
+    public void channelUnregistered(ChannelHandlerContext agentChannelContext) throws Exception {
+        var agentChannel = agentChannelContext.channel();
+        var proxyTcpChannel =
+                agentChannel.attr(ISAConstant.IAgentChannelConstant.PROXY_CHANNEL).get();
+        var agentChannelsOnProxyChannel = proxyTcpChannel.attr(ISAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
+        agentChannelsOnProxyChannel.remove(agentChannel.id().asLongText());
+    }
+
+    @Override
     protected void channelRead0(ChannelHandlerContext agentChannelContext, ByteBuf originalAgentData) throws Exception {
         var agentChannel = agentChannelContext.channel();
-        var tcpConnectionInfo =
-                agentChannel.attr(ISAConstant.IAgentChannelConstant.TCP_CONNECTION_INFO).get();
-        if (tcpConnectionInfo == null) {
-            PpaassLogger.INSTANCE.error(
-                    () -> "Fail write agent original message to proxy because of no connection information attached, agent channel = {}",
-                    () -> new Object[]{agentChannel.id().asLongText()});
-            return;
-        }
-        var proxyTcpChannel = tcpConnectionInfo.getProxyTcpChannel();
+        var proxyTcpChannel = agentChannel.attr(ISAConstant.IAgentChannelConstant.PROXY_CHANNEL).get();
         var originalAgentDataByteArray = new byte[originalAgentData.readableBytes()];
         originalAgentData.readBytes(originalAgentDataByteArray);
+        var targetHost = agentChannel.attr(ISAConstant.IAgentChannelConstant.TARGET_HOST).get();
+        var targetPort = agentChannel.attr(ISAConstant.IAgentChannelConstant.TARGET_PORT).get();
         var agentMessageBody = new AgentMessageBody(
                 UUIDUtil.INSTANCE.generateUuid(),
                 this.agentConfiguration.getAgentInstanceId(),
                 this.agentConfiguration.getUserToken(),
                 this.agentConfiguration.getAgentSourceAddress(),
                 this.agentConfiguration.getTcpPort(),
-                tcpConnectionInfo.getTargetHost(),
-                tcpConnectionInfo.getTargetPort(),
+                targetHost,
+                targetPort,
                 AgentMessageBodyType.TCP_DATA,
                 agentChannel.id().asLongText(),
-                tcpConnectionInfo.getTargetChannelId(),
+                null,
                 originalAgentDataByteArray);
         var agentMessage = new AgentMessage(
                 UUIDUtil.INSTANCE.generateUuidInBytes(),

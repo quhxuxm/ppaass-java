@@ -88,8 +88,14 @@ public class SAEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
                 this.processProxyConnect(agentChannel, proxyChannel, socks5CommandRequest);
             } catch (Exception e) {
                 PpaassLogger.INSTANCE
-                        .error(() -> "Fail to create proxy tcp channel connection because of exception.",
-                                () -> new Object[]{e});
+                        .error(() -> "Fail to create proxy tcp channel connection because of exception, max connection number:{}, idle connection number:{}, active connection number:{}, target host={}, target port={}.",
+                                () -> new Object[]{
+                                        this.saProxyResourceManager.getProxyTcpChannelPool().getMaxTotal(),
+                                        this.saProxyResourceManager.getProxyTcpChannelPool().getNumIdle(),
+                                        this.saProxyResourceManager.getProxyTcpChannelPool().getNumActive(),
+                                        socks5CommandRequest.dstAddr(),
+                                        socks5CommandRequest.dstPort(),
+                                        e});
                 agentChannel.writeAndFlush(new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE,
                         socks5CommandRequest.dstAddrType())).addListener(ChannelFutureListener.CLOSE);
             }
@@ -132,22 +138,17 @@ public class SAEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
         PpaassLogger.INSTANCE.debug(
                 () -> "Success connect to proxy, agent channel = {}, proxy channel = {}",
                 () -> new Object[]{agentChannel.id().asLongText(), proxyChannel.id().asLongText()});
-        var tcpConnectionInfo = new SATcpConnectionInfo(
-                socks5CommandRequest.dstAddr(),
-                socks5CommandRequest.dstPort(),
-                socks5CommandRequest.dstAddrType(),
-                agentConfiguration.getUserToken(),
-                agentChannel,
-                proxyChannel);
-        agentChannel.attr(ISAConstant.IAgentChannelConstant.TCP_CONNECTION_INFO)
-                .set(tcpConnectionInfo);
+        agentChannel.attr(ISAConstant.IAgentChannelConstant.PROXY_CHANNEL)
+                .set(proxyChannel);
+        agentChannel.attr(ISAConstant.IAgentChannelConstant.TARGET_HOST).set(socks5CommandRequest.dstAddr());
+        agentChannel.attr(ISAConstant.IAgentChannelConstant.TARGET_PORT).set(socks5CommandRequest.dstPort());
         var agentMessageBody = new AgentMessageBody(
                 UUIDUtil.INSTANCE.generateUuid(),
                 agentConfiguration.getAgentInstanceId(),
                 agentConfiguration.getUserToken(),
                 this.agentConfiguration.getAgentSourceAddress(), this.agentConfiguration.getTcpPort(),
-                tcpConnectionInfo.getTargetHost(),
-                tcpConnectionInfo.getTargetPort(),
+                socks5CommandRequest.dstAddr(),
+                socks5CommandRequest.dstPort(),
                 AgentMessageBodyType.TCP_CONNECT,
                 agentChannel.id().asLongText(),
                 null, null);
@@ -166,7 +167,8 @@ public class SAEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
         PpaassLogger.INSTANCE.trace(
                 () -> "Send TCP_CONNECT from agent to proxy [BEGIN] , agent channel = {}, proxy channel = {}",
                 () -> new Object[]{proxyChannel.id().asLongText()});
-        proxyChannel.attr(ISAConstant.IProxyChannelConstant.AGENT_CHANNEL).set(agentChannel);
+        var agentChannelsOnProxyChannel = proxyChannel.attr(ISAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
+        agentChannelsOnProxyChannel.putIfAbsent(agentChannel.id().asLongText(), agentChannel);
         proxyChannel.writeAndFlush(agentMessage)
                 .addListener((ChannelFutureListener) proxyWriteChannelFuture -> {
                     if (proxyWriteChannelFuture.isSuccess()) {
@@ -180,7 +182,7 @@ public class SAEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
                             () -> new Object[]{agentChannel.id().asLongText(), proxyChannel.id().asLongText()});
                     agentChannel.writeAndFlush(
                             new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE,
-                                    tcpConnectionInfo.getTargetAddressType()))
+                                    socks5CommandRequest.dstAddrType()))
                             .addListener(ChannelFutureListener.CLOSE);
                 });
     }
