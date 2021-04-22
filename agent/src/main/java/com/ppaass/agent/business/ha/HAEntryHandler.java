@@ -11,9 +11,14 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.ReferenceCountUtil;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 @ChannelHandler.Sharable
 @Service
 public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
+    private final ScheduledExecutorService DELAY_UNREGISTER_EXECUTOR = Executors.newScheduledThreadPool(8);
     private final AgentConfiguration agentConfiguration;
     private final HAProxyResourceManager haProxyResourceManager;
 
@@ -64,18 +69,21 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
     @Override
     public void channelUnregistered(ChannelHandlerContext agentChannelContext) throws Exception {
         var agentChannel = agentChannelContext.channel();
-        var connectionInfo = agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
-        if (connectionInfo == null) {
-            PpaassLogger.INSTANCE
-                    .debug(() -> "No connection info attached to agent channel, skip the step to unregister itself from proxy channel, agent channel = {}",
-                            () -> new Object[]{agentChannel.id().asLongText()});
-            return;
-        }
-        agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).set(null);
-        var proxyTcpChannel = connectionInfo.getProxyChannel();
-        var agentChannelsOnProxyChannel = proxyTcpChannel.attr(IHAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
-        agentChannelsOnProxyChannel.remove(agentChannel.id().asLongText());
-        agentChannel.attr(IAgentConst.CHANNEL_PROTOCOL_CATEGORY).set(null);
+        DELAY_UNREGISTER_EXECUTOR.schedule(() -> {
+            var connectionInfo = agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
+            if (connectionInfo == null) {
+                PpaassLogger.INSTANCE
+                        .debug(() -> "No connection info attached to agent channel, skip the step to unregister itself from proxy channel, agent channel = {}",
+                                () -> new Object[]{agentChannel.id().asLongText()});
+                return;
+            }
+            agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).set(null);
+            var proxyTcpChannel = connectionInfo.getProxyChannel();
+            var agentChannelsOnProxyChannel =
+                    proxyTcpChannel.attr(IHAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
+            agentChannelsOnProxyChannel.remove(agentChannel.id().asLongText());
+            agentChannel.attr(IAgentConst.CHANNEL_PROTOCOL_CATEGORY).set(null);
+        }, 20, TimeUnit.SECONDS);
     }
 
     @Override
