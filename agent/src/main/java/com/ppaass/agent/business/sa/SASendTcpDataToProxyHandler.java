@@ -32,7 +32,6 @@ class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
                         () -> new Object[]{agentChannel.id().asLongText()});
         var proxyTcpChannel =
                 agentChannel.attr(ISAConstant.IAgentChannelConstant.PROXY_CHANNEL).get();
-        var agentChannelsOnProxyChannel = proxyTcpChannel.attr(ISAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
         var socksProxyTcpChannelPool =
                 proxyTcpChannel.attr(ISAConstant.IProxyChannelConstant.CHANNEL_POOL).get();
         try {
@@ -44,8 +43,6 @@ class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
                                     proxyTcpChannel.id().asLongText(), e
                             });
         }
-//        agentChannelsOnProxyChannel.remove(agentChannel.id().asLongText());
-        agentChannel.attr(ISAConstant.IAgentChannelConstant.PROXY_CHANNEL).set(null);
         PpaassLogger.INSTANCE
                 .debug(() -> "Agent channel success unregistered, agent channel = {}",
                         () -> new Object[]{agentChannel.id().asLongText()});
@@ -56,6 +53,13 @@ class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
         var agentChannel = agentChannelContext.channel();
         var proxyTcpChannel =
                 agentChannel.attr(ISAConstant.IAgentChannelConstant.PROXY_CHANNEL).get();
+        agentChannel.attr(ISAConstant.IAgentChannelConstant.PROXY_CHANNEL).set(null);
+        if (proxyTcpChannel == null) {
+            PpaassLogger.INSTANCE
+                    .debug(() -> "No proxy channel attached to agent channel, skip the step to unregister itself from proxy channel, agent channel = {}",
+                            () -> new Object[]{agentChannel.id().asLongText()});
+            return;
+        }
         var agentChannelsOnProxyChannel = proxyTcpChannel.attr(ISAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
         agentChannelsOnProxyChannel.remove(agentChannel.id().asLongText());
         agentChannel.attr(IAgentConst.CHANNEL_PROTOCOL_CATEGORY).set(null);
