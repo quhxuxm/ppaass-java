@@ -83,7 +83,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                     proxyTcpChannel.attr(IHAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
             agentChannelsOnProxyChannel.remove(agentChannel.id().asLongText());
             agentChannel.attr(IAgentConst.CHANNEL_PROTOCOL_CATEGORY).set(null);
-        }, 20, TimeUnit.SECONDS);
+        }, this.agentConfiguration.getDelayCloseTimeSeconds(), TimeUnit.SECONDS);
     }
 
     @Override
