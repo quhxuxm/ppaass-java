@@ -40,7 +40,7 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext targetChannelContext) {
+    public void channelUnregistered(ChannelHandlerContext targetChannelContext) {
         var targetChannel = targetChannelContext.channel();
         var targetTcpInfo = targetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO).get();
         if (targetTcpInfo == null) {
