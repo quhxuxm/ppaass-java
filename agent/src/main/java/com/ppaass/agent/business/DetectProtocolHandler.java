@@ -16,14 +16,11 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.socksx.SocksPortUnificationServerHandler;
 import io.netty.handler.codec.socksx.SocksVersion;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.util.AttributeKey;
 import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
 @Service
 class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
-    private static final AttributeKey<ChannelProtocolCategory> CHANNEL_PROTOCOL_CATEGORY =
-            AttributeKey.valueOf("CHANNEL_PROTOCOL_TYPE");
     private final SAEntryHandler saEntryHandler;
     private final AgentConfiguration agentConfiguration;
     private final HAEntryHandler haEntryHandler;
@@ -41,7 +38,7 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext agentChannelContext, Object msg) throws Exception {
         var agentChannel = agentChannelContext.channel();
-        var channelProtocolType = agentChannel.attr(CHANNEL_PROTOCOL_CATEGORY).get();
+        var channelProtocolType = agentChannel.attr(IAgentConst.CHANNEL_PROTOCOL_CATEGORY).get();
         if (channelProtocolType != null) {
             PpaassLogger.INSTANCE
                     .debug(() -> "Incoming request protocol is: {}, agent channel = {}",
@@ -70,7 +67,7 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
                             () -> "Incoming request is a socks request, agent channel = {}",
                             () -> new Object[]{
                                     agentChannel.id().asLongText()});
-            agentChannel.attr(CHANNEL_PROTOCOL_CATEGORY)
+            agentChannel.attr(IAgentConst.CHANNEL_PROTOCOL_CATEGORY)
                     .set(ChannelProtocolCategory.SOCKS);
             agentChannelPipeline
                     .addBefore(IAgentConst.LAST_INBOUND_HANDLER, SocksPortUnificationServerHandler.class.getName(),
@@ -94,7 +91,7 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
                         () -> "Incoming request is a http request, agent channel = {}",
                         () -> new Object[]{
                                 agentChannel.id().asLongText()});
-        agentChannel.attr(CHANNEL_PROTOCOL_CATEGORY)
+        agentChannel.attr(IAgentConst.CHANNEL_PROTOCOL_CATEGORY)
                 .set(ChannelProtocolCategory.HTTP);
         agentChannelPipeline.addLast(HttpServerCodec.class.getName(), new HttpServerCodec());
         agentChannelPipeline.addLast(HttpObjectAggregator.class.getName(),

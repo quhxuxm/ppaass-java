@@ -1,6 +1,7 @@
 package com.ppaass.agent.business.ha;
 
 import com.ppaass.agent.AgentConfiguration;
+import com.ppaass.agent.IAgentConst;
 import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.protocol.vpn.message.AgentMessageBodyType;
 import io.netty.buffer.ByteBuf;
@@ -68,6 +69,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
         var proxyTcpChannel = httpConnectionInfo.getProxyChannel();
         var agentChannelsOnProxyChannel = proxyTcpChannel.attr(IHAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
         agentChannelsOnProxyChannel.remove(agentChannel.id().asLongText());
+        agentChannel.attr(IAgentConst.CHANNEL_PROTOCOL_CATEGORY).set(null);
     }
 
     @Override
