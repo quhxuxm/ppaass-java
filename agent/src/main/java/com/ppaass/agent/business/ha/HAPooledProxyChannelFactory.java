@@ -5,6 +5,7 @@ import com.ppaass.common.exception.PpaassException;
 import com.ppaass.common.log.PpaassLogger;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.PooledObjectFactory;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
@@ -31,16 +32,15 @@ class HAPooledProxyChannelFactory implements PooledObjectFactory<Channel> {
     @Override
     public PooledObject<Channel> makeObject() throws Exception {
         PpaassLogger.INSTANCE.debug(() -> "Begin to create proxy channel object.");
-        var proxyChannelConnectFuture = this.bootstrap
-                .connect(this.agentConfiguration.getProxyHost(), this.agentConfiguration.getProxyPort());
+        final ChannelFuture proxyChannelConnectFuture;
         try {
-            proxyChannelConnectFuture.syncUninterruptibly()
-                    .get(this.agentConfiguration.getProxyChannelPoolAcquireTimeoutMillis(), TimeUnit.MILLISECONDS);
+            proxyChannelConnectFuture = this.bootstrap
+                    .connect(this.agentConfiguration.getProxyHost(), this.agentConfiguration.getProxyPort())
+                    .syncUninterruptibly();
         } catch (Exception e) {
-            PpaassLogger.INSTANCE.error(() -> "Create proxy channel object have exception, proxy channel = {}.",
-                    () -> new Object[]{proxyChannelConnectFuture.channel().id().asLongText(), e});
-            throw new PpaassException("Create proxy channel object have exception.",
-                    proxyChannelConnectFuture.cause());
+            PpaassLogger.INSTANCE.error(() -> "Create proxy channel object have exception.",
+                    () -> new Object[]{e});
+            throw new PpaassException("Create proxy channel object have exception.", e);
         }
         if (!proxyChannelConnectFuture.isSuccess()) {
             PpaassLogger.INSTANCE.error(() -> "Fail to create proxy channel because of exception.",
