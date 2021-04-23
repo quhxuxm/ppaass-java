@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 @ChannelHandler.Sharable
 public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
     private final ProxyConfiguration proxyConfiguration;
-    private static final int TARGET_DATA_MAX_FRAME_LENGTH = 1024 * 1024 * 10;
+    private static final int TARGET_DATA_MAX_FRAME_LENGTH = 1024 * 1024 * 1000;
 
     public ReceiveTargetTcpDataChannelHandler(ProxyConfiguration proxyConfiguration) {
         this.proxyConfiguration = proxyConfiguration;
