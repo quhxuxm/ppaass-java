@@ -1,6 +1,7 @@
 package com.ppaass.agent.business.ha;
 
 import com.ppaass.agent.AgentConfiguration;
+import com.ppaass.agent.IAgentConst;
 import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.protocol.vpn.message.AgentMessageBodyType;
 import com.ppaass.protocol.vpn.message.ProxyMessage;
@@ -32,9 +33,9 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
     @Override
     public void channelInactive(ChannelHandlerContext proxyChannelContext) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
-        var agentChannelsOnProxyChannel = proxyChannel.attr(IHAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
-        agentChannelsOnProxyChannel.forEach((agentChannelId, agentChannel) -> {
-            agentChannel.close();
+        var agentChannelsOnProxyChannel = proxyChannel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNELS).get();
+        agentChannelsOnProxyChannel.forEach((agentChannelId, agentChannelWrapper) -> {
+            agentChannelWrapper.close();
         });
         var channelPool =
                 proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
@@ -46,9 +47,9 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
     @Override
     protected void channelRead0(ChannelHandlerContext proxyChannelContext, ProxyMessage proxyMessage) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
-        var agentChannelsOnProxyChannel = proxyChannel.attr(IHAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
-        var agentChannel = agentChannelsOnProxyChannel.get(proxyMessage.getBody().getAgentChannelId());
-        if (agentChannel == null) {
+        var agentChannelsOnProxyChannel = proxyChannel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNELS).get();
+        var agentChannelWrapper = agentChannelsOnProxyChannel.get(proxyMessage.getBody().getAgentChannelId());
+        if (agentChannelWrapper == null) {
             PpaassLogger.INSTANCE.error(
                     () -> "The agent channel id in proxy message is not for current proxy channel, discard the proxy message, proxy channel = {}, proxy message:\n{}\n",
                     () -> new Object[]{
@@ -57,6 +58,7 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
                     });
             return;
         }
+        var agentChannel = agentChannelWrapper.getChannel();
         var connectionInfo = agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
         switch (proxyMessage.getBody().getBodyType()) {
             case TCP_CONNECT_FAIL -> {

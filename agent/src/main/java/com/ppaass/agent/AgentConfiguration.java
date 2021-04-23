@@ -55,7 +55,7 @@ public class AgentConfiguration {
     private int proxyChannelPoolMinIdleSize;
     private int proxyChannelPoolAcquireTimeoutMillis;
     private int proxyChannelPoolDestroyTimeoutMillis;
-    private int delayCloseTimeSeconds;
+    private int delayCloseTimeMillis;
     private int proxyChannelTimeBetweenEvictionRunsMillis;
     private int proxyChannelSoftMinEvictableIdleTimeMillis;
 
@@ -406,12 +406,12 @@ public class AgentConfiguration {
         return agentChannelAllIdleSeconds;
     }
 
-    public void setDelayCloseTimeSeconds(int delayCloseTimeSeconds) {
-        this.delayCloseTimeSeconds = delayCloseTimeSeconds;
+    public void setDelayCloseTimeMillis(int delayCloseTimeMillis) {
+        this.delayCloseTimeMillis = delayCloseTimeMillis;
     }
 
-    public int getDelayCloseTimeSeconds() {
-        return delayCloseTimeSeconds;
+    public int getDelayCloseTimeMillis() {
+        return delayCloseTimeMillis;
     }
 
     public void setProxyChannelPoolDestroyTimeoutMillis(int proxyChannelPoolDestroyTimeoutMillis) {

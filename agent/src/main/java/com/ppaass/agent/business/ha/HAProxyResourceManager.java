@@ -2,6 +2,7 @@ package com.ppaass.agent.business.ha;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.IAgentResourceManager;
+import com.ppaass.agent.business.ClearClosedAgentChannelHandler;
 import com.ppaass.agent.business.ProxyTcpChannelPoolEvictionPolicy;
 import com.ppaass.common.constant.ICommonConstant;
 import com.ppaass.common.exception.PpaassException;
@@ -23,6 +24,7 @@ import io.netty.handler.codec.compression.Lz4FrameDecoder;
 import io.netty.handler.codec.compression.Lz4FrameEncoder;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpResponseDecoder;
+import io.netty.handler.timeout.IdleStateHandler;
 import org.apache.commons.pool2.impl.AbandonedConfig;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -41,14 +43,17 @@ class HAProxyResourceManager implements IAgentResourceManager {
     private final ReentrantReadWriteLock reentrantReadWriteLock;
     private final HASendPureDataToAgentHandler haSendPureDataToAgentHandler;
     private final HAProxyMessageBodyTypeHandler haProxyMessageBodyTypeHandler;
+    private final ClearClosedAgentChannelHandler clearClosedAgentChannelHandler;
 
     public HAProxyResourceManager(
             AgentConfiguration agentConfiguration,
             HASendPureDataToAgentHandler haSendPureDataToAgentHandler,
-            HAProxyMessageBodyTypeHandler haProxyMessageBodyTypeHandler) {
+            HAProxyMessageBodyTypeHandler haProxyMessageBodyTypeHandler,
+            ClearClosedAgentChannelHandler clearClosedAgentChannelHandler) {
         this.agentConfiguration = agentConfiguration;
         this.haSendPureDataToAgentHandler = haSendPureDataToAgentHandler;
         this.haProxyMessageBodyTypeHandler = haProxyMessageBodyTypeHandler;
+        this.clearClosedAgentChannelHandler = clearClosedAgentChannelHandler;
         this.reentrantReadWriteLock = new ReentrantReadWriteLock();
     }
 
@@ -158,6 +163,7 @@ class HAProxyResourceManager implements IAgentResourceManager {
                 proxyChannelPipeline.addLast(new LengthFieldPrepender(ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER));
                 proxyChannelPipeline.addLast(new AgentMessageEncoder(
                         agentConfiguration.getProxyPublicKey()));
+                proxyChannel.pipeline().addLast(clearClosedAgentChannelHandler);
                 proxyChannelPipeline.addLast(PrintExceptionHandler.INSTANCE);
             }
         });
@@ -203,6 +209,7 @@ class HAProxyResourceManager implements IAgentResourceManager {
                 proxyChannelPipeline.addLast(new LengthFieldPrepender(ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER));
                 proxyChannelPipeline.addLast(new AgentMessageEncoder(
                         agentConfiguration.getProxyPublicKey()));
+                proxyChannel.pipeline().addLast(clearClosedAgentChannelHandler);
                 proxyChannelPipeline.addLast(PrintExceptionHandler.INSTANCE);
             }
         });

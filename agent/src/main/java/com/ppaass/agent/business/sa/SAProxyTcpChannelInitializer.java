@@ -1,6 +1,7 @@
 package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
+import com.ppaass.agent.business.ClearClosedAgentChannelHandler;
 import com.ppaass.common.constant.ICommonConstant;
 import com.ppaass.common.handler.AgentMessageEncoder;
 import com.ppaass.common.handler.PrintExceptionHandler;
@@ -12,18 +13,22 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.compression.Lz4FrameDecoder;
 import io.netty.handler.codec.compression.Lz4FrameEncoder;
+import io.netty.handler.timeout.IdleStateHandler;
 import org.springframework.stereotype.Service;
 
 @Service
 class SAProxyTcpChannelInitializer extends ChannelInitializer<Channel> {
     private final AgentConfiguration agentConfiguration;
-    private final SAReceiveProxyDataHandler SAReceiveProxyDataHandler;
+    private final SAReceiveProxyDataHandler saReceiveProxyDataHandler;
+    private final ClearClosedAgentChannelHandler clearClosedAgentChannelHandler;
 
     public SAProxyTcpChannelInitializer(
             AgentConfiguration agentConfiguration,
-            SAReceiveProxyDataHandler SAReceiveProxyDataHandler) {
+            SAReceiveProxyDataHandler saReceiveProxyDataHandler,
+            ClearClosedAgentChannelHandler clearClosedAgentChannelHandler) {
         this.agentConfiguration = agentConfiguration;
-        this.SAReceiveProxyDataHandler = SAReceiveProxyDataHandler;
+        this.saReceiveProxyDataHandler = saReceiveProxyDataHandler;
+        this.clearClosedAgentChannelHandler = clearClosedAgentChannelHandler;
     }
 
     @Override
@@ -38,12 +43,13 @@ class SAProxyTcpChannelInitializer extends ChannelInitializer<Channel> {
                 new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER,
                         0, ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER));
         proxyChannelPipeline.addLast(new ProxyMessageDecoder(agentConfiguration.getAgentPrivateKey()));
-        proxyChannelPipeline.addLast(this.SAReceiveProxyDataHandler);
+        proxyChannelPipeline.addLast(this.saReceiveProxyDataHandler);
         if (agentConfiguration.isProxyTcpCompressEnable()) {
             proxyChannelPipeline.addLast(new Lz4FrameEncoder());
         }
         proxyChannelPipeline.addLast(new LengthFieldPrepender(ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER));
         proxyChannelPipeline.addLast(new AgentMessageEncoder(agentConfiguration.getProxyPublicKey()));
+        proxyChannel.pipeline().addLast(clearClosedAgentChannelHandler);
         proxyChannelPipeline.addLast(PrintExceptionHandler.INSTANCE);
     }
 }

@@ -1,7 +1,6 @@
 package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
-import com.ppaass.agent.IAgentConst;
 import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.protocol.common.util.UUIDUtil;
 import com.ppaass.protocol.vpn.message.AgentMessage;
@@ -15,14 +14,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 @ChannelHandler.Sharable
 @Service
 class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
-    private final ScheduledExecutorService DELAY_UNREGISTER_EXECUTOR = Executors.newScheduledThreadPool(8);
     private final AgentConfiguration agentConfiguration;
 
     SASendTcpDataToProxyHandler(AgentConfiguration agentConfiguration) {
@@ -51,26 +45,6 @@ class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
         PpaassLogger.INSTANCE
                 .debug(() -> "Agent channel success unregistered, agent channel = {}",
                         () -> new Object[]{agentChannel.id().asLongText()});
-    }
-
-    @Override
-    public void channelUnregistered(ChannelHandlerContext agentChannelContext) throws Exception {
-        var agentChannel = agentChannelContext.channel();
-        DELAY_UNREGISTER_EXECUTOR.schedule(() -> {
-            var proxyTcpChannel =
-                    agentChannel.attr(ISAConstant.IAgentChannelConstant.PROXY_CHANNEL).get();
-            agentChannel.attr(ISAConstant.IAgentChannelConstant.PROXY_CHANNEL).set(null);
-            if (proxyTcpChannel == null) {
-                PpaassLogger.INSTANCE
-                        .debug(() -> "No proxy channel attached to agent channel, skip the step to unregister itself from proxy channel, agent channel = {}",
-                                () -> new Object[]{agentChannel.id().asLongText()});
-                return;
-            }
-            var agentChannelsOnProxyChannel =
-                    proxyTcpChannel.attr(ISAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
-            agentChannelsOnProxyChannel.remove(agentChannel.id().asLongText());
-            agentChannel.attr(IAgentConst.CHANNEL_PROTOCOL_CATEGORY).set(null);
-        }, this.agentConfiguration.getDelayCloseTimeSeconds(), TimeUnit.SECONDS);
     }
 
     @Override

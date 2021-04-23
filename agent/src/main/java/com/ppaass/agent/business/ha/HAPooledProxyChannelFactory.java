@@ -1,6 +1,7 @@
 package com.ppaass.agent.business.ha;
 
 import com.ppaass.agent.AgentConfiguration;
+import com.ppaass.agent.IAgentConst;
 import com.ppaass.common.exception.PpaassException;
 import com.ppaass.common.log.PpaassLogger;
 import io.netty.bootstrap.Bootstrap;
@@ -51,7 +52,7 @@ class HAPooledProxyChannelFactory implements PooledObjectFactory<Channel> {
         var channel = proxyChannelConnectFuture.channel();
         channel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL).set(this.pool);
         channel.attr(IHAConstant.IProxyChannelConstant.CLOSED_ALREADY).set(false);
-        channel.attr(IHAConstant.IProxyChannelConstant.AGENT_CHANNELS).set(new ConcurrentHashMap<>());
+        channel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNELS).set(new ConcurrentHashMap<>());
         PpaassLogger.INSTANCE.debug(() -> "Success create proxy channel object, proxy channel = {}.",
                 () -> new Object[]{channel.id().asLongText()});
         return new DefaultPooledObject<>(channel);

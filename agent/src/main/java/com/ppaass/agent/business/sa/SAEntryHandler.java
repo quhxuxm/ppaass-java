@@ -1,6 +1,8 @@
 package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
+import com.ppaass.agent.IAgentConst;
+import com.ppaass.agent.business.ChannelWrapper;
 import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.protocol.common.util.UUIDUtil;
 import com.ppaass.protocol.vpn.message.AgentMessage;
@@ -167,8 +169,9 @@ public class SAEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
         PpaassLogger.INSTANCE.trace(
                 () -> "Send TCP_CONNECT from agent to proxy [BEGIN] , agent channel = {}, proxy channel = {}",
                 () -> new Object[]{proxyChannel.id().asLongText()});
-        var agentChannelsOnProxyChannel = proxyChannel.attr(ISAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
-        agentChannelsOnProxyChannel.putIfAbsent(agentChannel.id().asLongText(), agentChannel);
+        var agentChannelsOnProxyChannel = proxyChannel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNELS).get();
+        var channelWrapper=new ChannelWrapper(agentChannel);
+        agentChannelsOnProxyChannel.putIfAbsent(agentChannel.id().asLongText(), channelWrapper);
         proxyChannel.writeAndFlush(agentMessage)
                 .addListener((ChannelFutureListener) proxyWriteChannelFuture -> {
                     if (proxyWriteChannelFuture.isSuccess()) {

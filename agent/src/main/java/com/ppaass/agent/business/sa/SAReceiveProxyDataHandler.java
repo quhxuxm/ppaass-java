@@ -37,12 +37,12 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
     @Override
     public void channelInactive(ChannelHandlerContext proxyChannelContext) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
-        var agentChannelsOnProxyChannel = proxyChannel.attr(ISAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
-        agentChannelsOnProxyChannel.forEach((agentChannelId, agentChannel) -> {
+        var agentChannelsOnProxyChannel = proxyChannel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNELS).get();
+        agentChannelsOnProxyChannel.forEach((agentChannelId, agentChannelWrapper) -> {
             PpaassLogger.INSTANCE.error(() -> "Proxy channel closed, proxy channel = {}, agent channel = {}",
-                    () -> new Object[]{proxyChannel.id().asLongText(), agentChannel.id().asLongText()});
-            agentChannel.close();
-            agentChannelsOnProxyChannel.remove(agentChannelId);
+                    () -> new Object[]{proxyChannel.id().asLongText(),
+                            agentChannelWrapper.getChannel().id().asLongText()});
+            agentChannelWrapper.close();
         });
         var channelPool = proxyChannel.attr(ISAConstant.IProxyChannelConstant.CHANNEL_POOL).get();
         proxyChannel.attr(ISAConstant.IProxyChannelConstant.CLOSED_ALREADY).set(true);
@@ -52,9 +52,9 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
     @Override
     protected void channelRead0(ChannelHandlerContext proxyChannelContext, ProxyMessage proxyMessage) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
-        var agentChannelsOnProxyChannel = proxyChannel.attr(ISAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
-        var agentChannel = agentChannelsOnProxyChannel.get(proxyMessage.getBody().getAgentChannelId());
-        if (agentChannel == null) {
+        var agentChannelsOnProxyChannel = proxyChannel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNELS).get();
+        var agentChannelWrapper = agentChannelsOnProxyChannel.get(proxyMessage.getBody().getAgentChannelId());
+        if (agentChannelWrapper == null) {
             PpaassLogger.INSTANCE.error(
                     () -> "The agent channel id in proxy message is not for current proxy channel, discard the proxy message, proxy channel = {}, proxy message:\n{}\n",
                     () -> new Object[]{
@@ -65,22 +65,22 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
         }
         switch (proxyMessage.getBody().getBodyType()) {
             case TCP_CONNECT_SUCCESS -> {
-                handleTcpConnectSuccess(proxyMessage, proxyChannel, agentChannel);
+                handleTcpConnectSuccess(proxyMessage, proxyChannel, agentChannelWrapper.getChannel());
             }
             case TCP_CONNECT_FAIL -> {
-                handleTcpConnectFail(proxyMessage, proxyChannel, agentChannel);
+                handleTcpConnectFail(proxyMessage, proxyChannel, agentChannelWrapper.getChannel());
             }
             case TCP_CONNECTION_CLOSE -> {
-                handleTcpConnectionClose(proxyMessage, proxyChannel, agentChannel);
+                handleTcpConnectionClose(proxyMessage, proxyChannel, agentChannelWrapper.getChannel());
             }
             case TCP_DATA_SUCCESS -> {
-                handleTcpDataSuccess(proxyMessage, proxyChannel, agentChannel);
+                handleTcpDataSuccess(proxyMessage, proxyChannel, agentChannelWrapper.getChannel());
             }
             case UDP_DATA_SUCCESS -> {
                 handleUdpDataSuccess(proxyMessage, proxyChannel);
             }
             case TCP_DATA_FAIL, UDP_DATA_FAIL -> {
-                handleTcpDataFail(proxyMessage, proxyChannel, agentChannel);
+                handleTcpDataFail(proxyMessage, proxyChannel, agentChannelWrapper.getChannel());
             }
         }
     }

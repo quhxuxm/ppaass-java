@@ -1,6 +1,8 @@
 package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
+import com.ppaass.agent.IAgentConst;
+import com.ppaass.agent.business.ChannelWrapper;
 import com.ppaass.common.log.PpaassLogger;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -57,8 +59,9 @@ class SAUdpBindListener implements ChannelFutureListener {
         this.proxyTcpChannel.attr(ISAConstant.SOCKS_UDP_CONNECTION_INFO)
                 .set(udpConnectionInfo);
         var agentChannelsOnProxyChannel =
-                this.proxyTcpChannel.attr(ISAConstant.IProxyChannelConstant.AGENT_CHANNELS).get();
-        agentChannelsOnProxyChannel.putIfAbsent(agentUdpChannel.id().asLongText(), agentUdpChannel);
+                this.proxyTcpChannel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNELS).get();
+        var agentUdpChannelWrapper=new ChannelWrapper(agentUdpChannel);
+        agentChannelsOnProxyChannel.putIfAbsent(agentUdpChannel.id().asLongText(), agentUdpChannelWrapper);
         agentUdpChannel.attr(ISAConstant.SOCKS_UDP_CONNECTION_INFO)
                 .set(udpConnectionInfo);
         this.agentTcpChannel.writeAndFlush(new DefaultSocks5CommandResponse(
