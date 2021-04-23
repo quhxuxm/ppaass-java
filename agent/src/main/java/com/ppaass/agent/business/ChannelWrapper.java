@@ -23,9 +23,8 @@ public class ChannelWrapper {
         return closed;
     }
 
-    public void close() {
+    public void markClose() {
         this.closeTime = System.currentTimeMillis();
         this.closed = true;
-        this.channel.close();
     }
 }

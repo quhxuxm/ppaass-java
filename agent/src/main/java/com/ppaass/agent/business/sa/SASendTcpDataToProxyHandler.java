@@ -1,6 +1,7 @@
 package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
+import com.ppaass.agent.IAgentConst;
 import com.ppaass.common.log.PpaassLogger;
 import com.ppaass.protocol.common.util.UUIDUtil;
 import com.ppaass.protocol.vpn.message.AgentMessage;
@@ -41,6 +42,11 @@ class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
                             () -> new Object[]{
                                     proxyTcpChannel.id().asLongText(), e
                             });
+        }
+        var agentAgentChannels = proxyTcpChannel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNELS).get();
+        var agentAgentWrapper = agentAgentChannels.get(agentChannel.id().asLongText());
+        if (agentAgentWrapper != null) {
+            agentAgentWrapper.markClose();
         }
         PpaassLogger.INSTANCE
                 .debug(() -> "Agent channel success unregistered, agent channel = {}",

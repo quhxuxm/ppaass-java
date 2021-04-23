@@ -35,7 +35,10 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
         var proxyChannel = proxyChannelContext.channel();
         var agentChannelsOnProxyChannel = proxyChannel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNELS).get();
         agentChannelsOnProxyChannel.forEach((agentChannelId, agentChannelWrapper) -> {
-            agentChannelWrapper.close();
+            if(agentChannelWrapper.isClosed()){
+                return;
+            }
+            agentChannelWrapper.markClose();
         });
         var channelPool =
                 proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)

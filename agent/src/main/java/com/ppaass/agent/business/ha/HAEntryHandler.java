@@ -57,24 +57,14 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                                     proxyChannel.id().asLongText(), e
                             });
         }
+        var agentAgentChannels = proxyChannel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNELS).get();
+        var agentAgentWrapper = agentAgentChannels.get(agentChannel.id().asLongText());
+        if (agentAgentWrapper != null) {
+            agentAgentWrapper.markClose();
+        }
         PpaassLogger.INSTANCE
                 .debug(() -> "Agent channel become inactive, and it is not for HTTPS, agent channel = {}",
                         () -> new Object[]{agentChannel.id().asLongText()});
-    }
-
-    @Override
-    public void channelUnregistered(ChannelHandlerContext agentChannelContext) throws Exception {
-        var agentChannel = agentChannelContext.channel();
-        var connectionInfo = agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
-        if (connectionInfo == null) {
-            PpaassLogger.INSTANCE
-                    .debug(() -> "No connection info attached to agent channel, skip the step to unregister itself from proxy channel, agent channel = {}",
-                            () -> new Object[]{agentChannel.id().asLongText()});
-            return;
-        }
-        agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).set(null);
-        var proxyTcpChannel = connectionInfo.getProxyChannel();
-        agentChannel.attr(IAgentConst.CHANNEL_PROTOCOL_CATEGORY).set(null);
     }
 
     @Override

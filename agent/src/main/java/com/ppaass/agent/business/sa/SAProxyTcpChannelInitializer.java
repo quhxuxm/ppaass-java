@@ -13,7 +13,6 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.compression.Lz4FrameDecoder;
 import io.netty.handler.codec.compression.Lz4FrameEncoder;
-import io.netty.handler.timeout.IdleStateHandler;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -36,6 +35,7 @@ class SAProxyTcpChannelInitializer extends ChannelInitializer<Channel> {
         PpaassLogger.INSTANCE.info(
                 () -> "Proxy channel created, proxy channel = " + proxyChannel.id().asLongText());
         var proxyChannelPipeline = proxyChannel.pipeline();
+        proxyChannelPipeline.addLast(clearClosedAgentChannelHandler);
         if (agentConfiguration.isProxyTcpCompressEnable()) {
             proxyChannelPipeline.addLast(new Lz4FrameDecoder());
         }
@@ -49,7 +49,6 @@ class SAProxyTcpChannelInitializer extends ChannelInitializer<Channel> {
         }
         proxyChannelPipeline.addLast(new LengthFieldPrepender(ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER));
         proxyChannelPipeline.addLast(new AgentMessageEncoder(agentConfiguration.getProxyPublicKey()));
-        proxyChannel.pipeline().addLast(clearClosedAgentChannelHandler);
         proxyChannelPipeline.addLast(PrintExceptionHandler.INSTANCE);
     }
 }
