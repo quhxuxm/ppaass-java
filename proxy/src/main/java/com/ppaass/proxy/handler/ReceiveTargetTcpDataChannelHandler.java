@@ -36,6 +36,7 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
         }
         var proxyChannel = targetTcpInfo.getProxyTcpChannel();
         proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).set(null);
+        proxyChannel.attr(IProxyConstant.IProxyChannelAttr.SHOULD_CLOSE_AGENT).set(false);
         targetChannel.close();
         proxyChannel.close();
     }
@@ -53,7 +54,8 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
             return;
         }
         var proxyChannel = targetTcpInfo.getProxyTcpChannel();
-        if (!proxyChannel.isActive()) {
+        var shouldCloseAgent = proxyChannel.attr(IProxyConstant.IProxyChannelAttr.SHOULD_CLOSE_AGENT).get();
+        if (shouldCloseAgent == null || !shouldCloseAgent) {
             return;
         }
         var proxyMessageBody =
@@ -80,8 +82,9 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
                         () -> new Object[]{targetTcpInfo});
                 return;
             }
-            PpaassLogger.INSTANCE.error(() -> "Fail to write TCP_CONNECTION_CLOSE to agent, tcp info:\n{}\n",
-                    () -> new Object[]{targetTcpInfo});
+            PpaassLogger.INSTANCE
+                    .error(() -> "Fail to write TCP_CONNECTION_CLOSE to agent because of exception, tcp info:\n{}\n",
+                            () -> new Object[]{targetTcpInfo, future.cause()});
         });
     }
 
