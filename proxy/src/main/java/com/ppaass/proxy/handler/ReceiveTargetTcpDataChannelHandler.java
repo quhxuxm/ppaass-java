@@ -74,7 +74,6 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
             if (future.isSuccess()) {
                 PpaassLogger.INSTANCE.debug(() -> "Success to write TCP_CONNECTION_CLOSE to agent, tcp info:\n{}\n",
                         () -> new Object[]{targetTcpInfo});
-                proxyChannel.close();
                 return;
             }
             PpaassLogger.INSTANCE.error(() -> "Fail to write TCP_CONNECTION_CLOSE to agent, tcp info:\n{}\n",
