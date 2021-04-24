@@ -37,6 +37,7 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
         var proxyChannel = targetTcpInfo.getProxyTcpChannel();
         proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).set(null);
         targetChannel.close();
+        proxyChannel.close();
     }
 
     @Override
