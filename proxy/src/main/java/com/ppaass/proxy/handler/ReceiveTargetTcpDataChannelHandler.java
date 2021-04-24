@@ -41,7 +41,7 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
     }
 
     @Override
-    public void channelUnregistered(ChannelHandlerContext targetChannelContext) {
+    public void channelInactive(ChannelHandlerContext targetChannelContext) {
         var targetChannel = targetChannelContext.channel();
         var targetTcpInfo = targetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO).get();
         if (targetTcpInfo == null) {
@@ -53,6 +53,9 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
             return;
         }
         var proxyChannel = targetTcpInfo.getProxyTcpChannel();
+        if (!proxyChannel.isActive()) {
+            return;
+        }
         var proxyMessageBody =
                 new ProxyMessageBody(
                         UUIDUtil.INSTANCE.generateUuid(),
