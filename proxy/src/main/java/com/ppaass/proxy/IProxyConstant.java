@@ -16,7 +16,7 @@ public interface IProxyConstant {
     interface IProxyChannelAttr {
         AttributeKey<Channel> TARGET_CHANNEL =
                 AttributeKey.valueOf("TARGET_CHANNEL");
-        AttributeKey<Boolean> SHOULD_CLOSE_AGENT =
+        AttributeKey<Boolean> CLOSED_ALREADY =
                 AttributeKey.valueOf("MARK_TO_CLOSED");
     }
 }

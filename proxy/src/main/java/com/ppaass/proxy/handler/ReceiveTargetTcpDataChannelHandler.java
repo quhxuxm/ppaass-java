@@ -36,7 +36,7 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
         }
         var proxyChannel = targetTcpInfo.getProxyTcpChannel();
         proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).set(null);
-        proxyChannel.attr(IProxyConstant.IProxyChannelAttr.SHOULD_CLOSE_AGENT).set(false);
+        proxyChannel.attr(IProxyConstant.IProxyChannelAttr.CLOSED_ALREADY).set(true);
         targetChannel.close();
         proxyChannel.close();
     }
@@ -54,8 +54,8 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
             return;
         }
         var proxyChannel = targetTcpInfo.getProxyTcpChannel();
-        var shouldCloseAgent = proxyChannel.attr(IProxyConstant.IProxyChannelAttr.SHOULD_CLOSE_AGENT).get();
-        if (shouldCloseAgent == null || !shouldCloseAgent) {
+        var closedAlready = proxyChannel.attr(IProxyConstant.IProxyChannelAttr.CLOSED_ALREADY).get();
+        if (closedAlready != null && closedAlready) {
             return;
         }
         var proxyMessageBody =
