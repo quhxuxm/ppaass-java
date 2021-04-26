@@ -1,7 +1,8 @@
 package com.ppaass.proxy.handler;
 
 import com.ppaass.common.exception.PpaassException;
-import com.ppaass.common.log.PpaassLogger;
+import com.ppaass.common.log.IPpaassLogger;
+import com.ppaass.common.log.PpaassLoggerFactory;
 import com.ppaass.protocol.common.util.UUIDUtil;
 import com.ppaass.protocol.vpn.message.*;
 import com.ppaass.proxy.IProxyConstant;
@@ -21,6 +22,7 @@ import java.util.Arrays;
 @Service
 @ChannelHandler.Sharable
 public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentMessage> {
+    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
     private static final int UDP_PACKET_MAX_LENGTH = 64 * 1024;
     private final Bootstrap targetTcpBootstrap;
     private final ProxyConfiguration proxyConfiguration;
@@ -45,7 +47,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
 
     private void handleTcpConnect(ChannelHandlerContext proxyChannelContext, AgentMessage agentMessage) {
         var proxyChannel = proxyChannelContext.channel();
-        PpaassLogger.INSTANCE.debug(() -> "Begin to create TCP connection for: {}", () -> new Object[]{agentMessage});
+        logger.debug(() -> "Begin to create TCP connection for: {}", () -> new Object[]{agentMessage});
         this.targetTcpBootstrap
                 .connect(agentMessage.getBody().getTargetHost(),
                         agentMessage.getBody().getTargetPort())
@@ -68,7 +70,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                         proxyChannel.writeAndFlush(proxyMessage)
                                 .addListener((ChannelFutureListener) proxyChannelFuture -> {
                                     if (proxyChannelFuture.isSuccess()) {
-                                        PpaassLogger.INSTANCE.debug(
+                                        logger.debug(
                                                 () -> "Success to write TCP connect result (TCP_CONNECT_FAIL) to agent, agent message:\n{}\n",
                                                 () -> new Object[]{
                                                         agentMessage,
@@ -76,7 +78,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                                                 });
                                         return;
                                     }
-                                    PpaassLogger.INSTANCE.error(
+                                    logger.error(
                                             () -> "Fail to write TCP connect result (TCP_CONNECT_FAIL) to agent because of exception, agent message:\n{}\n",
                                             () -> new Object[]{
                                                     agentMessage,
@@ -84,11 +86,11 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                                             });
                                     proxyChannel.close();
                                 });
-                        PpaassLogger.INSTANCE
+                        logger
                                 .error(() -> "Fail to create TCP connection for: {}", () -> new Object[]{agentMessage});
                         return;
                     }
-                    PpaassLogger.INSTANCE
+                    logger
                             .debug(() -> "Success to create TCP connection for: {}", () -> new Object[]{agentMessage});
                     var targetChannel = targetChannelFuture.channel();
                     var targetTcpConnectionInfo = new TargetTcpInfo(
@@ -103,7 +105,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                             proxyChannel,
                             targetChannel
                     );
-                    PpaassLogger.INSTANCE
+                    logger
                             .debug(() -> "Create TCP connection info: \n{}\n",
                                     () -> new Object[]{targetTcpConnectionInfo});
                     targetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO)
@@ -130,7 +132,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                     proxyChannel.writeAndFlush(proxyMessage)
                             .addListener((ChannelFutureListener) proxyChannelFuture -> {
                                 if (proxyChannelFuture.isSuccess()) {
-                                    PpaassLogger.INSTANCE.debug(
+                                    logger.debug(
                                             () -> "Success to write TCP connect result (TCP_CONNECT_SUCCESS) to agent, TCP connection info:\n{}\n",
                                             () -> new Object[]{
                                                     targetTcpConnectionInfo,
@@ -138,7 +140,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                                             });
                                     return;
                                 }
-                                PpaassLogger.INSTANCE.error(
+                                logger.error(
                                         () -> "Fail to write TCP connect result (TCP_CONNECT_SUCCESS) to agent because of exception, TCP connection info:\n{}\n",
                                         () -> new Object[]{
                                                 targetTcpConnectionInfo,
@@ -170,7 +172,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
             proxyChannel.writeAndFlush(proxyMessage)
                     .addListener((ChannelFutureListener) proxyChannelFuture -> {
                         if (proxyChannelFuture.isSuccess()) {
-                            PpaassLogger.INSTANCE.debug(
+                            logger.debug(
                                     () -> "Success to write TCP_DATA_FAIL(1) result to agent, agent message:\n{}\n",
                                     () -> new Object[]{
                                             agentMessage,
@@ -178,7 +180,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                                     });
                             return;
                         }
-                        PpaassLogger.INSTANCE.error(
+                        logger.error(
                                 () -> "Fail to write TCP_DATA_FAIL(1) result to agent because of exception, agent message:\n{}\n",
                                 () -> new Object[]{
                                         agentMessage,
@@ -192,7 +194,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                 Unpooled.wrappedBuffer(agentMessage.getBody().getData()))
                 .addListener((ChannelFutureListener) targetChannelFuture -> {
                     if (targetChannelFuture.isSuccess()) {
-                        PpaassLogger.INSTANCE.debug(
+                        logger.debug(
                                 () -> "Success to write agent data to target, agent message:\n{}\n ",
                                 () -> new Object[]{
                                         agentMessage,
@@ -201,7 +203,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                         return;
                     }
                     targetChannel.close();
-                    PpaassLogger.INSTANCE.error(
+                    logger.error(
                             () -> "Fail to write agent data to target because of exception, agent message:\n{}\n ",
                             () -> new Object[]{
                                     agentMessage,
@@ -223,7 +225,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                     proxyChannel.writeAndFlush(failProxyMessage)
                             .addListener((ChannelFutureListener) proxyChannelFuture -> {
                                 if (proxyChannelFuture.isSuccess()) {
-                                    PpaassLogger.INSTANCE.debug(
+                                    logger.debug(
                                             () -> "Success to write TCP_DATA_FAIL(2) result to agent, agent message:\n{}\n",
                                             () -> new Object[]{
                                                     agentMessage,
@@ -231,7 +233,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                                             });
                                     return;
                                 }
-                                PpaassLogger.INSTANCE.error(
+                                logger.error(
                                         () -> "Fail to write TCP_DATA_FAIL(2) result to agent because of exception, agent message:\n{}\n",
                                         () -> new Object[]{
                                                 agentMessage,
@@ -249,7 +251,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                         agentMessage.getBody().getTargetPort());
         var udpPackage = new DatagramPacket(agentMessage.getBody().getData(), agentMessage.getBody().getData().length,
                 destinationInetSocketAddress);
-        PpaassLogger.INSTANCE.debug(
+        logger.debug(
                 () -> "Receive agent message for udp, agent message: \n{}\n",
                 () -> new Object[]{
                         agentMessage
@@ -274,7 +276,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
             proxyTcpChannel.writeAndFlush(failProxyMessage)
                     .addListener((ChannelFutureListener) proxyChannelFuture -> {
                         if (proxyChannelFuture.isSuccess()) {
-                            PpaassLogger.INSTANCE.debug(
+                            logger.debug(
                                     () -> "Success to write UDP_DATA result to agent, agent message:\n{}\n",
                                     () -> new Object[]{
                                             agentMessage,
@@ -282,7 +284,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                                     });
                             return;
                         }
-                        PpaassLogger.INSTANCE.error(
+                        logger.error(
                                 () -> "Fail to write UDP_DATA result to agent because of exception, agent message:\n{}\n",
                                 () -> new Object[]{
                                         agentMessage,
@@ -325,7 +327,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
             proxyTcpChannel.writeAndFlush(failProxyMessage)
                     .addListener((ChannelFutureListener) proxyChannelFuture -> {
                         if (proxyChannelFuture.isSuccess()) {
-                            PpaassLogger.INSTANCE.debug(
+                            logger.debug(
                                     () -> "Success to write UDP_DATA result to agent, agent message:\n{}\n",
                                     () -> new Object[]{
                                             agentMessage,
@@ -333,7 +335,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                                     });
                             return;
                         }
-                        PpaassLogger.INSTANCE.error(
+                        logger.error(
                                 () -> "Fail to write UDP_DATA result to agent because of exception, agent message:\n{}\n",
                                 () -> new Object[]{
                                         agentMessage,
@@ -371,7 +373,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                 return;
             }
             proxyTcpChannel.close();
-            PpaassLogger.INSTANCE
+            logger
                     .error(() -> "Fail to send udp data to agent because of exception happen when write data to agent, proxy channel = {}.",
                             () -> new Object[]{
                                     proxyTcpChannel.id().asLongText(),

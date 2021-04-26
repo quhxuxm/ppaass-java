@@ -1,6 +1,7 @@
 package com.ppaass.proxy.handler;
 
-import com.ppaass.common.log.PpaassLogger;
+import com.ppaass.common.log.IPpaassLogger;
+import com.ppaass.common.log.PpaassLoggerFactory;
 import com.ppaass.protocol.common.util.UUIDUtil;
 import com.ppaass.protocol.vpn.message.EncryptionType;
 import com.ppaass.protocol.vpn.message.ProxyMessage;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 @Service
 @ChannelHandler.Sharable
 public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHandler<ByteBuf> {
+    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
     private final ProxyConfiguration proxyConfiguration;
     private static final int TARGET_DATA_MAX_FRAME_LENGTH = 1024 * 1024 * 1000;
 
@@ -27,7 +29,7 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
 
     @Override
     public void exceptionCaught(ChannelHandlerContext targetChannelContext, Throwable cause) throws Exception {
-        PpaassLogger.INSTANCE.error(() -> "Exception happen on target channel.", () -> new Object[]{cause});
+        logger.error(() -> "Exception happen on target channel.", () -> new Object[]{cause});
         var targetChannel = targetChannelContext.channel();
         var targetTcpInfo = targetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO).get();
         if (targetTcpInfo == null) {
@@ -46,7 +48,7 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
         var targetChannel = targetChannelContext.channel();
         var targetTcpInfo = targetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO).get();
         if (targetTcpInfo == null) {
-            PpaassLogger.INSTANCE.error(
+            logger.error(
                     () -> "Fail to transfer data from target to proxy because of no tcp info attached, target channel = {}.",
                     () -> new Object[]{
                             targetChannel.id().asLongText()
@@ -78,11 +80,11 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
         proxyChannel.writeAndFlush(proxyMessage).addListener(future -> {
             proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).set(null);
             if (future.isSuccess()) {
-                PpaassLogger.INSTANCE.debug(() -> "Success to write TCP_CONNECTION_CLOSE to agent, tcp info:\n{}\n",
+                logger.debug(() -> "Success to write TCP_CONNECTION_CLOSE to agent, tcp info:\n{}\n",
                         () -> new Object[]{targetTcpInfo});
                 return;
             }
-            PpaassLogger.INSTANCE
+            logger
                     .error(() -> "Fail to write TCP_CONNECTION_CLOSE to agent because of exception, tcp info:\n{}\n",
                             () -> new Object[]{targetTcpInfo, future.cause()});
         });
@@ -93,7 +95,7 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
         var targetChannel = targetChannelContext.channel();
         var targetTcpInfo = targetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO).get();
         if (targetTcpInfo == null) {
-            PpaassLogger.INSTANCE.error(
+            logger.error(
                     () -> "Fail to transfer data from target to agent because of no tcp info attached, target channel = {}.",
                     () -> new Object[]{
                             targetChannel.id().asLongText()
@@ -130,14 +132,14 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
             proxyChannel.writeAndFlush(proxyMessage).syncUninterruptibly()
                     .addListener((ChannelFutureListener) proxyChannelFuture -> {
                         if (proxyChannelFuture.isSuccess()) {
-                            PpaassLogger.INSTANCE.debug(
+                            logger.debug(
                                     () -> "Success to write target data to agent, tcp info: \n{}\n",
                                     () -> new Object[]{
                                             targetTcpInfo
                                     });
                             return;
                         }
-                        PpaassLogger.INSTANCE.error(
+                        logger.error(
                                 () -> "Fail to write target data to agent because of exception, tcp info: \n{}\n",
                                 () -> new Object[]{
                                         targetTcpInfo

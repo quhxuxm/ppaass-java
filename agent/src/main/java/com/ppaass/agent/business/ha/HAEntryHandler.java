@@ -3,7 +3,8 @@ package com.ppaass.agent.business.ha;
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.IAgentConst;
 import com.ppaass.agent.business.ChannelWrapper;
-import com.ppaass.common.log.PpaassLogger;
+import com.ppaass.common.log.IPpaassLogger;
+import com.ppaass.common.log.PpaassLoggerFactory;
 import com.ppaass.protocol.vpn.message.AgentMessageBodyType;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 @ChannelHandler.Sharable
 @Service
 public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
+    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
     private final AgentConfiguration agentConfiguration;
     private final HAProxyResourceManager haProxyResourceManager;
 
@@ -27,7 +29,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
     @Override
     public void exceptionCaught(ChannelHandlerContext agentChannelContext, Throwable cause) {
         var agentChannel = agentChannelContext.channel();
-        PpaassLogger.INSTANCE.error(() -> "Exception happen on agent channel, close agent channel, agent channel = {}.",
+        logger.error(() -> "Exception happen on agent channel, close agent channel, agent channel = {}.",
                 () -> new Object[]{
                         agentChannel.id().asLongText(), cause
                 });
@@ -39,7 +41,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
         var agentChannel = agentChannelContext.channel();
         var connectionInfo = agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
         if (connectionInfo == null) {
-            PpaassLogger.INSTANCE
+            logger
                     .debug(() -> "No connection info attached to agent channel, skip the step to return proxy channel, agent channel = {}",
                             () -> new Object[]{agentChannel.id().asLongText()});
             return;
@@ -51,7 +53,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                             .get();
             channelPool.returnObject(proxyChannel);
         } catch (Exception e) {
-            PpaassLogger.INSTANCE
+            logger
                     .debug(() -> "Fail to return proxy channel to pool because of exception, proxy channel = {}",
                             () -> new Object[]{
                                     proxyChannel.id().asLongText(), e
@@ -62,7 +64,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
         if (agentAgentWrapper != null) {
             agentAgentWrapper.markClose();
         }
-        PpaassLogger.INSTANCE
+        logger
                 .debug(() -> "Agent channel become inactive, and it is not for HTTPS, agent channel = {}",
                         () -> new Object[]{agentChannel.id().asLongText()});
     }
@@ -77,7 +79,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                 var connectionInfo =
                         HAUtil.INSTANCE.parseConnectionInfo(fullHttpRequest.uri());
                 if (connectionInfo == null) {
-                    PpaassLogger.INSTANCE
+                    logger
                             .error(HAEntryHandler.class,
                                     () -> "Close agent channel because of fail to parse uri:[{}] on CONNECT, agent channel = {}",
                                     () -> new Object[]{
@@ -89,7 +91,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                     agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
                     return;
                 }
-                PpaassLogger.INSTANCE
+                logger
                         .debug(HAEntryHandler.class,
                                 () -> "A https CONNECT request send to uri: [{}], agent channel = {}",
                                 () -> new Object[]{
@@ -100,7 +102,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                 try {
                     httpsProxyTcpChannel = this.haProxyResourceManager.getProxyTcpChannelPoolForHttps().borrowObject();
                 } catch (Exception e) {
-                    PpaassLogger.INSTANCE
+                    logger
                             .error(() -> "Fail to create proxy tcp channel connection because of exception, max connection number:{}, idle connection number:{}, active connection number:{}, agent channel = {}, target host={}, target port={}.",
                                     () -> new Object[]{
                                             this.haProxyResourceManager.getProxyTcpChannelPoolForHttps().getMaxTotal(),
@@ -133,7 +135,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                                     if (proxyChannelWriteFuture.isSuccess()) {
                                         return;
                                     }
-                                    PpaassLogger.INSTANCE.error(
+                                    logger.error(
                                             () -> "Fail to write HTTP/HTTPS connection data to proxy because of exception, agent channel = {}, proxy channel = {}.",
                                             () -> new Object[]{
                                                     agentChannel.id().asLongText(),
@@ -154,7 +156,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
             var connectionInfo = agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
             if (connectionInfo != null) {
                 var proxyChannel = connectionInfo.getProxyChannel();
-                PpaassLogger.INSTANCE.trace(
+                logger.trace(
                         () -> "HTTP DATA send to uri: [{}], agent channel = {}, http data: \n{}\n",
                         () -> new Object[]{
                                 fullHttpRequest.uri(),
@@ -176,7 +178,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                             if (proxyChannelWriteFuture.isSuccess()) {
                                 return;
                             }
-                            PpaassLogger.INSTANCE.error(
+                            logger.error(
                                     () -> "Fail to write HTTP data to uri:[{}] because of exception, agent channel = {}, proxy channel = {}.",
                                     () -> new Object[]{
                                             fullHttpRequest.uri(), agentChannel.id().asLongText(),
@@ -195,7 +197,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
             //First time create HTTP connection
             connectionInfo = HAUtil.INSTANCE.parseConnectionInfo(fullHttpRequest.uri());
             if (connectionInfo == null) {
-                PpaassLogger.INSTANCE.error(HAEntryHandler.class,
+                logger.error(HAEntryHandler.class,
                         () -> "Close HTTP agent channel because of fail to parse uri:[{}], agent channel = {}",
                         () -> new Object[]{
                                 fullHttpRequest.uri(),
@@ -206,7 +208,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                 agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
                 return;
             }
-            PpaassLogger.INSTANCE.trace(HAEntryHandler.class,
+            logger.trace(HAEntryHandler.class,
                     () -> "A http FIRST request send to uri: [{}], agent channel = {}, http data:\n{}\n",
                     () -> new Object[]{
                             fullHttpRequest.uri(),
@@ -218,7 +220,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                 httpProxyTcpChannel = this.haProxyResourceManager.getProxyTcpChannelPoolForHttp().borrowObject();
             } catch (Exception e) {
                 var finalConnectionInfo = connectionInfo;
-                PpaassLogger.INSTANCE
+                logger
                         .error(() -> "Fail to create proxy tcp channel connection because of exception, max connection number:{}, idle connection number:{}, active connection number:{}, agent channel = {},  target host={}, target port={}.",
                                 () -> new Object[]{
                                         this.haProxyResourceManager.getProxyTcpChannelPoolForHttp().getMaxTotal(),
@@ -252,7 +254,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                                 if (proxyChannelWriteFuture.isSuccess()) {
                                     return;
                                 }
-                                PpaassLogger.INSTANCE.error(
+                                logger.error(
                                         () -> "Fail to write HTTP/HTTPS connection data to proxy because of exception, agent channel = {}, proxy channel = {}.",
                                         () -> new Object[]{
                                                 agentChannel.id().asLongText(), httpProxyTcpChannel.id().asLongText(),
@@ -269,7 +271,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
         //A HTTPS request to send data
         var connectionInfo = agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
         if (connectionInfo == null) {
-            PpaassLogger.INSTANCE.error(HAEntryHandler.class,
+            logger.error(HAEntryHandler.class,
                     () -> "Close HTTPS agent channel because of connection info not existing for agent channel, agent channel = {}",
                     () -> new Object[]{
                             agentChannel.id().asLongText()
@@ -280,7 +282,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
             return;
         }
         var httpsProxyTcpChannel = connectionInfo.getProxyChannel();
-        PpaassLogger.INSTANCE.trace(HAEntryHandler.class,
+        logger.trace(HAEntryHandler.class,
                 () -> "HTTPS DATA send to uri: [{}], agent channel = {}, https data:\n{}\n",
                 () -> new Object[]{
                         connectionInfo.getUri(),
@@ -301,7 +303,7 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
                     if (proxyChannelWriteFuture.isSuccess()) {
                         return;
                     }
-                    PpaassLogger.INSTANCE.error(
+                    logger.error(
                             () -> "Fail to write HTTPS data to uri:[{}] because of exception, agent channel = {}, proxy channel = {}.",
                             () -> new Object[]{
                                     connectionInfo.getUri(),

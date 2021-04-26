@@ -2,7 +2,8 @@ package com.ppaass.agent.business;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.IAgentConst;
-import com.ppaass.common.log.PpaassLogger;
+import com.ppaass.common.log.IPpaassLogger;
+import com.ppaass.common.log.PpaassLoggerFactory;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 @ChannelHandler.Sharable
 @Service
 public class ClearClosedAgentChannelHandler extends ChannelInboundHandlerAdapter {
+    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
     private final AgentConfiguration agentConfiguration;
 
     public ClearClosedAgentChannelHandler(AgentConfiguration agentConfiguration) {
@@ -35,7 +37,7 @@ public class ClearClosedAgentChannelHandler extends ChannelInboundHandlerAdapter
         if (agentChannelWrappers == null) {
             return;
         }
-        PpaassLogger.INSTANCE.debug(() -> "Begin to cleanup closed agent channels");
+        logger.debug(() -> "Begin to cleanup closed agent channels");
         agentChannelWrappers.forEach((agentChannelId, agentChannelWrapper) -> {
             if (!agentChannelWrapper.isClosed()) {
                 return;
@@ -43,7 +45,7 @@ public class ClearClosedAgentChannelHandler extends ChannelInboundHandlerAdapter
             var closeTime = agentChannelWrapper.getCloseTime();
             if (System.currentTimeMillis() - closeTime >= this.agentConfiguration.getDelayCloseTimeMillis()) {
                 agentChannelWrappers.remove(agentChannelId);
-                PpaassLogger.INSTANCE
+                logger
                         .debug(() -> "Cleanup closed agent channel, agent channel = {}, proxy channel = {}",
                                 () -> new Object[]{agentChannelId, proxyChannel.id().asLongText()});
             }

@@ -2,7 +2,8 @@ package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.IAgentConst;
-import com.ppaass.common.log.PpaassLogger;
+import com.ppaass.common.log.IPpaassLogger;
+import com.ppaass.common.log.PpaassLoggerFactory;
 import com.ppaass.protocol.common.util.UUIDUtil;
 import com.ppaass.protocol.vpn.message.AgentMessage;
 import com.ppaass.protocol.vpn.message.AgentMessageBody;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 @ChannelHandler.Sharable
 @Service
 class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
+    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
     private final AgentConfiguration agentConfiguration;
 
     SASendTcpDataToProxyHandler(AgentConfiguration agentConfiguration) {
@@ -27,7 +29,7 @@ class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
     @Override
     public void channelInactive(ChannelHandlerContext agentChannelContext) throws Exception {
         var agentChannel = agentChannelContext.channel();
-        PpaassLogger.INSTANCE
+        logger
                 .debug(() -> "Begin to unregister agent channel, agent channel = {}",
                         () -> new Object[]{agentChannel.id().asLongText()});
         var proxyTcpChannel =
@@ -37,7 +39,7 @@ class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
         try {
             socksProxyTcpChannelPool.returnObject(proxyTcpChannel);
         } catch (Exception e) {
-            PpaassLogger.INSTANCE
+            logger
                     .debug(() -> "Fail to return proxy channel to pool because of exception, proxy channel = {}",
                             () -> new Object[]{
                                     proxyTcpChannel.id().asLongText(), e
@@ -48,7 +50,7 @@ class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
         if (agentAgentWrapper != null) {
             agentAgentWrapper.markClose();
         }
-        PpaassLogger.INSTANCE
+        logger
                 .debug(() -> "Agent channel success unregistered, agent channel = {}",
                         () -> new Object[]{agentChannel.id().asLongText()});
     }
@@ -77,21 +79,21 @@ class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
                 UUIDUtil.INSTANCE.generateUuidInBytes(),
                 EncryptionType.choose(),
                 agentMessageBody);
-        PpaassLogger.INSTANCE.debug(
+        logger.debug(
                 () -> "Forward client original message to proxy, agent channel = {}, proxy channel = {}",
                 () -> new Object[]{
                         agentChannel.id().asLongText(), proxyTcpChannel.id().asLongText()
                 });
         proxyTcpChannel.writeAndFlush(agentMessage).addListener((ChannelFutureListener) proxyChannelFuture -> {
             if (proxyChannelFuture.isSuccess()) {
-                PpaassLogger.INSTANCE.debug(
+                logger.debug(
                         () -> "Success forward client original message to proxy, agent channel = {}, proxy channel = {}",
                         () -> new Object[]{
                                 agentChannel.id().asLongText(), proxyTcpChannel.id().asLongText()
                         });
                 return;
             }
-            PpaassLogger.INSTANCE.error(
+            logger.error(
                     () -> "Fail forward client original message to proxy because of exception, agent channel = {}, proxy channel = {}",
                     () -> new Object[]{
                             agentChannel.id().asLongText(), proxyTcpChannel.id().asLongText(),

@@ -9,7 +9,8 @@ import com.ppaass.common.exception.PpaassException;
 import com.ppaass.common.handler.AgentMessageEncoder;
 import com.ppaass.common.handler.PrintExceptionHandler;
 import com.ppaass.common.handler.ProxyMessageDecoder;
-import com.ppaass.common.log.PpaassLogger;
+import com.ppaass.common.log.IPpaassLogger;
+import com.ppaass.common.log.PpaassLoggerFactory;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -34,6 +35,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Service
 class HAProxyResourceManager implements IAgentResourceManager {
+    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
     private final AgentConfiguration agentConfiguration;
     private Bootstrap proxyTcpChannelBootstrapForHttp;
     private Bootstrap proxyTcpChannelBootstrapForHttps;
@@ -244,7 +246,7 @@ class HAProxyResourceManager implements IAgentResourceManager {
         try {
             result.preparePool();
         } catch (Exception e) {
-            PpaassLogger.INSTANCE
+            logger
                     .error(() -> "Fail to initialize proxy channel pool because of exception.", () -> new Object[]{e});
             throw new PpaassException("Fail to initialize proxy channel pool.", e);
         }

@@ -2,13 +2,13 @@ package com.ppaass.agent.ui;
 
 import com.ppaass.agent.Agent;
 import com.ppaass.agent.AgentConfiguration;
+import com.ppaass.common.log.IPpaassLogger;
+import com.ppaass.common.log.PpaassLoggerFactory;
 import com.ppaass.protocol.common.util.UUIDUtil;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.spi.AbstractLogger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -45,7 +45,7 @@ public class MainFrame extends JFrame {
     private static final String LOGO_BLACK = "icons/logo_black.png";
     private static final String LOGO_WHITE = "icons/logo_white.png";
     private static final int PANEL_WIDTH = 500;
-    private static final Logger logger = LoggerFactory.getLogger(MainFrame.class);
+    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
     private final Agent agent;
     private final MessageSource messageSource;
     private final AgentConfiguration agentConfiguration;
@@ -94,7 +94,7 @@ public class MainFrame extends JFrame {
             try {
                 tray.add(trayIcon);
             } catch (AWTException e) {
-                logger.error("Fail to add system tray icon because of exception.", e);
+                logger.error(() -> "Fail to add system tray icon because of exception.", () -> new Object[]{e});
             }
         }
         this.setResizable(false);
@@ -191,7 +191,7 @@ public class MainFrame extends JFrame {
                     try {
                         agent.stop();
                     } catch (Exception e1) {
-                        logger.error("Fail to stop agent because of exception.", e1);
+                        logger.error(() -> "Fail to stop agent because of exception.", () -> new Object[]{e1});
                     }
                     statusLabel.setText(getMessage(STATUS_LABEL_DEFAULT_MESSAGE_KEY));
                     tokenInput.setEditable(true);
@@ -241,7 +241,7 @@ public class MainFrame extends JFrame {
                         agent.start();
                     } catch (Exception e1) {
                         statusLabel.setText(this.getMessage(STATUS_AGENT_START_FAIL_MESSAGE_KEY));
-                        logger.error("Fail to start http agent because of exception.", e1);
+                        logger.error(() -> "Fail to start http agent because of exception.", () -> new Object[]{e1});
                         return;
                     }
                     statusLabel.setText(this.getMessage(STATUS_PROXY_IS_RUNNING_MESSAGE_KEY));

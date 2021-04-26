@@ -1,11 +1,13 @@
 package com.ppaass.proxy;
 
-import com.ppaass.common.log.PpaassLogger;
+import com.ppaass.common.log.IPpaassLogger;
+import com.ppaass.common.log.PpaassLoggerFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import org.springframework.stereotype.Service;
 
 @Service
 public class Proxy {
+    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
     private final ProxyConfiguration proxyConfiguration;
     private final ServerBootstrap proxyServerBootstrap;
 
@@ -22,7 +24,7 @@ public class Proxy {
         try {
             proxyServerBootstrap.bind(proxyConfiguration.getProxyTcpServerPort()).sync();
         } catch (Exception e) {
-            PpaassLogger.INSTANCE.error(Proxy.class, () -> "Fail to start ppaass tcp proxy because of exception.",
+            logger.error(Proxy.class, () -> "Fail to start ppaass tcp proxy because of exception.",
                     () -> new Object[]{e});
             System.exit(1);
         }

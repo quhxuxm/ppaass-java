@@ -2,7 +2,8 @@ package com.ppaass.agent.business.ha;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.IAgentConst;
-import com.ppaass.common.log.PpaassLogger;
+import com.ppaass.common.log.IPpaassLogger;
+import com.ppaass.common.log.PpaassLoggerFactory;
 import com.ppaass.protocol.vpn.message.AgentMessageBodyType;
 import com.ppaass.protocol.vpn.message.ProxyMessage;
 import io.netty.channel.ChannelFutureListener;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 @ChannelHandler.Sharable
 @Service
 class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMessage> {
+    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
     private final AgentConfiguration agentConfiguration;
 
     HAProxyMessageBodyTypeHandler(AgentConfiguration agentConfiguration) {
@@ -25,7 +27,7 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
     @Override
     public void exceptionCaught(ChannelHandlerContext proxyChannelContext, Throwable cause) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
-        PpaassLogger.INSTANCE.error(() -> "Proxy channel exception happen, proxy channel = {}",
+        logger.error(() -> "Proxy channel exception happen, proxy channel = {}",
                 () -> new Object[]{proxyChannel.id().asLongText(), cause});
         proxyChannel.close();
     }
@@ -35,7 +37,7 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
         var proxyChannel = proxyChannelContext.channel();
         var agentChannelsOnProxyChannel = proxyChannel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNELS).get();
         agentChannelsOnProxyChannel.forEach((agentChannelId, agentChannelWrapper) -> {
-            if(agentChannelWrapper.isClosed()){
+            if (agentChannelWrapper.isClosed()) {
                 return;
             }
             agentChannelWrapper.markClose();
@@ -53,7 +55,7 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
         var agentChannelsOnProxyChannel = proxyChannel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNELS).get();
         var agentChannelWrapper = agentChannelsOnProxyChannel.get(proxyMessage.getBody().getAgentChannelId());
         if (agentChannelWrapper == null) {
-            PpaassLogger.INSTANCE.error(
+            logger.error(
                     () -> "The agent channel id in proxy message is not for current proxy channel, discard the proxy message, proxy channel = {}, proxy message:\n{}\n",
                     () -> new Object[]{
                             proxyChannel.id().asLongText(),
@@ -65,7 +67,7 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
         var connectionInfo = agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
         switch (proxyMessage.getBody().getBodyType()) {
             case TCP_CONNECT_FAIL -> {
-                PpaassLogger.INSTANCE.error(
+                logger.error(
                         () -> "Connect fail for uri: [{}], close it, agent channel = {}, proxy channel = {}",
                         () -> new Object[]{
                                 connectionInfo.getUri(), agentChannel.id().asLongText(), proxyChannel.id().asLongText()
@@ -95,7 +97,7 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
                                     }
                                     return;
                                 }
-                                PpaassLogger.INSTANCE.trace(
+                                logger.trace(
                                         () -> "Fail to write CONNECT_SUCCESS to client because of exception, uri=[{}] agent channel = {}, proxy channel = {}.",
                                         () -> new Object[]{
                                                 connectionInfo.getUri(), agentChannel.id().asLongText(),
@@ -125,7 +127,7 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
                             if (proxyWriteChannelFuture.isSuccess()) {
                                 return;
                             }
-                            PpaassLogger.INSTANCE.trace(
+                            logger.trace(
                                     () -> "Fail to write HTTP DATA to from agent to proxy because of exception, uri=[{}] agent channel = {}, proxy channel = {}.",
                                     () -> new Object[]{
                                             connectionInfo.getUri(), agentChannel.id().asLongText(),
@@ -148,7 +150,7 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
                 agentChannel.close();
             }
             case TCP_DATA_FAIL -> {
-                PpaassLogger.INSTANCE.trace(
+                logger.trace(
                         () -> "FAIL_TCP happen close connection, agent channel = {}, proxy channel = {}.",
                         () -> new Object[]{
                                 connectionInfo.getUri(), agentChannel.id().asLongText(),
@@ -160,7 +162,7 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
                 agentChannel.writeAndFlush(failResponse).addListener(ChannelFutureListener.CLOSE);
             }
             case UDP_DATA_FAIL, UDP_DATA_SUCCESS -> {
-                PpaassLogger.INSTANCE.trace(
+                logger.trace(
                         () -> "No OK_UDP proxy message body type for HTTP agent, close it, agent channel = {}, proxy channel = {}",
                         () -> new Object[]{
                                 agentChannel.id().asLongText(), proxyChannel.id().asLongText()

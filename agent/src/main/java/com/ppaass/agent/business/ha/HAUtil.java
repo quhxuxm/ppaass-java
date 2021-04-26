@@ -1,6 +1,7 @@
 package com.ppaass.agent.business.ha;
 
-import com.ppaass.common.log.PpaassLogger;
+import com.ppaass.common.log.IPpaassLogger;
+import com.ppaass.common.log.PpaassLoggerFactory;
 import com.ppaass.protocol.common.util.UUIDUtil;
 import com.ppaass.protocol.vpn.message.AgentMessage;
 import com.ppaass.protocol.vpn.message.AgentMessageBody;
@@ -16,6 +17,7 @@ import io.netty.handler.codec.http.HttpRequestEncoder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 class HAUtil {
+    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
     private static final String HTTP_SCHEMA = "http://";
     private static final String HTTPS_SCHEMA = "https://";
     private static final String SCHEMA_AND_HOST_SEP = "://";
@@ -84,7 +86,7 @@ class HAUtil {
             try {
                 port = Integer.parseInt(hostNameAndPortParts[1]);
             } catch (NumberFormatException e) {
-                PpaassLogger.INSTANCE.error(HAUtil.class,
+                logger.error(HAUtil.class,
                         () -> "Fail to parse port from request uri, uri = {}",
                         () -> new Object[]{uri});
             }

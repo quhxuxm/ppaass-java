@@ -2,7 +2,8 @@ package com.ppaass.agent;
 
 import com.ppaass.agent.business.AgentChannelInitializer;
 import com.ppaass.common.exception.PpaassException;
-import com.ppaass.common.log.PpaassLogger;
+import com.ppaass.common.log.IPpaassLogger;
+import com.ppaass.common.log.PpaassLoggerFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -17,6 +18,7 @@ import java.util.Set;
 
 @Service
 public class Agent {
+    private static final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
     private Channel serverSocketChannel;
     private EventLoopGroup masterThreadGroup;
     private EventLoopGroup workerThreadGroup;
@@ -61,7 +63,7 @@ public class Agent {
         try {
             channelFuture = newServerBootstrap.bind(agentTcpPort).sync();
         } catch (InterruptedException e) {
-            PpaassLogger.INSTANCE
+            logger
                     .error(Agent.class, () -> "Fail to start ppaass because of exception", () -> new Object[]{e});
             throw new PpaassException("Fail to start ppaass because of exception", e);
         }
@@ -76,7 +78,7 @@ public class Agent {
             try {
                 this.serverSocketChannel.close().sync();
             } catch (InterruptedException e) {
-                PpaassLogger.INSTANCE
+                logger
                         .error(Agent.class, () -> "Fail to stop ppaass because of exception", () -> new Object[]{e});
             }
         }

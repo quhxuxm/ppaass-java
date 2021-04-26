@@ -6,7 +6,8 @@ import com.ppaass.agent.IAgentConst;
 import com.ppaass.agent.business.ha.HAEntryHandler;
 import com.ppaass.agent.business.sa.SAEntryHandler;
 import com.ppaass.common.handler.ChannelCleanupHandler;
-import com.ppaass.common.log.PpaassLogger;
+import com.ppaass.common.log.IPpaassLogger;
+import com.ppaass.common.log.PpaassLoggerFactory;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 @ChannelHandler.Sharable
 @Service
 class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
+    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
     private final SAEntryHandler saEntryHandler;
     private final AgentConfiguration agentConfiguration;
     private final HAEntryHandler haEntryHandler;
@@ -40,7 +42,7 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
         var agentChannel = agentChannelContext.channel();
         var channelProtocolType = agentChannel.attr(IAgentConst.CHANNEL_PROTOCOL_CATEGORY).get();
         if (channelProtocolType != null) {
-            PpaassLogger.INSTANCE
+            logger
                     .debug(() -> "Incoming request protocol is: {}, agent channel = {}",
                             () -> new Object[]{channelProtocolType,
                                     agentChannel.id().asLongText()});
@@ -50,7 +52,7 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
         var messageBuf = (ByteBuf) msg;
         var readerIndex = messageBuf.readerIndex();
         if (messageBuf.writerIndex() == readerIndex) {
-            PpaassLogger.INSTANCE
+            logger
                     .debug(
                             () -> "Incoming request reader index is the same as writer index, agent channel = {}",
                             () -> new Object[]{
@@ -62,7 +64,7 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
         var agentChannelPipeline = agentChannelContext.pipeline();
         if (SocksVersion.SOCKS4a.byteValue() == protocolVersionByte ||
                 SocksVersion.SOCKS5.byteValue() == protocolVersionByte) {
-            PpaassLogger.INSTANCE
+            logger
                     .debug(
                             () -> "Incoming request is a socks request, agent channel = {}",
                             () -> new Object[]{
@@ -86,7 +88,7 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
             agentChannelContext.fireChannelRead(messageBuf);
             return;
         }
-        PpaassLogger.INSTANCE
+        logger
                 .debug(
                         () -> "Incoming request is a http request, agent channel = {}",
                         () -> new Object[]{

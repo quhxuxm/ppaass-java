@@ -1,7 +1,8 @@
 package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
-import com.ppaass.common.log.PpaassLogger;
+import com.ppaass.common.log.IPpaassLogger;
+import com.ppaass.common.log.PpaassLoggerFactory;
 import com.ppaass.protocol.common.util.UUIDUtil;
 import com.ppaass.protocol.vpn.message.AgentMessage;
 import com.ppaass.protocol.vpn.message.AgentMessageBody;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 @ChannelHandler.Sharable
 @Service
 class SASendUdpDataToProxyHandler extends SimpleChannelInboundHandler<SAUdpProtocolMessage> {
+    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
     private final AgentConfiguration agentConfiguration;
 
     SASendUdpDataToProxyHandler(AgentConfiguration agentConfiguration) {
@@ -61,7 +63,7 @@ class SASendUdpDataToProxyHandler extends SimpleChannelInboundHandler<SAUdpProto
         proxyTcpChannelForUdpTransfer.writeAndFlush(agentMessage)
                 .addListener((ChannelFutureListener) proxyChannelFuture -> {
                     if (!proxyChannelFuture.isSuccess()) {
-                        PpaassLogger.INSTANCE
+                        logger
                                 .error(() -> "Fail to write udp message to proxy because of exception, udp connection info: \n{}\n.",
                                         () -> new Object[]{
                                                 udpConnectionInfo,
@@ -69,7 +71,7 @@ class SASendUdpDataToProxyHandler extends SimpleChannelInboundHandler<SAUdpProto
                                         });
                         return;
                     }
-                    PpaassLogger.INSTANCE
+                    logger
                             .debug(() -> "Success to write udp message to proxy, udp connection info: \n{}\n.",
                                     () -> new Object[]{
                                             udpConnectionInfo,

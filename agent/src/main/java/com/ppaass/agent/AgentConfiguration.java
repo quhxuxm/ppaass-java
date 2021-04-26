@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ppaass.common.exception.PpaassException;
-import com.ppaass.common.log.PpaassLogger;
+import com.ppaass.common.log.IPpaassLogger;
+import com.ppaass.common.log.PpaassLoggerFactory;
 import com.ppaass.protocol.common.util.UUIDUtil;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
@@ -20,6 +21,7 @@ import java.util.Locale;
 @ConfigurationProperties(prefix = "ppaass.agent")
 @Component
 public class AgentConfiguration {
+    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
     private static final String USER_CONFIGURATION_FILE_NAME = ".ppaass";
     private static final String USER_HOME_PROPERTY = "user.home";
     private String userToken;
@@ -131,7 +133,7 @@ public class AgentConfiguration {
                         this.objectMapper.readValue(agentDynamicConfigurationFile,
                                 AgentDynamicConfiguration.class);
             } catch (IOException e) {
-                PpaassLogger.INSTANCE
+                logger
                         .error(() -> "Fail to read agent configuration because of exception.", () -> new Object[]{e});
                 throw new PpaassException("Fail to read agent configuration because of exception.", e);
             }
@@ -149,21 +151,21 @@ public class AgentConfiguration {
         try {
             this.proxyPublicKey = proxyPublicKeyFile.getInputStream().readAllBytes();
         } catch (IOException e) {
-            PpaassLogger.INSTANCE
+            logger
                     .error(() -> "Fail to read proxy public key because of exception.", () -> new Object[]{e});
             throw new PpaassException("Fail to read proxy public key because of exception.", e);
         }
         try {
             this.agentPrivateKey = agentPrivateKeyFile.getInputStream().readAllBytes();
         } catch (IOException e) {
-            PpaassLogger.INSTANCE
+            logger
                     .error(() -> "Fail to read agent private key because of exception.", () -> new Object[]{e});
             throw new PpaassException("Fail to read agent private key because of exception.", e);
         }
         try {
             this.agentSourceAddress = InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
-            PpaassLogger.INSTANCE
+            logger
                     .warn(() -> "Fail to get source host address because of exception, use agent instance id as the address",
                             () -> new Object[]{e});
             this.agentSourceAddress = this.agentInstanceId;
@@ -444,19 +446,19 @@ public class AgentConfiguration {
         var agentDynamicConfigurationFile = agentDynamicConfigurationFilePath.toFile();
         if (agentDynamicConfigurationFile.exists()) {
             if (!agentDynamicConfigurationFile.delete()) {
-                PpaassLogger.INSTANCE
+                logger
                         .error(() -> "Fail to save agent configuration because of can not delete existing one.");
                 throw new PpaassException("Fail to save agent configuration because of can not delete existing one.");
             }
         }
         try {
             if (!agentDynamicConfigurationFile.createNewFile()) {
-                PpaassLogger.INSTANCE
+                logger
                         .error(() -> "Fail to save agent configuration because of can not create new file.");
                 throw new PpaassException("Fail to save agent configuration because of can not create new file.");
             }
         } catch (IOException e) {
-            PpaassLogger.INSTANCE
+            logger
                     .error(() -> "Fail to save agent configuration because of exception on create new file.",
                             () -> new Object[]{e});
             throw new PpaassException("Fail to save agent configuration because of exception on create new file.", e);
@@ -470,7 +472,7 @@ public class AgentConfiguration {
         try {
             this.objectMapper.writeValue(agentDynamicConfigurationFile, agentDynamicConfiguration);
         } catch (IOException e) {
-            PpaassLogger.INSTANCE
+            logger
                     .error(() -> "Fail to save agent configuration because of exception on write json to file.",
                             () -> new Object[]{e});
             throw new PpaassException("Fail to save agent configuration because of exception on write json to file.",

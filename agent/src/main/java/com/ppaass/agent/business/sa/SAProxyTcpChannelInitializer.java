@@ -6,7 +6,8 @@ import com.ppaass.common.constant.ICommonConstant;
 import com.ppaass.common.handler.AgentMessageEncoder;
 import com.ppaass.common.handler.PrintExceptionHandler;
 import com.ppaass.common.handler.ProxyMessageDecoder;
-import com.ppaass.common.log.PpaassLogger;
+import com.ppaass.common.log.IPpaassLogger;
+import com.ppaass.common.log.PpaassLoggerFactory;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 class SAProxyTcpChannelInitializer extends ChannelInitializer<Channel> {
+    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
     private final AgentConfiguration agentConfiguration;
     private final SAReceiveProxyDataHandler saReceiveProxyDataHandler;
     private final ClearClosedAgentChannelHandler clearClosedAgentChannelHandler;
@@ -32,7 +34,7 @@ class SAProxyTcpChannelInitializer extends ChannelInitializer<Channel> {
 
     @Override
     protected void initChannel(Channel proxyChannel) throws Exception {
-        PpaassLogger.INSTANCE.info(
+        logger.info(
                 () -> "Proxy channel created, proxy channel = " + proxyChannel.id().asLongText());
         var proxyChannelPipeline = proxyChannel.pipeline();
         proxyChannelPipeline.addLast(clearClosedAgentChannelHandler);

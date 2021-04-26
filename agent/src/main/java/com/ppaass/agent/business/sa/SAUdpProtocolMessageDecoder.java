@@ -1,6 +1,7 @@
 package com.ppaass.agent.business.sa;
 
-import com.ppaass.common.log.PpaassLogger;
+import com.ppaass.common.log.IPpaassLogger;
+import com.ppaass.common.log.PpaassLoggerFactory;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.DatagramPacket;
@@ -11,6 +12,8 @@ import io.netty.handler.codec.socksx.v5.Socks5AddressType;
 import java.util.List;
 
 class SAUdpProtocolMessageDecoder extends MessageToMessageDecoder<DatagramPacket> {
+    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
+
     @Override
     protected void decode(ChannelHandlerContext agentUdpChannelContext, DatagramPacket udpMessage, List<Object> out)
             throws Exception {
@@ -32,7 +35,7 @@ class SAUdpProtocolMessageDecoder extends MessageToMessageDecoder<DatagramPacket
                 targetPort,
                 data
         );
-        PpaassLogger.INSTANCE.debug(SAUdpProtocolMessageDecoder.class,
+        logger.debug(SAUdpProtocolMessageDecoder.class,
                 () -> "Decode socks5 udp message, agent channel = {}, proxy channel = {}, udp message:\n{}\n",
                 () -> new Object[]{
                         agentUdpChannelContext.channel().id().asLongText(),

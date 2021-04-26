@@ -1,5 +1,7 @@
 package com.ppaass.common.handler;
 
+import com.ppaass.common.log.IPpaassLogger;
+import com.ppaass.common.log.PpaassLoggerFactory;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -9,6 +11,7 @@ import io.netty.handler.timeout.IdleStateEvent;
 
 @ChannelHandler.Sharable
 public class ChannelCleanupHandler extends ChannelInboundHandlerAdapter {
+    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
     public static final ChannelCleanupHandler INSTANCE = new ChannelCleanupHandler();
 
     private ChannelCleanupHandler() {

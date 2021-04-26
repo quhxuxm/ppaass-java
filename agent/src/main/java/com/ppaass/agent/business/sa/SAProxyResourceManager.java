@@ -4,7 +4,8 @@ import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.IAgentResourceManager;
 import com.ppaass.agent.business.ProxyTcpChannelPoolEvictionPolicy;
 import com.ppaass.common.exception.PpaassException;
-import com.ppaass.common.log.PpaassLogger;
+import com.ppaass.common.log.IPpaassLogger;
+import com.ppaass.common.log.PpaassLoggerFactory;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -22,6 +23,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Service
 class SAProxyResourceManager implements IAgentResourceManager {
+    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
     private final SAUdpChannelInitializer saUdpChannelInitializer;
     private final SAProxyTcpChannelInitializer saProxyTcpChannelInitializer;
     private final AgentConfiguration agentConfiguration;
@@ -162,7 +164,7 @@ class SAProxyResourceManager implements IAgentResourceManager {
         try {
             result.preparePool();
         } catch (Exception e) {
-            PpaassLogger.INSTANCE
+            logger
                     .error(() -> "Fail to initialize proxy channel pool because of exception.", () -> new Object[]{e});
             throw new PpaassException("Fail to initialize proxy channel pool.", e);
         }

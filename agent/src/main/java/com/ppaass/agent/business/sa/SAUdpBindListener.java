@@ -3,7 +3,8 @@ package com.ppaass.agent.business.sa;
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.IAgentConst;
 import com.ppaass.agent.business.ChannelWrapper;
-import com.ppaass.common.log.PpaassLogger;
+import com.ppaass.common.log.IPpaassLogger;
+import com.ppaass.common.log.PpaassLoggerFactory;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -15,6 +16,7 @@ import io.netty.handler.codec.socksx.v5.Socks5CommandStatus;
 import java.net.InetSocketAddress;
 
 class SAUdpBindListener implements ChannelFutureListener {
+    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
     private final Channel agentTcpChannel;
     private final Channel proxyTcpChannel;
     private final AgentConfiguration agentConfiguration;
@@ -33,7 +35,7 @@ class SAUdpBindListener implements ChannelFutureListener {
     @Override
     public void operationComplete(ChannelFuture agentUdpChannelFuture) throws Exception {
         if (!agentUdpChannelFuture.isSuccess()) {
-            PpaassLogger.INSTANCE.error(
+            logger.error(
                     () -> "Fail to associate UDP tunnel for agent channel because of exception, agent channel = {}",
                     () -> new Object[]{
                             agentTcpChannel.id().asLongText(),
@@ -60,7 +62,7 @@ class SAUdpBindListener implements ChannelFutureListener {
                 .set(udpConnectionInfo);
         var agentChannelsOnProxyChannel =
                 this.proxyTcpChannel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNELS).get();
-        var agentUdpChannelWrapper=new ChannelWrapper(agentUdpChannel);
+        var agentUdpChannelWrapper = new ChannelWrapper(agentUdpChannel);
         agentChannelsOnProxyChannel.putIfAbsent(agentUdpChannel.id().asLongText(), agentUdpChannelWrapper);
         agentUdpChannel.attr(ISAConstant.SOCKS_UDP_CONNECTION_INFO)
                 .set(udpConnectionInfo);

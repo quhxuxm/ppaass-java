@@ -1,6 +1,7 @@
 package com.ppaass.agent.business.ha;
 
-import com.ppaass.common.log.PpaassLogger;
+import com.ppaass.common.log.IPpaassLogger;
+import com.ppaass.common.log.PpaassLoggerFactory;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelFutureListener;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 @ChannelHandler.Sharable
 @Service
 class HASendPureDataToAgentHandler extends ChannelInboundHandlerAdapter {
+    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
+
     @Override
     public void channelRead(ChannelHandlerContext proxyChannelContext, Object msg) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
@@ -24,7 +27,7 @@ class HASendPureDataToAgentHandler extends ChannelInboundHandlerAdapter {
             if (agentChannelFuture.isSuccess()) {
                 return;
             }
-            PpaassLogger.INSTANCE.trace(
+            logger.trace(
                     () -> "Receive proxy data, agent channel = {}, proxy channel = {}, proxy data: \n{}\n",
                     () -> {
                         var messageToPrint = msg;
