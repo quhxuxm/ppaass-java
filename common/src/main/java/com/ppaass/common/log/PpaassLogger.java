@@ -10,9 +10,17 @@ import java.util.function.Supplier;
 public class PpaassLogger {
     public static PpaassLogger INSTANCE = new PpaassLogger();
     private static final ConcurrentMap<String, Logger> loggers = new ConcurrentHashMap<>();
-    private static final int STACK_TRACE_INDEX_FOR_LOGGING = 2;
 
     private PpaassLogger() {
+    }
+
+    private String findCurrentLoggerClassStackTraceIndex(StackTraceElement[] stackTraceElements) {
+        for (int i = 0; i < stackTraceElements.length; i++) {
+            if (stackTraceElements[i].getClassName().equals(PpaassLogger.class.getName())) {
+                return stackTraceElements[i + 1].getClassName();
+            }
+        }
+        return PpaassLogger.class.getName();
     }
 
     public <T> void info(Class<T> targetClass, Supplier<String> logSupplier, Supplier<Object[]> argumentsSupplier) {
@@ -30,7 +38,8 @@ public class PpaassLogger {
     }
 
     public <T> void info(Supplier<String> logSupplier) {
-        String invokingClassName = Thread.currentThread().getStackTrace()[STACK_TRACE_INDEX_FOR_LOGGING].getClassName();
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        String invokingClassName = this.findCurrentLoggerClassStackTraceIndex(stackTraceElements);
         Logger logger = loggers.computeIfAbsent(invokingClassName, LoggerFactory::getLogger);
         if (logger.isInfoEnabled()) {
             logger.info(logSupplier.get());
@@ -38,7 +47,8 @@ public class PpaassLogger {
     }
 
     public <T> void info(Supplier<String> logSupplier, Supplier<Object[]> argumentsSupplier) {
-        String invokingClassName = Thread.currentThread().getStackTrace()[STACK_TRACE_INDEX_FOR_LOGGING].getClassName();
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        String invokingClassName = this.findCurrentLoggerClassStackTraceIndex(stackTraceElements);
         Logger logger = loggers.computeIfAbsent(invokingClassName, LoggerFactory::getLogger);
         if (logger.isInfoEnabled()) {
             logger.info(logSupplier.get(), argumentsSupplier.get());
@@ -60,7 +70,8 @@ public class PpaassLogger {
     }
 
     public <T> void debug(Supplier<String> logSupplier) {
-        String invokingClassName = Thread.currentThread().getStackTrace()[STACK_TRACE_INDEX_FOR_LOGGING].getClassName();
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        String invokingClassName = this.findCurrentLoggerClassStackTraceIndex(stackTraceElements);
         Logger logger = loggers.computeIfAbsent(invokingClassName, LoggerFactory::getLogger);
         if (logger.isDebugEnabled()) {
             logger.debug(logSupplier.get());
@@ -68,7 +79,8 @@ public class PpaassLogger {
     }
 
     public <T> void debug(Supplier<String> logSupplier, Supplier<Object[]> argumentsSupplier) {
-        String invokingClassName = Thread.currentThread().getStackTrace()[STACK_TRACE_INDEX_FOR_LOGGING].getClassName();
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        String invokingClassName = this.findCurrentLoggerClassStackTraceIndex(stackTraceElements);
         Logger logger = loggers.computeIfAbsent(invokingClassName, LoggerFactory::getLogger);
         if (logger.isDebugEnabled()) {
             logger.debug(logSupplier.get(), argumentsSupplier.get());
@@ -90,7 +102,8 @@ public class PpaassLogger {
     }
 
     public <T> void warn(Supplier<String> logSupplier) {
-        String invokingClassName = Thread.currentThread().getStackTrace()[STACK_TRACE_INDEX_FOR_LOGGING].getClassName();
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        String invokingClassName = this.findCurrentLoggerClassStackTraceIndex(stackTraceElements);
         Logger logger = loggers.computeIfAbsent(invokingClassName, LoggerFactory::getLogger);
         if (logger.isWarnEnabled()) {
             logger.warn(logSupplier.get());
@@ -98,7 +111,8 @@ public class PpaassLogger {
     }
 
     public <T> void warn(Supplier<String> logSupplier, Supplier<Object[]> argumentsSupplier) {
-        String invokingClassName = Thread.currentThread().getStackTrace()[STACK_TRACE_INDEX_FOR_LOGGING].getClassName();
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        String invokingClassName = this.findCurrentLoggerClassStackTraceIndex(stackTraceElements);
         Logger logger = loggers.computeIfAbsent(invokingClassName, LoggerFactory::getLogger);
         if (logger.isWarnEnabled()) {
             logger.warn(logSupplier.get(), argumentsSupplier.get());
@@ -120,7 +134,8 @@ public class PpaassLogger {
     }
 
     public <T> void error(Supplier<String> logSupplier) {
-        String invokingClassName = Thread.currentThread().getStackTrace()[STACK_TRACE_INDEX_FOR_LOGGING].getClassName();
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        String invokingClassName = this.findCurrentLoggerClassStackTraceIndex(stackTraceElements);
         Logger logger = loggers.computeIfAbsent(invokingClassName, LoggerFactory::getLogger);
         if (logger.isErrorEnabled()) {
             logger.error(logSupplier.get());
@@ -128,7 +143,8 @@ public class PpaassLogger {
     }
 
     public <T> void error(Supplier<String> logSupplier, Supplier<Object[]> argumentsSupplier) {
-        String invokingClassName = Thread.currentThread().getStackTrace()[STACK_TRACE_INDEX_FOR_LOGGING].getClassName();
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        String invokingClassName = this.findCurrentLoggerClassStackTraceIndex(stackTraceElements);
         Logger logger = loggers.computeIfAbsent(invokingClassName, LoggerFactory::getLogger);
         if (logger.isErrorEnabled()) {
             logger.error(logSupplier.get(), argumentsSupplier.get());
@@ -150,7 +166,8 @@ public class PpaassLogger {
     }
 
     public <T> void trace(Supplier<String> logSupplier) {
-        String invokingClassName = Thread.currentThread().getStackTrace()[STACK_TRACE_INDEX_FOR_LOGGING].getClassName();
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        String invokingClassName = this.findCurrentLoggerClassStackTraceIndex(stackTraceElements);
         Logger logger = loggers.computeIfAbsent(invokingClassName, LoggerFactory::getLogger);
         if (logger.isTraceEnabled()) {
             logger.trace(logSupplier.get());
@@ -158,7 +175,8 @@ public class PpaassLogger {
     }
 
     public <T> void trace(Supplier<String> logSupplier, Supplier<Object[]> argumentsSupplier) {
-        String invokingClassName = Thread.currentThread().getStackTrace()[STACK_TRACE_INDEX_FOR_LOGGING].getClassName();
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        String invokingClassName = this.findCurrentLoggerClassStackTraceIndex(stackTraceElements);
         Logger logger = loggers.computeIfAbsent(invokingClassName, LoggerFactory::getLogger);
         if (logger.isTraceEnabled()) {
             logger.trace(logSupplier.get(), argumentsSupplier.get());
