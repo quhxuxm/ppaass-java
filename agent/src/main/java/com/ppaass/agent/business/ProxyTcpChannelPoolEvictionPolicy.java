@@ -10,6 +10,6 @@ public class ProxyTcpChannelPoolEvictionPolicy extends DefaultEvictionPolicy<Cha
     public boolean evict(EvictionConfig config, PooledObject<Channel> underTest, int idleCount) {
         boolean poolSizeCondition = super.evict(config, underTest, idleCount);
         Channel proxyTcpChannel = underTest.getObject();
-        return !proxyTcpChannel.isActive() && poolSizeCondition;
+        return !(proxyTcpChannel.isOpen() || proxyTcpChannel.isActive()) && poolSizeCondition;
     }
 }
