@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class Launcher {
     public static void main(String[] args) {
-        PpaassLoggerFactory.INSTANCE.init("com.ppaass.proxy.ProxyPpaassLogger");
+        PpaassLoggerFactory.INSTANCE.init(ProxyPpaassLogger.class);
         var logger = PpaassLoggerFactory.INSTANCE.getLogger();
         var context = SpringApplication.run(Launcher.class, args);
         var proxy = context.getBean(Proxy.class);

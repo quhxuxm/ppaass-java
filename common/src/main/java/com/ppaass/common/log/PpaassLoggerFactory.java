@@ -9,10 +9,19 @@ public class PpaassLoggerFactory {
     private PpaassLoggerFactory() {
     }
 
+    public void init(Class<? extends IPpaassLogger> loggerClass) {
+        try {
+            this.logger = loggerClass.getConstructor().newInstance();
+        } catch (Exception e) {
+            throw new PpaassException("Fail to initialize logger factory because of exception.", e);
+        }
+    }
+
     public void init(String className) {
         try {
-            Class<?> loggerClass = Class.forName(className);
-            this.logger = (IPpaassLogger) loggerClass.getConstructor().newInstance();
+            @SuppressWarnings("unchecked")
+            Class<? extends IPpaassLogger> loggerClass = (Class<? extends IPpaassLogger>) Class.forName(className);
+            this.init(loggerClass);
         } catch (Exception e) {
             throw new PpaassException("Fail to initialize logger factory because of exception.", e);
         }

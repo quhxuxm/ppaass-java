@@ -10,7 +10,7 @@ import java.awt.*;
 @SpringBootApplication
 public class Launcher {
     public static void main(String[] args) {
-        PpaassLoggerFactory.INSTANCE.init("com.ppaass.agent.AgentPpaassLogger");
+        PpaassLoggerFactory.INSTANCE.init(AgentPpaassLogger.class);
         var context =
                 new SpringApplicationBuilder(Launcher.class)
                         .headless(false).run(args);
