@@ -308,7 +308,15 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
             sendUdpDataToAgent(agentMessage, proxyTcpChannel, proxyMessageData);
             while (currentReceivedDataLength >= UDP_PACKET_MAX_LENGTH) {
                 DatagramPacket nextReceiveDataPacket = new DatagramPacket(receiveDataPacketBuf, UDP_PACKET_MAX_LENGTH);
-                targetUdpSocket.receive(nextReceiveDataPacket);
+                try {
+                    targetUdpSocket.receive(nextReceiveDataPacket);
+                } catch (Exception e) {
+                    logger.debug(() -> "No more data from target UDP socket, agent message:\n{}\n",
+                            () -> new Object[]{
+                                    agentMessage, e
+                            });
+                    break;
+                }
                 currentReceivedDataLength = nextReceiveDataPacket.getLength();
                 byte[] nextProxyMessageData = Arrays.copyOf(nextReceiveDataPacket.getData(), currentReceivedDataLength);
                 sendUdpDataToAgent(agentMessage, proxyTcpChannel, nextProxyMessageData);
