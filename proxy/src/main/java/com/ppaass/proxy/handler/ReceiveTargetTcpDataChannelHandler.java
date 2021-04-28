@@ -33,14 +33,20 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
         var targetChannel = targetChannelContext.channel();
         var targetTcpInfo = targetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO).get();
         if (targetTcpInfo == null) {
-            targetChannel.close();
+            if (targetChannel.isActive()) {
+                targetChannel.close();
+            }
             return;
         }
         var proxyChannel = targetTcpInfo.getProxyTcpChannel();
         proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).set(null);
         proxyChannel.attr(IProxyConstant.IProxyChannelAttr.CLOSED_ALREADY).set(true);
-        targetChannel.close();
-        proxyChannel.close();
+        if (targetChannel.isActive()) {
+            targetChannel.close();
+        }
+        if (proxyChannel.isActive()) {
+            proxyChannel.close();
+        }
     }
 
     @Override
@@ -100,7 +106,9 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
                     () -> new Object[]{
                             targetChannel.id().asLongText()
                     });
-            targetChannel.close();
+            if (targetChannel.isActive()) {
+                targetChannel.close();
+            }
             return;
         }
         var proxyChannel = targetTcpInfo.getProxyTcpChannel();
@@ -144,8 +152,12 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
                                 () -> new Object[]{
                                         targetTcpInfo
                                 });
-                        targetChannel.close();
-                        proxyChannel.close();
+                        if (targetChannel.isActive()) {
+                            targetChannel.close();
+                        }
+                        if (proxyChannel.isActive()) {
+                            proxyChannel.close();
+                        }
                     });
         }
     }
