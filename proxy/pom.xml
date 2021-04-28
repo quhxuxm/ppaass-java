@@ -11,9 +11,8 @@
     <artifactId>proxy</artifactId>
     <dependencies>
         <dependency>
-            <groupId>com.ppaass</groupId>
-            <artifactId>common</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -60,6 +59,11 @@
         <dependency>
             <groupId>org.lz4</groupId>
             <artifactId>lz4-java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.ppaass</groupId>
+            <artifactId>common</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
     <build>
@@ -117,7 +121,10 @@
                                         </assembly>
                                         <cmd>
                                             <!-- <shell>exec $JAVA_HOME/bin/java -jar ${app.domain}/${project.build.finalName}.jar</shell> -->
-                                            <shell>java -jar -server -Dio.netty.recycler.maxCapacity=16 -Dio.netty.noResourceLeakDetection=true -XX:+UseG1GC -XX:+UseCompressedOops -XX:+UseCompressedClassPointers -XX:+SegmentedCodeCache  -XX:+ExplicitGCInvokesConcurrent -Xms256m -Xmx256m -XX:MaxDirectMemorySize=256m  proxy-*.jar --spring.config.location=classpath:application.properties,optional:./application.properties</shell>
+                                            <shell>java -jar -server -Dio.netty.recycler.maxCapacity=16 -Dio.netty.noResourceLeakDetection=true -XX:+UseG1GC -XX:+UseCompressedOops
+                                                -XX:+UseCompressedClassPointers -XX:+SegmentedCodeCache -XX:+ExplicitGCInvokesConcurrent -Xms256m -Xmx256m
+                                                -XX:MaxDirectMemorySize=256m proxy-*.jar --spring.config.location=classpath:application.properties,optional:./application.properties
+                                            </shell>
                                         </cmd>
                                     </build>
                                 </image>
