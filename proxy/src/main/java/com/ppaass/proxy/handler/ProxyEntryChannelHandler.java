@@ -260,6 +260,9 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         try {
             targetUdpSocket = new DatagramSocket();
         } catch (SocketException e) {
+            logger.error(() -> "Fail to create UDP socket for target, agent message:\n{}\n", () -> new Object[]{
+                    agentMessage, e
+            });
             var failProxyMessageBody = new ProxyMessageBody(UUIDUtil.INSTANCE.generateUuid(),
                     proxyConfiguration.getProxyInstanceId(),
                     agentMessage.getBody().getUserToken(),
@@ -311,6 +314,10 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                 sendUdpDataToAgent(agentMessage, proxyTcpChannel, nextProxyMessageData);
             }
         } catch (Exception e) {
+            logger.error(() -> "Fail to send UDP message to target UDP socket, agent message:\n{}\n",
+                    () -> new Object[]{
+                            agentMessage, e
+                    });
             var failProxyMessageBody = new ProxyMessageBody(UUIDUtil.INSTANCE.generateUuid(),
                     proxyConfiguration.getProxyInstanceId(),
                     agentMessage.getBody().getUserToken(),
