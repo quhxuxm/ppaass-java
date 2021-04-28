@@ -28,7 +28,7 @@ sudo mkdir /tmp/build
 
 # Pull ppaass-common
 cd /tmp/sourcecode
-sudo git clone https://github.com/quhxuxm/ppaass-protocol.git ppaass-common
+sudo git clone https://github.com/quhxuxm/ppaass-common.git ppaass-common
 cd /tmp/sourcecode/ppaass-common
 sudo git pull
 sudo mvn clean install
