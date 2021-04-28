@@ -4,7 +4,7 @@ import com.ppaass.agent.Agent;
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.common.log.IPpaassLogger;
 import com.ppaass.common.log.PpaassLoggerFactory;
-import com.ppaass.protocol.common.util.UUIDUtil;
+import com.ppaass.common.util.UUIDUtil;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;

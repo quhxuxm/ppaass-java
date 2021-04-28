@@ -22,6 +22,14 @@
             <groupId>com.ppaass.protocol</groupId>
             <artifactId>vpn</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.ppaass.common</groupId>
+            <artifactId>log</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.ppaass.common</groupId>
+            <artifactId>util</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

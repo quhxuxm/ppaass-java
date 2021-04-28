@@ -3,7 +3,7 @@ package com.ppaass.agent.business.sa;
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.common.log.IPpaassLogger;
 import com.ppaass.common.log.PpaassLoggerFactory;
-import com.ppaass.protocol.common.util.UUIDUtil;
+import com.ppaass.common.util.UUIDUtil;
 import com.ppaass.protocol.vpn.message.AgentMessage;
 import com.ppaass.protocol.vpn.message.AgentMessageBody;
 import com.ppaass.protocol.vpn.message.AgentMessageBodyType;

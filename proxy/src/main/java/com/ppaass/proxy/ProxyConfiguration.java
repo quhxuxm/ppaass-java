@@ -1,7 +1,7 @@
 package com.ppaass.proxy;
 
 import com.ppaass.common.exception.PpaassException;
-import com.ppaass.protocol.common.util.UUIDUtil;
+import com.ppaass.common.util.UUIDUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;

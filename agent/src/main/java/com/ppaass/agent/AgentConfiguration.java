@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ppaass.common.exception.PpaassException;
 import com.ppaass.common.log.IPpaassLogger;
 import com.ppaass.common.log.PpaassLoggerFactory;
-import com.ppaass.protocol.common.util.UUIDUtil;
+import com.ppaass.common.util.UUIDUtil;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
