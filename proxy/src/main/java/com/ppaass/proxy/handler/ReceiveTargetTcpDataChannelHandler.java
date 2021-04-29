@@ -126,10 +126,7 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
             }
             long proxyChannelWritableBytes = proxyChannel.bytesBeforeWritable();
             if (frameLength > proxyChannelWritableBytes) {
-                frameLength = (int) proxyChannelWritableBytes - 2048;
-                if (frameLength < 0) {
-                    frameLength = (int) proxyChannelWritableBytes;
-                }
+                frameLength = (int) proxyChannelWritableBytes;
             }
             final byte[] originalDataByteArray = new byte[frameLength];
             targetOriginalMessageBuf.readBytes(originalDataByteArray);
