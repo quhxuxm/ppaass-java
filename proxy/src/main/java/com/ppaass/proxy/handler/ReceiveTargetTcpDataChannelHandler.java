@@ -9,9 +9,11 @@ import com.ppaass.protocol.vpn.message.ProxyMessageBody;
 import com.ppaass.protocol.vpn.message.ProxyMessageBodyType;
 import com.ppaass.proxy.IProxyConstant;
 import com.ppaass.proxy.ProxyConfiguration;
-import com.ppaass.proxy.handler.bo.TargetTcpInfo;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -116,63 +118,65 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
             return;
         }
         var proxyChannel = targetTcpInfo.getProxyTcpChannel();
-        concreteWriteDataToAgent(targetOriginalMessageBuf, targetChannel, targetTcpInfo, proxyChannel);
-    }
-
-    private void concreteWriteDataToAgent(ByteBuf targetOriginalMessageBuf, Channel targetChannel,
-                                          TargetTcpInfo targetTcpInfo,
-                                          Channel proxyChannel) {
-        if (!targetOriginalMessageBuf.isReadable()) {
-            return;
-        }
-        int targetDataTotalLength = targetOriginalMessageBuf.readableBytes();
-        int frameLength = TARGET_DATA_MAX_FRAME_LENGTH;
-        if (targetDataTotalLength < frameLength) {
-            frameLength = targetDataTotalLength;
-        }
-        final byte[] originalDataByteArray = new byte[frameLength];
-        targetOriginalMessageBuf.readBytes(originalDataByteArray);
-        var proxyMessageBody =
-                new ProxyMessageBody(
-                        UUIDUtil.INSTANCE.generateUuid(),
-                        proxyConfiguration.getProxyInstanceId(),
-                        targetTcpInfo.getUserToken(),
-                        targetTcpInfo.getSourceHost(),
-                        targetTcpInfo.getSourcePort(),
-                        targetTcpInfo.getTargetHost(),
-                        targetTcpInfo.getTargetPort(),
-                        ProxyMessageBodyType.TCP_DATA_SUCCESS,
-                        targetTcpInfo.getAgentChannelId(),
-                        targetTcpInfo.getTargetChannelId(),
-                        originalDataByteArray);
-        var proxyMessage = new ProxyMessage(
-                UUIDUtil.INSTANCE.generateUuidInBytes(),
-                EncryptionType.choose(),
-                proxyMessageBody);
-        proxyChannel.writeAndFlush(proxyMessage)
-                .addListener((ChannelFutureListener) proxyChannelFuture -> {
-                    if (proxyChannelFuture.isSuccess()) {
-                        logger.debug(
-                                () -> "Success to write target data to agent, tcp info: \n{}\n",
+        while (targetOriginalMessageBuf.isReadable()) {
+            int targetDataTotalLength = targetOriginalMessageBuf.readableBytes();
+            int frameLength = TARGET_DATA_MAX_FRAME_LENGTH;
+            if (targetDataTotalLength < frameLength) {
+                frameLength = targetDataTotalLength;
+            }
+            final byte[] originalDataByteArray = new byte[frameLength];
+            targetOriginalMessageBuf.readBytes(originalDataByteArray);
+            var proxyMessageBody =
+                    new ProxyMessageBody(
+                            UUIDUtil.INSTANCE.generateUuid(),
+                            proxyConfiguration.getProxyInstanceId(),
+                            targetTcpInfo.getUserToken(),
+                            targetTcpInfo.getSourceHost(),
+                            targetTcpInfo.getSourcePort(),
+                            targetTcpInfo.getTargetHost(),
+                            targetTcpInfo.getTargetPort(),
+                            ProxyMessageBodyType.TCP_DATA_SUCCESS,
+                            targetTcpInfo.getAgentChannelId(),
+                            targetTcpInfo.getTargetChannelId(),
+                            originalDataByteArray);
+            var proxyMessage = new ProxyMessage(
+                    UUIDUtil.INSTANCE.generateUuidInBytes(),
+                    EncryptionType.choose(),
+                    proxyMessageBody);
+            if (!proxyChannel.isActive()) {
+                if (targetChannel.isActive()) {
+                    targetChannel.close();
+                }
+                logger.error(
+                        () -> "Fail to write target data to agent because of proxy channel is not active, tcp info: \n{}\n",
+                        () -> new Object[]{
+                                targetTcpInfo
+                        });
+                break;
+            }
+            proxyChannel.writeAndFlush(proxyMessage).syncUninterruptibly()
+                    .addListener((ChannelFutureListener) proxyChannelFuture -> {
+                        if (proxyChannelFuture.isSuccess()) {
+                            logger.debug(
+                                    () -> "Success to write target data to agent, tcp info: \n{}\n",
+                                    () -> new Object[]{
+                                            targetTcpInfo
+                                    });
+                            return;
+                        }
+                        logger.error(
+                                () -> "Fail to write target data to agent because of exception, tcp info: \n{}\n",
                                 () -> new Object[]{
-                                        targetTcpInfo
+                                        targetTcpInfo,
+                                        proxyChannelFuture.cause()
                                 });
-                        this.concreteWriteDataToAgent(targetOriginalMessageBuf, targetChannel, targetTcpInfo,
-                                proxyChannel);
-                        return;
-                    }
-                    logger.error(
-                            () -> "Fail to write target data to agent because of exception, tcp info: \n{}\n",
-                            () -> new Object[]{
-                                    targetTcpInfo,
-                                    proxyChannelFuture.cause()
-                            });
-                    if (targetChannel.isActive()) {
-                        targetChannel.close();
-                    }
-                    if (proxyChannel.isActive()) {
-                        proxyChannel.close();
-                    }
-                });
+                        if (targetChannel.isActive()) {
+                            targetChannel.close();
+                        }
+                        if (proxyChannel.isActive()) {
+                            proxyChannel.close();
+                        }
+                    });
+        }
     }
 }
