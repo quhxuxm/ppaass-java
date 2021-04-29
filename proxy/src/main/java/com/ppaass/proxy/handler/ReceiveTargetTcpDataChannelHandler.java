@@ -164,7 +164,8 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
                     logger.error(
                             () -> "Fail to write target data to agent because of exception, tcp info: \n{}\n",
                             () -> new Object[]{
-                                    targetTcpInfo
+                                    targetTcpInfo,
+                                    proxyChannelFuture.cause()
                             });
                     if (targetChannel.isActive()) {
                         targetChannel.close();
