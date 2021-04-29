@@ -97,6 +97,15 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
                 () -> new Object[]{
                         proxyMessage
                 });
+        if (proxyMessage.getBody().getData() == null) {
+            logger.trace(SAReceiveProxyDataHandler.class,
+                    () -> "Forward proxy data to client success [TCP_DATA_SUCCESS] with empty data, agent channel = {},  proxy channel = {}",
+                    () -> new Object[]{
+                            agentTcpChannel.id().asLongText(),
+                            proxyChannel.id().asLongText()
+                    });
+            return;
+        }
         var tcpDataByteBuf = Unpooled.wrappedBuffer(proxyMessage.getBody().getData());
         agentTcpChannel.writeAndFlush(
                 tcpDataByteBuf)
