@@ -6,7 +6,6 @@ import io.netty.util.AttributeKey;
 
 public interface IProxyConstant {
     String LAST_INBOUND_HANDLER = "LAST_INBOUND_HANDLER";
-    String TARGET_CHANNEL_KEY_FORMAT = "%s:%s";
 
     interface ITargetChannelAttr {
         AttributeKey<TargetTcpInfo> TCP_INFO =
@@ -16,7 +15,5 @@ public interface IProxyConstant {
     interface IProxyChannelAttr {
         AttributeKey<Channel> TARGET_CHANNEL =
                 AttributeKey.valueOf("TARGET_CHANNEL");
-        AttributeKey<Boolean> CLOSED_ALREADY =
-                AttributeKey.valueOf("MARK_TO_CLOSED");
     }
 }
