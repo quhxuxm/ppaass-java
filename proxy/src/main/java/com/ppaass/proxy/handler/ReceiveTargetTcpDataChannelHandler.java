@@ -128,8 +128,21 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
             if (frameLength > proxyChannelWritableBytes) {
                 frameLength = (int) proxyChannelWritableBytes - 2048;
             }
-            if (frameLength < 0) {
-                frameLength = 0;
+            if (frameLength <= 0) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    if (targetChannel.isActive()) {
+                        targetChannel.close();
+                    }
+                    logger.error(
+                            () -> "Fail to write target data to agent because of exception, tcp info: \n{}\n",
+                            () -> new Object[]{
+                                    targetTcpInfo,
+                                    e
+                            });
+                }
+                continue;
             }
             final byte[] originalDataByteArray = new byte[frameLength];
             targetOriginalMessageBuf.readBytes(originalDataByteArray);
