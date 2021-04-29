@@ -124,7 +124,7 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
             if (targetDataTotalLength < frameLength) {
                 frameLength = targetDataTotalLength;
             }
-            long proxyChannelWritableBytes = proxyChannel.bytesBeforeWritable();
+            long proxyChannelWritableBytes = proxyChannel.bytesBeforeUnwritable();
             if (frameLength > proxyChannelWritableBytes) {
                 frameLength = (int) proxyChannelWritableBytes;
             }
