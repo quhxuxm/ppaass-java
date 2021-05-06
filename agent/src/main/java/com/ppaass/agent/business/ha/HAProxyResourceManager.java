@@ -228,7 +228,7 @@ class HAProxyResourceManager implements IAgentResourceManager {
         config.setBlockWhenExhausted(true);
         config.setTestWhileIdle(true);
         config.setTestOnBorrow(true);
-        config.setTestOnCreate(false);
+        config.setTestOnCreate(true);
         config.setTestOnReturn(true);
         config.setEvictionPolicy(new ProxyTcpChannelPoolEvictionPolicy());
         config.setTimeBetweenEvictionRunsMillis(agentConfiguration.getProxyChannelTimeBetweenEvictionRunsMillis());
