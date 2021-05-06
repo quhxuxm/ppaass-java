@@ -17,21 +17,23 @@ public class ProxyTcpChannelPoolEvictionPolicy implements EvictionPolicy<Channel
 //        boolean poolSizeCondition = super.evict(config, underTest, idleCount);
         Channel proxyTcpChannel = underTest.getObject();
         if (!proxyTcpChannel.isOpen()) {
-            logger.debug(() -> "Mark proxy channel should be evict as it is not open, proxy channel={}",
+            logger.error(() -> "Mark proxy channel should be evict as it is not open, proxy channel={}",
                     () -> new Object[]{proxyTcpChannel.id().asLongText()});
             return true;
         }
         if (!proxyTcpChannel.isActive()) {
-            logger.debug(() -> "Mark proxy channel should be evict as it is not active, proxy channel={}",
+            logger.error(() -> "Mark proxy channel should be evict as it is not active, proxy channel={}",
                     () -> new Object[]{proxyTcpChannel.id().asLongText()});
             return true;
         }
         ChannelFuture testResultFuture = proxyTcpChannel.writeAndFlush(Unpooled.EMPTY_BUFFER).syncUninterruptibly();
         if (!testResultFuture.isSuccess()) {
-            logger.debug(() -> "Mark proxy channel should be evict as fail to write, proxy channel={}",
+            logger.error(() -> "Mark proxy channel should be evict as fail to write, proxy channel={}",
                     () -> new Object[]{proxyTcpChannel.id().asLongText()});
             return true;
         }
+        logger.debug(() -> "Proxy channel still available, proxy channel={}",
+                () -> new Object[]{proxyTcpChannel.id().asLongText()});
         return false;
     }
 }

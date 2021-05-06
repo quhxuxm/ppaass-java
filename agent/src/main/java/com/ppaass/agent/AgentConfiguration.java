@@ -60,6 +60,8 @@ public class AgentConfiguration {
     private int delayCloseTimeMillis;
     private int proxyChannelTimeBetweenEvictionRunsMillis;
     private int proxyChannelSoftMinEvictableIdleTimeMillis;
+    private int proxyChannelMinEvictableIdleTimeMillis;
+    private int proxyChannelRumTestsPerEvictionRun;
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private static class AgentDynamicConfiguration {
@@ -438,6 +440,22 @@ public class AgentConfiguration {
 
     public int getProxyChannelTimeBetweenEvictionRunsMillis() {
         return proxyChannelTimeBetweenEvictionRunsMillis;
+    }
+
+    public void setProxyChannelMinEvictableIdleTimeMillis(int proxyChannelMinEvictableIdleTimeMillis) {
+        this.proxyChannelMinEvictableIdleTimeMillis = proxyChannelMinEvictableIdleTimeMillis;
+    }
+
+    public int getProxyChannelMinEvictableIdleTimeMillis() {
+        return proxyChannelMinEvictableIdleTimeMillis;
+    }
+
+    public void setProxyChannelRumTestsPerEvictionRun(int proxyChannelRumTestsPerEvictionRun) {
+        this.proxyChannelRumTestsPerEvictionRun = proxyChannelRumTestsPerEvictionRun;
+    }
+
+    public int getProxyChannelRumTestsPerEvictionRun() {
+        return proxyChannelRumTestsPerEvictionRun;
     }
 
     public void save() {
