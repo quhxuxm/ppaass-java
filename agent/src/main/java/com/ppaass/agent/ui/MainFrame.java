@@ -263,10 +263,8 @@ public class MainFrame extends JFrame {
                 }
         );
         var adjustLoggerButton = new JButton(this.getMessage(BUTTON_ADJUST_LOGGER_MESSAGE_KEY));
-        var adjustLoggerDialog =
-                new JDialog(this, this.getMessage(DIALOG_ADJUST_LOGGER_TITLE_MESSAGE_KEY), true);
-        this.initializeAdjustLoggerDialog(adjustLoggerDialog);
         adjustLoggerButton.addActionListener(e -> {
+            var adjustLoggerDialog = this.initializeAdjustLoggerDialog();
             adjustLoggerDialog.setVisible(true);
         });
         buttonPanel.add(startProxyBtn);
@@ -290,8 +288,11 @@ public class MainFrame extends JFrame {
                 .getMessage(statusTokenValidationFailMessageKey, null, locale);
     }
 
-    private void initializeAdjustLoggerDialog(JDialog adjustLoggerDialog) {
+    private JDialog initializeAdjustLoggerDialog() {
+        var adjustLoggerDialog =
+                new JDialog(this, this.getMessage(DIALOG_ADJUST_LOGGER_TITLE_MESSAGE_KEY), true);
         adjustLoggerDialog.setResizable(false);
+        adjustLoggerDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         var contentPanel = new JPanel();
         var contentPanelLayout = new BoxLayout(contentPanel, BoxLayout.Y_AXIS);
         contentPanel.setLayout(contentPanelLayout);
@@ -310,7 +311,7 @@ public class MainFrame extends JFrame {
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         adjustLogLevelPanel.setLayout(new BoxLayout(adjustLogLevelPanel, BoxLayout.Y_AXIS));
         adjustLogLevelPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-        var loggerContext = (LoggerContext) LogManager.getContext(false);
+        var loggerContext = (LoggerContext) LogManager.getContext(true);
         loggerContext.getLoggers().stream().filter(it -> it.getName().startsWith("com.ppaass"))
                 .sorted(Comparator.comparing(AbstractLogger::getName)).forEach(it -> {
             var loggerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -332,6 +333,7 @@ public class MainFrame extends JFrame {
         });
         contentPanel.add(adjustLogLevelPanelScrollPane);
         adjustLoggerDialog.pack();
+        return adjustLoggerDialog;
     }
 
     public void start() {
