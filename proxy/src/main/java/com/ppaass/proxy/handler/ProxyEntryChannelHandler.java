@@ -39,6 +39,16 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         proxyChannel.close();
     }
 
+    @Override
+    public void channelWritabilityChanged(ChannelHandlerContext proxyChannelContext) throws Exception {
+        var proxyChannel = proxyChannelContext.channel();
+        var targetChannel = proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).get();
+        if (targetChannel == null) {
+            return;
+        }
+        targetChannel.config().setAutoRead(proxyChannel.isWritable());
+    }
+
     private void handleTcpConnect(ChannelHandlerContext proxyChannelContext, AgentMessage agentMessage) {
         var proxyChannel = proxyChannelContext.channel();
         logger.debug(() -> "Begin to create TCP connection for: {}", () -> new Object[]{agentMessage});

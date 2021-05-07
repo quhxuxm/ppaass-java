@@ -82,6 +82,16 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
     }
 
     @Override
+    public void channelWritabilityChanged(ChannelHandlerContext targetChannelContext) throws Exception {
+        var targetChannel = targetChannelContext.channel();
+        var targetTcpInfo = targetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO).get();
+        if (targetTcpInfo == null) {
+            return;
+        }
+        targetTcpInfo.getProxyTcpChannel().config().setAutoRead(targetChannel.isWritable());
+    }
+
+    @Override
     protected void channelRead0(ChannelHandlerContext targetChannelContext, ByteBuf targetOriginalMessageBuf) {
         var targetChannel = targetChannelContext.channel();
         var targetTcpInfo = targetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO).get();
@@ -98,53 +108,53 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
         }
         var proxyChannel = targetTcpInfo.getProxyTcpChannel();
 //        while (targetOriginalMessageBuf.isReadable()) {
-            int targetDataTotalLength = targetOriginalMessageBuf.readableBytes();
+        int targetDataTotalLength = targetOriginalMessageBuf.readableBytes();
 //            int frameLength = TARGET_DATA_MAX_FRAME_LENGTH;
 //            if (targetDataTotalLength < frameLength) {
 //                frameLength = targetDataTotalLength;
 //            }
-            final byte[] originalDataByteArray = new byte[targetDataTotalLength];
-            targetOriginalMessageBuf.readBytes(originalDataByteArray);
-            var proxyMessageBody =
-                    new ProxyMessageBody(
-                            UUIDUtil.INSTANCE.generateUuid(),
-                            proxyConfiguration.getProxyInstanceId(),
-                            targetTcpInfo.getUserToken(),
-                            targetTcpInfo.getSourceHost(),
-                            targetTcpInfo.getSourcePort(),
-                            targetTcpInfo.getTargetHost(),
-                            targetTcpInfo.getTargetPort(),
-                            ProxyMessageBodyType.TCP_DATA_SUCCESS,
-                            targetTcpInfo.getAgentChannelId(),
-                            targetTcpInfo.getTargetChannelId(),
-                            originalDataByteArray);
-            var proxyMessage = new ProxyMessage(
-                    UUIDUtil.INSTANCE.generateUuidInBytes(),
-                    EncryptionType.choose(),
-                    proxyMessageBody);
-            proxyChannel.writeAndFlush(proxyMessage).syncUninterruptibly()
-                    .addListener((ChannelFutureListener) proxyChannelFuture -> {
-                        if (proxyChannelFuture.isSuccess()) {
-                            logger.debug(
-                                    () -> "Success to write target data to agent, tcp info: \n{}\n",
-                                    () -> new Object[]{
-                                            targetTcpInfo
-                                    });
-                            return;
-                        }
-                        logger.error(
-                                () -> "Fail to write target data to agent because of exception, tcp info: \n{}\n",
+        final byte[] originalDataByteArray = new byte[targetDataTotalLength];
+        targetOriginalMessageBuf.readBytes(originalDataByteArray);
+        var proxyMessageBody =
+                new ProxyMessageBody(
+                        UUIDUtil.INSTANCE.generateUuid(),
+                        proxyConfiguration.getProxyInstanceId(),
+                        targetTcpInfo.getUserToken(),
+                        targetTcpInfo.getSourceHost(),
+                        targetTcpInfo.getSourcePort(),
+                        targetTcpInfo.getTargetHost(),
+                        targetTcpInfo.getTargetPort(),
+                        ProxyMessageBodyType.TCP_DATA_SUCCESS,
+                        targetTcpInfo.getAgentChannelId(),
+                        targetTcpInfo.getTargetChannelId(),
+                        originalDataByteArray);
+        var proxyMessage = new ProxyMessage(
+                UUIDUtil.INSTANCE.generateUuidInBytes(),
+                EncryptionType.choose(),
+                proxyMessageBody);
+        proxyChannel.writeAndFlush(proxyMessage).syncUninterruptibly()
+                .addListener((ChannelFutureListener) proxyChannelFuture -> {
+                    if (proxyChannelFuture.isSuccess()) {
+                        logger.debug(
+                                () -> "Success to write target data to agent, tcp info: \n{}\n",
                                 () -> new Object[]{
-                                        targetTcpInfo,
-                                        proxyChannelFuture.cause()
+                                        targetTcpInfo
                                 });
-                        if (targetChannel.isActive()) {
-                            targetChannel.close();
-                        }
-                        if (proxyChannel.isActive()) {
-                            proxyChannel.close();
-                        }
-                    });
+                        return;
+                    }
+                    logger.error(
+                            () -> "Fail to write target data to agent because of exception, tcp info: \n{}\n",
+                            () -> new Object[]{
+                                    targetTcpInfo,
+                                    proxyChannelFuture.cause()
+                            });
+                    if (targetChannel.isActive()) {
+                        targetChannel.close();
+                    }
+                    if (proxyChannel.isActive()) {
+                        proxyChannel.close();
+                    }
+                });
 //        }
     }
 }
