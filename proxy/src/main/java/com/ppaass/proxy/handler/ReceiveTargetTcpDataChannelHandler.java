@@ -144,17 +144,6 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
                     UUIDUtil.INSTANCE.generateUuidInBytes(),
                     EncryptionType.choose(),
                     proxyMessageBody);
-            if (!proxyChannel.isActive()) {
-                if (targetChannel.isActive()) {
-                    targetChannel.close();
-                }
-                logger.error(
-                        () -> "Fail to write target data to agent because of proxy channel is not active, tcp info: \n{}\n",
-                        () -> new Object[]{
-                                targetTcpInfo
-                        });
-                break;
-            }
             proxyChannel.writeAndFlush(proxyMessage).syncUninterruptibly()
                     .addListener((ChannelFutureListener) proxyChannelFuture -> {
                         if (proxyChannelFuture.isSuccess()) {
