@@ -32,13 +32,18 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext proxyChannelContext) throws Exception {
+    public void channelReadComplete(ChannelHandlerContext proxyChannelContext) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
         var agentChannel = proxyChannel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNEL).get();
-        if (!agentChannel.isActive()) {
+        if (agentChannel == null) {
             return;
         }
-        agentChannel.close();
+        if (!proxyChannel.isActive()) {
+            if (!agentChannel.isActive()) {
+                return;
+            }
+            agentChannel.close();
+        }
     }
 
     @Override
