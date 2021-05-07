@@ -169,6 +169,7 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
                                 targetTcpInfo,
                                 e
                         });
+                return;
             }
         }
     }
