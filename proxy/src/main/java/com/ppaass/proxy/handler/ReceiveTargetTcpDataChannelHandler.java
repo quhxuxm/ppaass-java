@@ -97,13 +97,13 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
             return;
         }
         var proxyChannel = targetTcpInfo.getProxyTcpChannel();
-        while (targetOriginalMessageBuf.isReadable()) {
+//        while (targetOriginalMessageBuf.isReadable()) {
             int targetDataTotalLength = targetOriginalMessageBuf.readableBytes();
-            int frameLength = TARGET_DATA_MAX_FRAME_LENGTH;
-            if (targetDataTotalLength < frameLength) {
-                frameLength = targetDataTotalLength;
-            }
-            final byte[] originalDataByteArray = new byte[frameLength];
+//            int frameLength = TARGET_DATA_MAX_FRAME_LENGTH;
+//            if (targetDataTotalLength < frameLength) {
+//                frameLength = targetDataTotalLength;
+//            }
+            final byte[] originalDataByteArray = new byte[targetDataTotalLength];
             targetOriginalMessageBuf.readBytes(originalDataByteArray);
             var proxyMessageBody =
                     new ProxyMessageBody(
@@ -145,6 +145,6 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
                             proxyChannel.close();
                         }
                     });
-        }
+//        }
     }
 }
