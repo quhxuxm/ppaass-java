@@ -22,7 +22,6 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
     private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
     private final ProxyConfiguration proxyConfiguration;
     private static final int TARGET_DATA_MAX_FRAME_LENGTH = 1024 * 1024 * 1000;
-    private static final int PROXY_MESSAGE_WRAPPER_SIZE = 1024 * 5;
 
     public ReceiveTargetTcpDataChannelHandler(ProxyConfiguration proxyConfiguration) {
         this.proxyConfiguration = proxyConfiguration;
@@ -117,13 +116,6 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
             int frameLength = TARGET_DATA_MAX_FRAME_LENGTH;
             if (targetDataTotalLength < frameLength) {
                 frameLength = targetDataTotalLength;
-            }
-            long proxyChannelWritableBytes = proxyChannel.bytesBeforeUnwritable();
-            if (frameLength > proxyChannelWritableBytes) {
-                frameLength = (int) proxyChannelWritableBytes - PROXY_MESSAGE_WRAPPER_SIZE;
-                if (frameLength < 0) {
-                    frameLength = (int) proxyChannelWritableBytes;
-                }
             }
             final byte[] originalDataByteArray = new byte[frameLength];
             targetOriginalMessageBuf.readBytes(originalDataByteArray);
