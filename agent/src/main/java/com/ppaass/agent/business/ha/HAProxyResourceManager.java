@@ -2,10 +2,7 @@ package com.ppaass.agent.business.ha;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.IAgentResourceManager;
-import com.ppaass.agent.business.ClearClosedAgentChannelHandler;
-import com.ppaass.agent.business.ProxyTcpChannelPoolEvictionPolicy;
 import com.ppaass.common.constant.ICommonConstant;
-import com.ppaass.common.exception.PpaassException;
 import com.ppaass.common.handler.AgentMessageEncoder;
 import com.ppaass.common.handler.PrintExceptionHandler;
 import com.ppaass.common.handler.ProxyMessageDecoder;
@@ -13,7 +10,6 @@ import com.ppaass.common.log.IPpaassLogger;
 import com.ppaass.common.log.PpaassLoggerFactory;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -25,13 +21,7 @@ import io.netty.handler.codec.compression.Lz4FrameDecoder;
 import io.netty.handler.codec.compression.Lz4FrameEncoder;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpResponseDecoder;
-import org.apache.commons.pool2.impl.AbandonedConfig;
-import org.apache.commons.pool2.impl.GenericObjectPool;
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.stereotype.Service;
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Service
 class HAProxyResourceManager implements IAgentResourceManager {
@@ -39,88 +29,40 @@ class HAProxyResourceManager implements IAgentResourceManager {
     private final AgentConfiguration agentConfiguration;
     private Bootstrap proxyTcpChannelBootstrapForHttp;
     private Bootstrap proxyTcpChannelBootstrapForHttps;
-    private GenericObjectPool<Channel> proxyTcpChannelPoolForHttp;
-    private GenericObjectPool<Channel> proxyTcpChannelPoolForHttps;
-    private final ReentrantReadWriteLock reentrantReadWriteLock;
     private final HASendPureDataToAgentHandler haSendPureDataToAgentHandler;
     private final HAProxyMessageBodyTypeHandler haProxyMessageBodyTypeHandler;
-    private final ClearClosedAgentChannelHandler clearClosedAgentChannelHandler;
 
     public HAProxyResourceManager(
             AgentConfiguration agentConfiguration,
             HASendPureDataToAgentHandler haSendPureDataToAgentHandler,
-            HAProxyMessageBodyTypeHandler haProxyMessageBodyTypeHandler,
-            ClearClosedAgentChannelHandler clearClosedAgentChannelHandler) {
+            HAProxyMessageBodyTypeHandler haProxyMessageBodyTypeHandler) {
         this.agentConfiguration = agentConfiguration;
         this.haSendPureDataToAgentHandler = haSendPureDataToAgentHandler;
         this.haProxyMessageBodyTypeHandler = haProxyMessageBodyTypeHandler;
-        this.clearClosedAgentChannelHandler = clearClosedAgentChannelHandler;
-        this.reentrantReadWriteLock = new ReentrantReadWriteLock();
     }
 
-    public GenericObjectPool<Channel> getProxyTcpChannelPoolForHttp() {
-        try {
-            this.reentrantReadWriteLock.readLock().lock();
-            return this.proxyTcpChannelPoolForHttp;
-        } finally {
-            this.reentrantReadWriteLock.readLock().unlock();
-        }
+    public Bootstrap getProxyTcpChannelBootstrapForHttp() {
+        return proxyTcpChannelBootstrapForHttp;
     }
 
-    public GenericObjectPool<Channel> getProxyTcpChannelPoolForHttps() {
-        try {
-            this.reentrantReadWriteLock.readLock().lock();
-            return this.proxyTcpChannelPoolForHttps;
-        } finally {
-            this.reentrantReadWriteLock.readLock().unlock();
-        }
+    public Bootstrap getProxyTcpChannelBootstrapForHttps() {
+        return proxyTcpChannelBootstrapForHttps;
     }
 
     public void prepareResources() {
-        try {
-            this.reentrantReadWriteLock.writeLock().lock();
-            this.proxyTcpChannelBootstrapForHttp = this.createProxyTcpChannelBootstrapForHttp();
-            this.proxyTcpChannelBootstrapForHttps = this.createProxyTcpChannelBootstrapForHttps();
-            Executors.newSingleThreadExecutor().submit(() -> {
-                try {
-                    this.reentrantReadWriteLock.writeLock().lock();
-                    this.proxyTcpChannelPoolForHttp =
-                            this.createHttpOrHttpsProxyTcpChannelPool(this.proxyTcpChannelBootstrapForHttp);
-                    this.proxyTcpChannelPoolForHttps =
-                            this.createHttpOrHttpsProxyTcpChannelPool(this.proxyTcpChannelBootstrapForHttps);
-                } finally {
-                    this.reentrantReadWriteLock.writeLock().unlock();
-                }
-            });
-        } finally {
-            this.reentrantReadWriteLock.writeLock().unlock();
-        }
+        this.proxyTcpChannelBootstrapForHttp = this.createProxyTcpChannelBootstrapForHttp();
+        this.proxyTcpChannelBootstrapForHttps = this.createProxyTcpChannelBootstrapForHttps();
     }
 
     public void destroyResources() {
-        try {
-            this.reentrantReadWriteLock.writeLock().lock();
-            if (this.proxyTcpChannelBootstrapForHttp != null) {
-                this.proxyTcpChannelBootstrapForHttp.config().group().shutdownGracefully();
-            }
-            if (this.proxyTcpChannelBootstrapForHttps != null) {
-                this.proxyTcpChannelBootstrapForHttps.config().group().shutdownGracefully();
-            }
-            if (this.proxyTcpChannelPoolForHttp != null) {
-                this.proxyTcpChannelPoolForHttp.close();
-                this.proxyTcpChannelPoolForHttp.clear();
-            }
-            if (this.proxyTcpChannelPoolForHttps != null) {
-                this.proxyTcpChannelPoolForHttps.close();
-                this.proxyTcpChannelPoolForHttps.clear();
-            }
-            this.proxyTcpChannelBootstrapForHttp = null;
-            this.proxyTcpChannelBootstrapForHttps = null;
-            this.proxyTcpChannelPoolForHttps = null;
-            this.proxyTcpChannelPoolForHttp = null;
-        } finally {
-            this.reentrantReadWriteLock.writeLock().unlock();
+        if (this.proxyTcpChannelBootstrapForHttp != null) {
+            this.proxyTcpChannelBootstrapForHttp.config().group().shutdownGracefully();
         }
+        if (this.proxyTcpChannelBootstrapForHttps != null) {
+            this.proxyTcpChannelBootstrapForHttps.config().group().shutdownGracefully();
+        }
+        this.proxyTcpChannelBootstrapForHttp = null;
+        this.proxyTcpChannelBootstrapForHttps = null;
     }
 
     private Bootstrap createProxyTcpChannelBootstrapForHttp() {
@@ -142,10 +84,10 @@ class HAProxyResourceManager implements IAgentResourceManager {
                 agentConfiguration.getProxyTcpSoRcvbuf());
         result.option(ChannelOption.SO_SNDBUF,
                 agentConfiguration.getProxyTcpSoSndbuf());
+        result.remoteAddress(agentConfiguration.getProxyHost(), agentConfiguration.getProxyPort());
         result.handler(new ChannelInitializer<SocketChannel>() {
             public void initChannel(SocketChannel proxyChannel) {
                 var proxyChannelPipeline = proxyChannel.pipeline();
-                proxyChannelPipeline.addLast(clearClosedAgentChannelHandler);
                 if (agentConfiguration.isProxyTcpCompressEnable()) {
                     proxyChannelPipeline.addLast(new Lz4FrameDecoder());
                 }
@@ -190,10 +132,10 @@ class HAProxyResourceManager implements IAgentResourceManager {
                 agentConfiguration.getProxyTcpSoRcvbuf());
         result.option(ChannelOption.SO_SNDBUF,
                 agentConfiguration.getProxyTcpSoSndbuf());
+        result.remoteAddress(agentConfiguration.getProxyHost(), agentConfiguration.getProxyPort());
         result.handler(new ChannelInitializer<SocketChannel>() {
             public void initChannel(SocketChannel proxyChannel) {
                 var proxyChannelPipeline = proxyChannel.pipeline();
-                proxyChannelPipeline.addLast(clearClosedAgentChannelHandler);
                 if (agentConfiguration.isProxyTcpCompressEnable()) {
                     proxyChannelPipeline.addLast(new Lz4FrameDecoder());
                 }
@@ -214,42 +156,6 @@ class HAProxyResourceManager implements IAgentResourceManager {
                 proxyChannelPipeline.addLast(PrintExceptionHandler.INSTANCE);
             }
         });
-        return result;
-    }
-
-    private GenericObjectPool<Channel> createHttpOrHttpsProxyTcpChannelPool(Bootstrap bootstrap) {
-        var socksAgentPooledProxyChannelFactory =
-                new HAPooledProxyChannelFactory(bootstrap, agentConfiguration);
-        var config = new GenericObjectPoolConfig<Channel>();
-        config.setMaxIdle(agentConfiguration.getProxyChannelPoolMaxIdleSize());
-        config.setMaxTotal(agentConfiguration.getProxyChannelPoolMaxTotalSize());
-        config.setMinIdle(agentConfiguration.getProxyChannelPoolMinIdleSize());
-        config.setMaxWaitMillis(agentConfiguration.getProxyChannelPoolAcquireTimeoutMillis());
-        config.setBlockWhenExhausted(true);
-        config.setTestWhileIdle(true);
-        config.setTestOnBorrow(true);
-        config.setTestOnCreate(true);
-        config.setTestOnReturn(true);
-        config.setEvictionPolicy(new ProxyTcpChannelPoolEvictionPolicy());
-        config.setTimeBetweenEvictionRunsMillis(agentConfiguration.getProxyChannelTimeBetweenEvictionRunsMillis());
-        config.setMinEvictableIdleTimeMillis(agentConfiguration.getProxyChannelMinEvictableIdleTimeMillis());
-        config.setSoftMinEvictableIdleTimeMillis(agentConfiguration.getProxyChannelSoftMinEvictableIdleTimeMillis());
-        config.setNumTestsPerEvictionRun(agentConfiguration.getProxyChannelRumTestsPerEvictionRun());
-        config.setJmxEnabled(false);
-        var result = new GenericObjectPool<>(socksAgentPooledProxyChannelFactory, config);
-        var abandonedConfig = new AbandonedConfig();
-        abandonedConfig.setRemoveAbandonedOnMaintenance(true);
-        abandonedConfig.setRemoveAbandonedOnBorrow(true);
-        abandonedConfig.setRemoveAbandonedTimeout(Integer.MAX_VALUE);
-        result.setAbandonedConfig(abandonedConfig);
-        socksAgentPooledProxyChannelFactory.attachPool(result);
-        try {
-            result.preparePool();
-        } catch (Exception e) {
-            logger
-                    .error(() -> "Fail to initialize proxy channel pool because of exception.", () -> new Object[]{e});
-            throw new PpaassException("Fail to initialize proxy channel pool.", e);
-        }
         return result;
     }
 }

@@ -85,11 +85,11 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
             if (future.isSuccess()) {
                 logger.debug(() -> "Success to write TCP_CONNECTION_CLOSE to agent, tcp info:\n{}\n",
                         () -> new Object[]{targetTcpInfo});
-                return;
+            } else {
+                logger
+                        .error(() -> "Fail to write TCP_CONNECTION_CLOSE to agent because of exception, tcp info:\n{}\n",
+                                () -> new Object[]{targetTcpInfo, future.cause()});
             }
-            logger
-                    .error(() -> "Fail to write TCP_CONNECTION_CLOSE to agent because of exception, tcp info:\n{}\n",
-                            () -> new Object[]{targetTcpInfo, future.cause()});
             if (proxyChannel.isActive()) {
                 proxyChannel.close();
             }

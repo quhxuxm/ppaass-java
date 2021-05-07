@@ -11,7 +11,6 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
-import org.apache.commons.pool2.DestroyMode;
 import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
@@ -35,26 +34,18 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
     @Override
     public void channelInactive(ChannelHandlerContext proxyChannelContext) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
-        var agentChannelsOnProxyChannel = proxyChannel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNELS).get();
-        agentChannelsOnProxyChannel.forEach((agentChannelId, agentChannelWrapper) -> {
-            if (agentChannelWrapper.isClosed()) {
-                return;
-            }
-            agentChannelWrapper.markClose();
-        });
-        var channelPool =
-                proxyChannel.attr(IHAConstant.IProxyChannelConstant.CHANNEL_POOL)
-                        .get();
-        proxyChannel.attr(IHAConstant.IProxyChannelConstant.CLOSED_ALREADY).set(true);
-        channelPool.invalidateObject(proxyChannel, DestroyMode.ABANDONED);
+        var agentChannel = proxyChannel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNEL).get();
+        if (!agentChannel.isActive()) {
+            return;
+        }
+        agentChannel.close();
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext proxyChannelContext, ProxyMessage proxyMessage) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
-        var agentChannelsOnProxyChannel = proxyChannel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNELS).get();
-        var agentChannelWrapper = agentChannelsOnProxyChannel.get(proxyMessage.getBody().getAgentChannelId());
-        if (agentChannelWrapper == null) {
+        var agentChannel = proxyChannel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNEL).get();
+        if (agentChannel == null) {
             logger.error(
                     () -> "The agent channel id in proxy message is not for current proxy channel, discard the proxy message, proxy channel = {}, proxy message:\n{}\n",
                     () -> new Object[]{
@@ -63,7 +54,6 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
                     });
             return;
         }
-        var agentChannel = agentChannelWrapper.getChannel();
         var connectionInfo = agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
         switch (proxyMessage.getBody().getBodyType()) {
             case TCP_CONNECT_FAIL -> {

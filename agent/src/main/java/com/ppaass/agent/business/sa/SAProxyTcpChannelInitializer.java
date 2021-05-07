@@ -1,7 +1,6 @@
 package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
-import com.ppaass.agent.business.ClearClosedAgentChannelHandler;
 import com.ppaass.common.constant.ICommonConstant;
 import com.ppaass.common.handler.AgentMessageEncoder;
 import com.ppaass.common.handler.PrintExceptionHandler;
@@ -21,15 +20,12 @@ class SAProxyTcpChannelInitializer extends ChannelInitializer<Channel> {
     private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
     private final AgentConfiguration agentConfiguration;
     private final SAReceiveProxyDataHandler saReceiveProxyDataHandler;
-    private final ClearClosedAgentChannelHandler clearClosedAgentChannelHandler;
 
     public SAProxyTcpChannelInitializer(
             AgentConfiguration agentConfiguration,
-            SAReceiveProxyDataHandler saReceiveProxyDataHandler,
-            ClearClosedAgentChannelHandler clearClosedAgentChannelHandler) {
+            SAReceiveProxyDataHandler saReceiveProxyDataHandler) {
         this.agentConfiguration = agentConfiguration;
         this.saReceiveProxyDataHandler = saReceiveProxyDataHandler;
-        this.clearClosedAgentChannelHandler = clearClosedAgentChannelHandler;
     }
 
     @Override
@@ -37,7 +33,6 @@ class SAProxyTcpChannelInitializer extends ChannelInitializer<Channel> {
         logger.info(
                 () -> "Proxy channel created, proxy channel = " + proxyChannel.id().asLongText());
         var proxyChannelPipeline = proxyChannel.pipeline();
-        proxyChannelPipeline.addLast(clearClosedAgentChannelHandler);
         if (agentConfiguration.isProxyTcpCompressEnable()) {
             proxyChannelPipeline.addLast(new Lz4FrameDecoder());
         }

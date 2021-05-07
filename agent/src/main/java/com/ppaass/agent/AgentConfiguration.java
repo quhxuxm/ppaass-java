@@ -52,16 +52,7 @@ public class AgentConfiguration {
     private String agentInstanceId;
     private final ObjectMapper objectMapper;
     private String agentSourceAddress;
-    private int proxyChannelPoolMaxIdleSize;
-    private int proxyChannelPoolMaxTotalSize;
-    private int proxyChannelPoolMinIdleSize;
-    private int proxyChannelPoolAcquireTimeoutMillis;
-    private int proxyChannelPoolDestroyTimeoutMillis;
     private int delayCloseTimeMillis;
-    private int proxyChannelTimeBetweenEvictionRunsMillis;
-    private int proxyChannelSoftMinEvictableIdleTimeMillis;
-    private int proxyChannelMinEvictableIdleTimeMillis;
-    private int proxyChannelRumTestsPerEvictionRun;
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private static class AgentDynamicConfiguration {
@@ -370,38 +361,6 @@ public class AgentConfiguration {
         return agentSourceAddress;
     }
 
-    public int getProxyChannelPoolMaxIdleSize() {
-        return proxyChannelPoolMaxIdleSize;
-    }
-
-    public void setProxyChannelPoolMaxIdleSize(int proxyChannelPoolMaxIdleSize) {
-        this.proxyChannelPoolMaxIdleSize = proxyChannelPoolMaxIdleSize;
-    }
-
-    public int getProxyChannelPoolMaxTotalSize() {
-        return proxyChannelPoolMaxTotalSize;
-    }
-
-    public void setProxyChannelPoolMaxTotalSize(int proxyChannelPoolMaxTotalSize) {
-        this.proxyChannelPoolMaxTotalSize = proxyChannelPoolMaxTotalSize;
-    }
-
-    public int getProxyChannelPoolMinIdleSize() {
-        return proxyChannelPoolMinIdleSize;
-    }
-
-    public void setProxyChannelPoolMinIdleSize(int proxyChannelPoolMinIdleSize) {
-        this.proxyChannelPoolMinIdleSize = proxyChannelPoolMinIdleSize;
-    }
-
-    public int getProxyChannelPoolAcquireTimeoutMillis() {
-        return proxyChannelPoolAcquireTimeoutMillis;
-    }
-
-    public void setProxyChannelPoolAcquireTimeoutMillis(int proxyChannelPoolAcquireTimeoutMillis) {
-        this.proxyChannelPoolAcquireTimeoutMillis = proxyChannelPoolAcquireTimeoutMillis;
-    }
-
     public void setAgentChannelAllIdleSeconds(int agentChannelAllIdleSeconds) {
         this.agentChannelAllIdleSeconds = agentChannelAllIdleSeconds;
     }
@@ -416,46 +375,6 @@ public class AgentConfiguration {
 
     public int getDelayCloseTimeMillis() {
         return delayCloseTimeMillis;
-    }
-
-    public void setProxyChannelPoolDestroyTimeoutMillis(int proxyChannelPoolDestroyTimeoutMillis) {
-        this.proxyChannelPoolDestroyTimeoutMillis = proxyChannelPoolDestroyTimeoutMillis;
-    }
-
-    public int getProxyChannelPoolDestroyTimeoutMillis() {
-        return proxyChannelPoolDestroyTimeoutMillis;
-    }
-
-    public void setProxyChannelSoftMinEvictableIdleTimeMillis(int proxyChannelSoftMinEvictableIdleTimeMillis) {
-        this.proxyChannelSoftMinEvictableIdleTimeMillis = proxyChannelSoftMinEvictableIdleTimeMillis;
-    }
-
-    public int getProxyChannelSoftMinEvictableIdleTimeMillis() {
-        return proxyChannelSoftMinEvictableIdleTimeMillis;
-    }
-
-    public void setProxyChannelTimeBetweenEvictionRunsMillis(int proxyChannelTimeBetweenEvictionRunsMillis) {
-        this.proxyChannelTimeBetweenEvictionRunsMillis = proxyChannelTimeBetweenEvictionRunsMillis;
-    }
-
-    public int getProxyChannelTimeBetweenEvictionRunsMillis() {
-        return proxyChannelTimeBetweenEvictionRunsMillis;
-    }
-
-    public void setProxyChannelMinEvictableIdleTimeMillis(int proxyChannelMinEvictableIdleTimeMillis) {
-        this.proxyChannelMinEvictableIdleTimeMillis = proxyChannelMinEvictableIdleTimeMillis;
-    }
-
-    public int getProxyChannelMinEvictableIdleTimeMillis() {
-        return proxyChannelMinEvictableIdleTimeMillis;
-    }
-
-    public void setProxyChannelRumTestsPerEvictionRun(int proxyChannelRumTestsPerEvictionRun) {
-        this.proxyChannelRumTestsPerEvictionRun = proxyChannelRumTestsPerEvictionRun;
-    }
-
-    public int getProxyChannelRumTestsPerEvictionRun() {
-        return proxyChannelRumTestsPerEvictionRun;
     }
 
     public void save() {

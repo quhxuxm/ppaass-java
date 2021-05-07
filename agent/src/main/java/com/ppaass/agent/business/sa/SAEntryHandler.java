@@ -2,7 +2,6 @@ package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.IAgentConst;
-import com.ppaass.agent.business.ChannelWrapper;
 import com.ppaass.common.log.IPpaassLogger;
 import com.ppaass.common.log.PpaassLoggerFactory;
 import com.ppaass.common.util.UUIDUtil;
@@ -88,15 +87,13 @@ public class SAEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
                                     agentChannel.id().asLongText()
                             });
             try {
-                Channel proxyChannel = this.saProxyResourceManager.getProxyTcpChannelPool().borrowObject();
+                Channel proxyChannel =
+                        this.saProxyResourceManager.getProxyTcpChannelBootstrap().connect().sync().channel();
                 this.processProxyConnect(agentChannel, proxyChannel, socks5CommandRequest);
             } catch (Exception e) {
                 logger
-                        .error(() -> "Fail to create proxy tcp channel connection because of exception, max connection number:{}, idle connection number:{}, active connection number:{}, target host={}, target port={}.",
+                        .error(() -> "Fail to create proxy tcp channel connection because of exception, target host={}, target port={}.",
                                 () -> new Object[]{
-                                        this.saProxyResourceManager.getProxyTcpChannelPool().getMaxTotal(),
-                                        this.saProxyResourceManager.getProxyTcpChannelPool().getNumIdle(),
-                                        this.saProxyResourceManager.getProxyTcpChannelPool().getNumActive(),
                                         socks5CommandRequest.dstAddr(),
                                         socks5CommandRequest.dstPort(),
                                         e});
@@ -114,7 +111,8 @@ public class SAEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
                             });
             agentChannel.config().setOption(ChannelOption.SO_KEEPALIVE, true);
             try {
-                var proxyTcpChannel = this.saProxyResourceManager.getProxyTcpChannelPool().borrowObject();
+                var proxyTcpChannel =
+                        this.saProxyResourceManager.getProxyTcpChannelBootstrap().connect().sync().channel();
                 this.saProxyResourceManager.getProxyUdpChannelBootstrap().bind(0)
                         .addListener(new SAUdpBindListener(agentChannel,
                                 proxyTcpChannel,
@@ -171,9 +169,7 @@ public class SAEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
         logger.trace(
                 () -> "Send TCP_CONNECT from agent to proxy [BEGIN] , agent channel = {}, proxy channel = {}",
                 () -> new Object[]{proxyChannel.id().asLongText()});
-        var agentChannelsOnProxyChannel = proxyChannel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNELS).get();
-        var channelWrapper = new ChannelWrapper(agentChannel);
-        agentChannelsOnProxyChannel.putIfAbsent(agentChannel.id().asLongText(), channelWrapper);
+        proxyChannel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNEL).set(agentChannel);
         proxyChannel.writeAndFlush(agentMessage)
                 .addListener((ChannelFutureListener) proxyWriteChannelFuture -> {
                     if (proxyWriteChannelFuture.isSuccess()) {

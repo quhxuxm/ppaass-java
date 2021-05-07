@@ -1,7 +1,6 @@
 package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
-import com.ppaass.agent.IAgentConst;
 import com.ppaass.common.log.IPpaassLogger;
 import com.ppaass.common.log.PpaassLoggerFactory;
 import com.ppaass.common.util.UUIDUtil;
@@ -34,22 +33,7 @@ class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
                         () -> new Object[]{agentChannel.id().asLongText()});
         var proxyTcpChannel =
                 agentChannel.attr(ISAConstant.IAgentChannelConstant.PROXY_CHANNEL).get();
-        var socksProxyTcpChannelPool =
-                proxyTcpChannel.attr(ISAConstant.IProxyChannelConstant.CHANNEL_POOL).get();
-        try {
-            socksProxyTcpChannelPool.returnObject(proxyTcpChannel);
-        } catch (Exception e) {
-            logger
-                    .debug(() -> "Fail to return proxy channel to pool because of exception, proxy channel = {}",
-                            () -> new Object[]{
-                                    proxyTcpChannel.id().asLongText(), e
-                            });
-        }
-        var agentAgentChannels = proxyTcpChannel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNELS).get();
-        var agentAgentWrapper = agentAgentChannels.get(agentChannel.id().asLongText());
-        if (agentAgentWrapper != null) {
-            agentAgentWrapper.markClose();
-        }
+        proxyTcpChannel.close();
         logger
                 .debug(() -> "Agent channel success unregistered, agent channel = {}",
                         () -> new Object[]{agentChannel.id().asLongText()});
