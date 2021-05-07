@@ -132,29 +132,44 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
                     UUIDUtil.INSTANCE.generateUuidInBytes(),
                     EncryptionType.choose(),
                     proxyMessageBody);
-            proxyChannel.writeAndFlush(proxyMessage).syncUninterruptibly()
-                    .addListener((ChannelFutureListener) proxyChannelFuture -> {
-                        if (proxyChannelFuture.isSuccess()) {
-                            logger.debug(
-                                    () -> "Success to write target data to agent, tcp info: \n{}\n",
+            try {
+                proxyChannel.writeAndFlush(proxyMessage).sync()
+                        .addListener((ChannelFutureListener) proxyChannelFuture -> {
+                            if (proxyChannelFuture.isSuccess()) {
+                                logger.debug(
+                                        () -> "Success to write target data to agent, tcp info: \n{}\n",
+                                        () -> new Object[]{
+                                                targetTcpInfo
+                                        });
+                                return;
+                            }
+                            logger.error(
+                                    () -> "Fail to write target data to agent because of exception (1), tcp info: \n{}\n",
                                     () -> new Object[]{
-                                            targetTcpInfo
+                                            targetTcpInfo,
+                                            proxyChannelFuture.cause()
                                     });
-                            return;
-                        }
-                        logger.error(
-                                () -> "Fail to write target data to agent because of exception, tcp info: \n{}\n",
-                                () -> new Object[]{
-                                        targetTcpInfo,
-                                        proxyChannelFuture.cause()
-                                });
-                        if (targetChannel.isActive()) {
-                            targetChannel.close();
-                        }
-                        if (proxyChannel.isActive()) {
-                            proxyChannel.close();
-                        }
-                    });
+                            if (targetChannel.isActive()) {
+                                targetChannel.close();
+                            }
+                            if (proxyChannel.isActive()) {
+                                proxyChannel.close();
+                            }
+                        });
+            } catch (InterruptedException e) {
+                if (targetChannel.isActive()) {
+                    targetChannel.close();
+                }
+                if (proxyChannel.isActive()) {
+                    proxyChannel.close();
+                }
+                logger.error(
+                        () -> "Fail to write target data to agent because of exception (2), tcp info: \n{}\n",
+                        () -> new Object[]{
+                                targetTcpInfo,
+                                e
+                        });
+            }
         }
     }
 }
