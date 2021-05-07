@@ -33,6 +33,8 @@ public class ProxyConfiguration {
     private int proxyTcpChannelReadIdleSeconds;
     private int proxyTcpChannelWriteIdleSeconds;
     private int proxyTcpChannelAllIdleSeconds;
+    private int proxyTcpWriteBufferWaterMarkLow;
+    private int proxyTcpWriteBufferWaterMarkHigh;
     private boolean proxyTcpCompressEnable;
     private int targetTcpThreadNumber;
     private int targetTcpConnectionTimeout;
@@ -392,6 +394,22 @@ public class ProxyConfiguration {
 
     public int getDelayCloseTimeSeconds() {
         return delayCloseTimeSeconds;
+    }
+
+    public void setProxyTcpWriteBufferWaterMarkHigh(int proxyTcpWriteBufferWaterMarkHigh) {
+        this.proxyTcpWriteBufferWaterMarkHigh = proxyTcpWriteBufferWaterMarkHigh;
+    }
+
+    public int getProxyTcpWriteBufferWaterMarkHigh() {
+        return proxyTcpWriteBufferWaterMarkHigh;
+    }
+
+    public void setProxyTcpWriteBufferWaterMarkLow(int proxyTcpWriteBufferWaterMarkLow) {
+        this.proxyTcpWriteBufferWaterMarkLow = proxyTcpWriteBufferWaterMarkLow;
+    }
+
+    public int getProxyTcpWriteBufferWaterMarkLow() {
+        return proxyTcpWriteBufferWaterMarkLow;
     }
 
     @PostConstruct

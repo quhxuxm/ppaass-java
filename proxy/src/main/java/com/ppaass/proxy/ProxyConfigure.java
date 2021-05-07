@@ -121,6 +121,9 @@ class ProxyConfigure {
                         proxyConfiguration.getProxyTcpReceiveDataAverageBufferMinSize(),
                         proxyConfiguration.getProxyTcpReceiveDataAverageBufferInitialSize(),
                         proxyConfiguration.getProxyTcpReceiveDataAverageBufferMaxSize()));
+        result.option(ChannelOption.WRITE_BUFFER_WATER_MARK,
+                new WriteBufferWaterMark(proxyConfiguration.getProxyTcpWriteBufferWaterMarkLow(),
+                        proxyConfiguration.getProxyTcpWriteBufferWaterMarkHigh()));
         var channelInitializer = new ChannelInitializer<SocketChannel>() {
             public void initChannel(SocketChannel proxyChannel) {
                 //Inbound
