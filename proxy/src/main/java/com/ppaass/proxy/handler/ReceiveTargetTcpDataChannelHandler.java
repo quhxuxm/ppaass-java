@@ -29,21 +29,12 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
 
     @Override
     public void exceptionCaught(ChannelHandlerContext targetChannelContext, Throwable cause) throws Exception {
-        logger.error(() -> "Exception happen on target channel.", () -> new Object[]{cause});
         var targetChannel = targetChannelContext.channel();
-        var targetTcpInfo = targetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO).get();
-        if (targetTcpInfo == null) {
-            if (targetChannel.isActive()) {
-                targetChannel.close();
-            }
-            return;
-        }
-        var proxyChannel = targetTcpInfo.getProxyTcpChannel();
         if (targetChannel.isActive()) {
-            targetChannel.close().addListener(future -> {
-                proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).set(null);
-            });
+            targetChannel.close();
         }
+        logger.error(() -> "Exception happen on target channel, target channel = {}.",
+                () -> new Object[]{targetChannel.id().asLongText(), cause});
     }
 
     @Override
