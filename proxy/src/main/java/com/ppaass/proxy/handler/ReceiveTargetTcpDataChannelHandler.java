@@ -45,10 +45,11 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
             return;
         }
         var proxyChannel = targetTcpInfo.getProxyTcpChannel();
+        if (!proxyChannel.isActive()) {
+            targetChannel.close();
+            return;
+        }
         if (!targetChannel.isActive()) {
-            if (!proxyChannel.isActive()) {
-                return;
-            }
             var proxyMessageBody =
                     new ProxyMessageBody(
                             UUIDUtil.INSTANCE.generateUuid(),

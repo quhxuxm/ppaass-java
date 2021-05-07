@@ -42,10 +42,11 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
         if (agentChannel == null) {
             return;
         }
+        if (!agentChannel.isActive()) {
+            proxyChannel.close();
+            return;
+        }
         if (!proxyChannel.isActive()) {
-            if (!agentChannel.isActive()) {
-                return;
-            }
             agentChannel.close();
         }
     }

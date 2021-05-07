@@ -34,12 +34,6 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext proxyChannelContext) throws Exception {
-        var proxyChannel = proxyChannelContext.channel();
-        proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).set(null);
-    }
-
-    @Override
     public void exceptionCaught(ChannelHandlerContext proxyChannelContext, Throwable cause) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
         proxyChannel.close();

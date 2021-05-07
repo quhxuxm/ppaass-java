@@ -36,20 +36,6 @@ public class HAEntryHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext agentChannelContext) {
-        var agentChannel = agentChannelContext.channel();
-        var connectionInfo = agentChannel.attr(IHAConstant.IAgentChannelConstant.HTTP_CONNECTION_INFO).get();
-        if (connectionInfo == null) {
-            logger
-                    .debug(() -> "No connection info attached to agent channel, skip the step to return proxy channel, agent channel = {}",
-                            () -> new Object[]{agentChannel.id().asLongText()});
-            return;
-        }
-        var proxyChannel = connectionInfo.getProxyChannel();
-        proxyChannel.close();
-    }
-
-    @Override
     protected void channelRead0(ChannelHandlerContext agentChannelContext, Object httpProxyInput) throws Exception {
         var agentChannel = agentChannelContext.channel();
         if (httpProxyInput instanceof FullHttpRequest) {
