@@ -34,8 +34,6 @@ public class ProxyConfiguration {
     private int proxyTcpChannelWriteIdleSeconds;
     private int proxyTcpChannelAllIdleSeconds;
     private boolean proxyTcpCompressEnable;
-    private int proxyTcpChannelToTargetTcpChannelRetry;
-    private int targetToProxyTcpChannelRetry;
     private int targetTcpThreadNumber;
     private int targetTcpConnectionTimeout;
     private int targetTcpSoLinger;
@@ -210,22 +208,6 @@ public class ProxyConfiguration {
 
     public void setProxyTcpCompressEnable(boolean proxyTcpCompressEnable) {
         this.proxyTcpCompressEnable = proxyTcpCompressEnable;
-    }
-
-    public int getProxyTcpChannelToTargetTcpChannelRetry() {
-        return proxyTcpChannelToTargetTcpChannelRetry;
-    }
-
-    public void setProxyTcpChannelToTargetTcpChannelRetry(int proxyTcpChannelToTargetTcpChannelRetry) {
-        this.proxyTcpChannelToTargetTcpChannelRetry = proxyTcpChannelToTargetTcpChannelRetry;
-    }
-
-    public int getTargetToProxyTcpChannelRetry() {
-        return targetToProxyTcpChannelRetry;
-    }
-
-    public void setTargetToProxyTcpChannelRetry(int targetToProxyTcpChannelRetry) {
-        this.targetToProxyTcpChannelRetry = targetToProxyTcpChannelRetry;
     }
 
     public int getTargetTcpThreadNumber() {

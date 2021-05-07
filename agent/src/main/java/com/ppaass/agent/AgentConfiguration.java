@@ -36,8 +36,6 @@ public class AgentConfiguration {
     private int agentTcpSoLinger;
     private int agentTcpSoRcvbuf;
     private int agentTcpSoSndbuf;
-    private int agentToProxyTcpChannelConnectRetry;
-    private int agentToProxyTcpChannelWriteRetry;
     private int agentChannelAllIdleSeconds;
     private int proxyTcpThreadNumber;
     private int proxyTcpConnectionTimeout;
@@ -259,22 +257,6 @@ public class AgentConfiguration {
 
     public void setAgentTcpSoSndbuf(int agentTcpSoSndbuf) {
         this.agentTcpSoSndbuf = agentTcpSoSndbuf;
-    }
-
-    public int getAgentToProxyTcpChannelConnectRetry() {
-        return agentToProxyTcpChannelConnectRetry;
-    }
-
-    public void setAgentToProxyTcpChannelConnectRetry(int agentToProxyTcpChannelConnectRetry) {
-        this.agentToProxyTcpChannelConnectRetry = agentToProxyTcpChannelConnectRetry;
-    }
-
-    public int getAgentToProxyTcpChannelWriteRetry() {
-        return agentToProxyTcpChannelWriteRetry;
-    }
-
-    public void setAgentToProxyTcpChannelWriteRetry(int agentToProxyTcpChannelWriteRetry) {
-        this.agentToProxyTcpChannelWriteRetry = agentToProxyTcpChannelWriteRetry;
     }
 
     public int getProxyTcpThreadNumber() {
