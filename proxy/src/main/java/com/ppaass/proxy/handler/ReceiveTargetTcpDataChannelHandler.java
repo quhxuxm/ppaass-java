@@ -107,54 +107,54 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
             return;
         }
         var proxyChannel = targetTcpInfo.getProxyTcpChannel();
-//        while (targetOriginalMessageBuf.isReadable()) {
-        int targetDataTotalLength = targetOriginalMessageBuf.readableBytes();
-//            int frameLength = TARGET_DATA_MAX_FRAME_LENGTH;
-//            if (targetDataTotalLength < frameLength) {
-//                frameLength = targetDataTotalLength;
-//            }
-        final byte[] originalDataByteArray = new byte[targetDataTotalLength];
-        targetOriginalMessageBuf.readBytes(originalDataByteArray);
-        var proxyMessageBody =
-                new ProxyMessageBody(
-                        UUIDUtil.INSTANCE.generateUuid(),
-                        proxyConfiguration.getProxyInstanceId(),
-                        targetTcpInfo.getUserToken(),
-                        targetTcpInfo.getSourceHost(),
-                        targetTcpInfo.getSourcePort(),
-                        targetTcpInfo.getTargetHost(),
-                        targetTcpInfo.getTargetPort(),
-                        ProxyMessageBodyType.TCP_DATA_SUCCESS,
-                        targetTcpInfo.getAgentChannelId(),
-                        targetTcpInfo.getTargetChannelId(),
-                        originalDataByteArray);
-        var proxyMessage = new ProxyMessage(
-                UUIDUtil.INSTANCE.generateUuidInBytes(),
-                EncryptionType.choose(),
-                proxyMessageBody);
-        proxyChannel.writeAndFlush(proxyMessage).syncUninterruptibly()
-                .addListener((ChannelFutureListener) proxyChannelFuture -> {
-                    if (proxyChannelFuture.isSuccess()) {
-                        logger.debug(
-                                () -> "Success to write target data to agent, tcp info: \n{}\n",
+        while (targetOriginalMessageBuf.isReadable()) {
+            int targetDataTotalLength = targetOriginalMessageBuf.readableBytes();
+            int frameLength = TARGET_DATA_MAX_FRAME_LENGTH;
+            if (targetDataTotalLength < frameLength) {
+                frameLength = targetDataTotalLength;
+            }
+            final byte[] originalDataByteArray = new byte[frameLength];
+            targetOriginalMessageBuf.readBytes(originalDataByteArray);
+            var proxyMessageBody =
+                    new ProxyMessageBody(
+                            UUIDUtil.INSTANCE.generateUuid(),
+                            proxyConfiguration.getProxyInstanceId(),
+                            targetTcpInfo.getUserToken(),
+                            targetTcpInfo.getSourceHost(),
+                            targetTcpInfo.getSourcePort(),
+                            targetTcpInfo.getTargetHost(),
+                            targetTcpInfo.getTargetPort(),
+                            ProxyMessageBodyType.TCP_DATA_SUCCESS,
+                            targetTcpInfo.getAgentChannelId(),
+                            targetTcpInfo.getTargetChannelId(),
+                            originalDataByteArray);
+            var proxyMessage = new ProxyMessage(
+                    UUIDUtil.INSTANCE.generateUuidInBytes(),
+                    EncryptionType.choose(),
+                    proxyMessageBody);
+            proxyChannel.writeAndFlush(proxyMessage).syncUninterruptibly()
+                    .addListener((ChannelFutureListener) proxyChannelFuture -> {
+                        if (proxyChannelFuture.isSuccess()) {
+                            logger.debug(
+                                    () -> "Success to write target data to agent, tcp info: \n{}\n",
+                                    () -> new Object[]{
+                                            targetTcpInfo
+                                    });
+                            return;
+                        }
+                        logger.error(
+                                () -> "Fail to write target data to agent because of exception, tcp info: \n{}\n",
                                 () -> new Object[]{
-                                        targetTcpInfo
+                                        targetTcpInfo,
+                                        proxyChannelFuture.cause()
                                 });
-                        return;
-                    }
-                    logger.error(
-                            () -> "Fail to write target data to agent because of exception, tcp info: \n{}\n",
-                            () -> new Object[]{
-                                    targetTcpInfo,
-                                    proxyChannelFuture.cause()
-                            });
-                    if (targetChannel.isActive()) {
-                        targetChannel.close();
-                    }
-                    if (proxyChannel.isActive()) {
-                        proxyChannel.close();
-                    }
-                });
-//        }
+                        if (targetChannel.isActive()) {
+                            targetChannel.close();
+                        }
+                        if (proxyChannel.isActive()) {
+                            proxyChannel.close();
+                        }
+                    });
+        }
     }
 }
