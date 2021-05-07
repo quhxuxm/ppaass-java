@@ -47,52 +47,46 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext targetChannelContext) {
+    public void channelReadComplete(ChannelHandlerContext targetChannelContext) throws Exception {
         var targetChannel = targetChannelContext.channel();
         var targetTcpInfo = targetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO).get();
         if (targetTcpInfo == null) {
-            logger.error(
-                    () -> "Fail to transfer data from target to proxy because of no tcp info attached, target channel = {}.",
-                    () -> new Object[]{
-                            targetChannel.id().asLongText()
-                    });
             return;
         }
         var proxyChannel = targetTcpInfo.getProxyTcpChannel();
-        if (!proxyChannel.isActive()) {
-            return;
-        }
-        var proxyMessageBody =
-                new ProxyMessageBody(
-                        UUIDUtil.INSTANCE.generateUuid(),
-                        proxyConfiguration.getProxyInstanceId(),
-                        targetTcpInfo.getUserToken(),
-                        targetTcpInfo.getSourceHost(),
-                        targetTcpInfo.getSourcePort(),
-                        targetTcpInfo.getTargetHost(),
-                        targetTcpInfo.getTargetPort(),
-                        ProxyMessageBodyType.TCP_CONNECTION_CLOSE,
-                        targetTcpInfo.getAgentChannelId(),
-                        targetTcpInfo.getTargetChannelId(),
-                        null);
-        var proxyMessage = new ProxyMessage(
-                UUIDUtil.INSTANCE.generateUuidInBytes(),
-                EncryptionType.choose(),
-                proxyMessageBody);
-        proxyChannel.writeAndFlush(proxyMessage).addListener(future -> {
-            proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).set(null);
-            if (future.isSuccess()) {
-                logger.debug(() -> "Success to write TCP_CONNECTION_CLOSE to agent, tcp info:\n{}\n",
-                        () -> new Object[]{targetTcpInfo});
-            } else {
-                logger
-                        .error(() -> "Fail to write TCP_CONNECTION_CLOSE to agent because of exception, tcp info:\n{}\n",
-                                () -> new Object[]{targetTcpInfo, future.cause()});
+        if (!targetChannel.isActive()) {
+            if (!proxyChannel.isActive()) {
+                return;
             }
-            if (proxyChannel.isActive()) {
+            var proxyMessageBody =
+                    new ProxyMessageBody(
+                            UUIDUtil.INSTANCE.generateUuid(),
+                            proxyConfiguration.getProxyInstanceId(),
+                            targetTcpInfo.getUserToken(),
+                            targetTcpInfo.getSourceHost(),
+                            targetTcpInfo.getSourcePort(),
+                            targetTcpInfo.getTargetHost(),
+                            targetTcpInfo.getTargetPort(),
+                            ProxyMessageBodyType.TCP_CONNECTION_CLOSE,
+                            targetTcpInfo.getAgentChannelId(),
+                            targetTcpInfo.getTargetChannelId(),
+                            null);
+            var proxyMessage = new ProxyMessage(
+                    UUIDUtil.INSTANCE.generateUuidInBytes(),
+                    EncryptionType.choose(),
+                    proxyMessageBody);
+            proxyChannel.writeAndFlush(proxyMessage).addListener(future -> {
+                if (future.isSuccess()) {
+                    logger.debug(() -> "Success to write TCP_CONNECTION_CLOSE to agent, tcp info:\n{}\n",
+                            () -> new Object[]{targetTcpInfo});
+                } else {
+                    logger
+                            .error(() -> "Fail to write TCP_CONNECTION_CLOSE to agent because of exception, tcp info:\n{}\n",
+                                    () -> new Object[]{targetTcpInfo, future.cause()});
+                }
                 proxyChannel.close();
-            }
-        });
+            });
+        }
     }
 
     @Override
