@@ -26,6 +26,18 @@ class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
     }
 
     @Override
+    public void channelUnregistered(ChannelHandlerContext agentChannelContext) throws Exception {
+        var agentChannel = agentChannelContext.channel();
+        var proxyTcpChannel = agentChannel.attr(ISAConstant.IAgentChannelConstant.PROXY_CHANNEL).get();
+        if (proxyTcpChannel == null) {
+            return;
+        }
+        if (proxyTcpChannel.isActive()) {
+            proxyTcpChannel.close();
+        }
+    }
+
+    @Override
     protected void channelRead0(ChannelHandlerContext agentChannelContext, ByteBuf originalAgentData) throws Exception {
         var agentChannel = agentChannelContext.channel();
         var proxyTcpChannel = agentChannel.attr(ISAConstant.IAgentChannelConstant.PROXY_CHANNEL).get();
