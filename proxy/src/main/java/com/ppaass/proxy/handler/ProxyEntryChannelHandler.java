@@ -80,14 +80,14 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                                                         agentMessage,
                                                         proxyChannelFuture.cause()
                                                 });
-                                        return;
+                                    } else {
+                                        logger.error(
+                                                () -> "Fail to write TCP connect result (TCP_CONNECT_FAIL) to agent because of exception, agent message:\n{}\n",
+                                                () -> new Object[]{
+                                                        agentMessage,
+                                                        proxyChannelFuture.cause()
+                                                });
                                     }
-                                    logger.error(
-                                            () -> "Fail to write TCP connect result (TCP_CONNECT_FAIL) to agent because of exception, agent message:\n{}\n",
-                                            () -> new Object[]{
-                                                    agentMessage,
-                                                    proxyChannelFuture.cause()
-                                            });
                                     proxyChannel.close();
                                 });
                         logger
