@@ -136,7 +136,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                     proxyChannel.writeAndFlush(proxyMessage)
                             .addListener((ChannelFutureListener) proxyChannelFuture -> {
                                 if (proxyChannelFuture.isSuccess()) {
-                                    logger.debug(
+                                    logger.info(
                                             () -> "Success to write TCP connect result (TCP_CONNECT_SUCCESS) to agent, TCP connection info:\n{}\n",
                                             () -> new Object[]{
                                                     targetTcpConnectionInfo,
