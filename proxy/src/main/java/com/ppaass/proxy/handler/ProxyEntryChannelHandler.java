@@ -40,6 +40,18 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
     }
 
     @Override
+    public void channelUnregistered(ChannelHandlerContext proxyChannelContext) throws Exception {
+        var proxyChannel = proxyChannelContext.channel();
+        var targetChannel = proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).get();
+        if (targetChannel == null) {
+            return;
+        }
+        if (targetChannel.isActive()) {
+            targetChannel.close();
+        }
+    }
+
+    @Override
     public void channelWritabilityChanged(ChannelHandlerContext proxyChannelContext) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
         var targetChannel = proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).get();
