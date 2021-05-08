@@ -2,7 +2,6 @@ package com.ppaass.proxy.handler;
 
 import com.ppaass.common.log.IPpaassLogger;
 import com.ppaass.common.log.PpaassLoggerFactory;
-import com.ppaass.proxy.IProxyConstant;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Service;
 @ChannelHandler.Sharable
 public class CleanupInactiveProxyChannelHandler extends ChannelInboundHandlerAdapter {
     private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
+
     @Override
     public void userEventTriggered(ChannelHandlerContext proxyChannelContext, Object evt) throws Exception {
         if (!(evt instanceof IdleStateEvent)) {
@@ -26,7 +26,8 @@ public class CleanupInactiveProxyChannelHandler extends ChannelInboundHandlerAda
             return;
         }
         var proxyChannel = proxyChannelContext.channel();
-        proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).set(null);
         proxyChannel.close();
+        logger.info(() -> "Close proxy channel as it is idle for a long time, proxy channel = {}",
+                () -> new Object[]{proxyChannel.id().asLongText()});
     }
 }
