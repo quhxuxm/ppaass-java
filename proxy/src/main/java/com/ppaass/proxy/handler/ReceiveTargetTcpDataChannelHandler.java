@@ -31,9 +31,14 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
     public void exceptionCaught(ChannelHandlerContext targetChannelContext, Throwable cause) throws Exception {
         var targetChannel = targetChannelContext.channel();
         if (targetChannel.isActive()) {
+            logger.error(
+                    () -> "Exception happen on target channel, and target channel still active, we should close it, target channel = {}.",
+                    () -> new Object[]{targetChannel.id().asLongText(), cause});
             targetChannel.close();
+            return;
         }
-        logger.error(() -> "Exception happen on target channel, target channel = {}.",
+        logger.error(
+                () -> "Exception happen on target channel, and target channel inactive already, target channel = {}.",
                 () -> new Object[]{targetChannel.id().asLongText(), cause});
     }
 
