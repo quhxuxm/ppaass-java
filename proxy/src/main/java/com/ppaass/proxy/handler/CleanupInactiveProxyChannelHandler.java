@@ -26,8 +26,10 @@ public class CleanupInactiveProxyChannelHandler extends ChannelInboundHandlerAda
             return;
         }
         var proxyChannel = proxyChannelContext.channel();
-        proxyChannel.close();
-        logger.info(() -> "Close proxy channel as it is idle for a long time, proxy channel = {}",
-                () -> new Object[]{proxyChannel.id().asLongText()});
+        if (proxyChannel.isActive()) {
+            proxyChannel.close();
+            logger.info(() -> "Close proxy channel as it is idle for a long time, proxy channel = {}",
+                    () -> new Object[]{proxyChannel.id().asLongText()});
+        }
     }
 }
