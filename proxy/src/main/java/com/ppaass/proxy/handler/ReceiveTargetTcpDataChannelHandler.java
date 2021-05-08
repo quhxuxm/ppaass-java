@@ -38,6 +38,13 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
     }
 
     @Override
+    public void channelInactive(ChannelHandlerContext targetChannelContext) throws Exception {
+        var targetChannel = targetChannelContext.channel();
+        logger.info(() -> "Target channel become inactive, target channel = {}.",
+                () -> new Object[]{targetChannel.id().asLongText()});
+    }
+
+    @Override
     public void channelReadComplete(ChannelHandlerContext targetChannelContext) throws Exception {
         var targetChannel = targetChannelContext.channel();
         var targetTcpInfo = targetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO).get();
@@ -84,6 +91,9 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
     @Override
     public void channelWritabilityChanged(ChannelHandlerContext targetChannelContext) throws Exception {
         var targetChannel = targetChannelContext.channel();
+        if (targetChannel.isActive()) {
+            return;
+        }
         var targetTcpInfo = targetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO).get();
         if (targetTcpInfo == null) {
             return;
