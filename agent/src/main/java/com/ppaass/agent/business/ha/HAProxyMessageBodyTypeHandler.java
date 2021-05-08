@@ -38,10 +38,6 @@ class HAProxyMessageBodyTypeHandler extends SimpleChannelInboundHandler<ProxyMes
         if (agentChannel == null) {
             return;
         }
-        if (!agentChannel.isActive()) {
-            proxyChannel.close();
-            return;
-        }
         if (!proxyChannel.isActive()) {
             agentChannel.close();
         }
