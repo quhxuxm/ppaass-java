@@ -94,8 +94,7 @@ class HAProxyResourceManager implements IAgentResourceManager {
                 proxyChannelPipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE,
                         0, ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER, 0,
                         ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER));
-                proxyChannelPipeline.addLast(new ProxyMessageDecoder(
-                        agentConfiguration.getAgentPrivateKey()));
+                proxyChannelPipeline.addLast(new ProxyMessageDecoder());
                 proxyChannelPipeline.addLast(haProxyMessageBodyTypeHandler);
                 proxyChannelPipeline.addLast(new HAExtractPureDataDecoder());
                 proxyChannelPipeline.addLast(new HttpResponseDecoder());
@@ -105,8 +104,7 @@ class HAProxyResourceManager implements IAgentResourceManager {
                     proxyChannelPipeline.addLast(new Lz4FrameEncoder());
                 }
                 proxyChannelPipeline.addLast(new LengthFieldPrepender(ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER));
-                proxyChannelPipeline.addLast(new AgentMessageEncoder(
-                        agentConfiguration.getProxyPublicKey()));
+                proxyChannelPipeline.addLast(new AgentMessageEncoder());
                 proxyChannelPipeline.addLast(PrintExceptionHandler.INSTANCE);
             }
         });
@@ -142,8 +140,7 @@ class HAProxyResourceManager implements IAgentResourceManager {
                 proxyChannelPipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE,
                         0, ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER, 0,
                         ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER));
-                proxyChannelPipeline.addLast(new ProxyMessageDecoder(
-                        agentConfiguration.getAgentPrivateKey()));
+                proxyChannelPipeline.addLast(new ProxyMessageDecoder());
                 proxyChannelPipeline.addLast(haProxyMessageBodyTypeHandler);
                 proxyChannelPipeline.addLast(new HAExtractPureDataDecoder());
                 proxyChannelPipeline.addLast(haSendPureDataToAgentHandler);
@@ -151,8 +148,7 @@ class HAProxyResourceManager implements IAgentResourceManager {
                     proxyChannelPipeline.addLast(new Lz4FrameEncoder());
                 }
                 proxyChannelPipeline.addLast(new LengthFieldPrepender(ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER));
-                proxyChannelPipeline.addLast(new AgentMessageEncoder(
-                        agentConfiguration.getProxyPublicKey()));
+                proxyChannelPipeline.addLast(new AgentMessageEncoder());
                 proxyChannelPipeline.addLast(PrintExceptionHandler.INSTANCE);
             }
         });

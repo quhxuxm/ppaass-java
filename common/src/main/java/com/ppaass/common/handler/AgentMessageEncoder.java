@@ -10,15 +10,10 @@ import io.netty.handler.codec.MessageToByteEncoder;
 
 public class AgentMessageEncoder extends MessageToByteEncoder<AgentMessage> {
     private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
-    private final byte[] proxyPublicKey;
-
-    public AgentMessageEncoder(byte[] proxyPublicKey) {
-        this.proxyPublicKey = proxyPublicKey;
-    }
 
     @Override
     protected void encode(ChannelHandlerContext ctx, AgentMessage msg, ByteBuf out) throws Exception {
-        MessageCodec.INSTANCE.encodeAgentMessage(msg, this.proxyPublicKey, out);
+        MessageCodec.INSTANCE.encodeAgentMessage(msg, out);
         logger
                 .trace(AgentMessageEncoder.class, () -> "Encode agent message, channel = {}, agent message = {}",
                         () -> new Object[]{

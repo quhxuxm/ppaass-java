@@ -145,7 +145,7 @@ class ProxyConfigure {
                                 ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER, 0,
                                 ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER));
                 proxyChannel.pipeline().addLast(
-                        new AgentMessageDecoder(proxyConfiguration.getProxyPrivateKey()));
+                        new AgentMessageDecoder());
                 proxyChannel.pipeline().addLast(proxyEntryChannelHandler);
                 if (proxyConfiguration.isProxyTcpCompressEnable()) {
                     proxyChannel.pipeline().addLast(new Lz4FrameEncoder());
@@ -154,7 +154,7 @@ class ProxyConfigure {
                 proxyChannel.pipeline()
                         .addLast(new LengthFieldPrepender(ICommonConstant.LENGTH_FRAME_FIELD_BYTE_NUMBER));
                 proxyChannel.pipeline().addLast(
-                        new ProxyMessageEncoder(proxyConfiguration.getAgentPublicKey()));
+                        new ProxyMessageEncoder());
                 proxyChannel.pipeline().addLast(LAST_INBOUND_HANDLER, PrintExceptionHandler.INSTANCE);
             }
         };

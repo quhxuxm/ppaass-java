@@ -7,6 +7,7 @@ import com.ppaass.common.exception.PpaassException;
 import com.ppaass.common.log.IPpaassLogger;
 import com.ppaass.common.log.PpaassLoggerFactory;
 import com.ppaass.common.util.UUIDUtil;
+import com.ppaass.protocol.vpn.cryptography.CryptographyUtil;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -161,6 +162,7 @@ public class AgentConfiguration {
                             () -> new Object[]{e});
             this.agentSourceAddress = this.agentInstanceId;
         }
+        CryptographyUtil.INSTANCE.init(this.proxyPublicKey, this.agentPrivateKey);
     }
 
     public String getUserToken() {

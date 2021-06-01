@@ -2,6 +2,7 @@ package com.ppaass.proxy;
 
 import com.ppaass.common.exception.PpaassException;
 import com.ppaass.common.util.UUIDUtil;
+import com.ppaass.protocol.vpn.cryptography.CryptographyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -426,5 +427,6 @@ public class ProxyConfiguration {
             logger.error("Fail to read agent private key because of exception.", e);
             throw new PpaassException("Fail to read agent private key because of exception.", e);
         }
+        CryptographyUtil.INSTANCE.init(agentPublicKey, proxyPrivateKey);
     }
 }

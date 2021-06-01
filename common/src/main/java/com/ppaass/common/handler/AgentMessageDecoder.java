@@ -12,15 +12,10 @@ import java.util.List;
 
 public class AgentMessageDecoder extends ByteToMessageDecoder {
     private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
-    private final byte[] proxyPrivateKey;
-
-    public AgentMessageDecoder(byte[] proxyPrivateKey) {
-        this.proxyPrivateKey = proxyPrivateKey;
-    }
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        AgentMessage message = MessageCodec.INSTANCE.decodeAgentMessage(in, this.proxyPrivateKey);
+        AgentMessage message = MessageCodec.INSTANCE.decodeAgentMessage(in);
         logger
                 .trace(AgentMessageDecoder.class, () -> "Decode agent message, channel = {}, agent message = {}",
                         () -> new Object[]{
