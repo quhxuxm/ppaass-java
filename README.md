@@ -10,3 +10,12 @@ The server side of the ppaass application.
 
 The client side of the ppaass application, which implement HTTP and SOCKS5 protocol.
 The connection between agent and proxy is encrypt to make it security.
+
+# Architecture
+
+```plantuml
+@startuml
+node a
+a
+@enduml
+```
