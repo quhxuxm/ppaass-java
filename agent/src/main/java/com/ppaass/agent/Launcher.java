@@ -7,6 +7,9 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 
 import java.awt.*;
 
+/**
+ * The launcher of the agent.
+ */
 @SpringBootApplication
 public class Launcher {
     public static void main(String[] args) {
