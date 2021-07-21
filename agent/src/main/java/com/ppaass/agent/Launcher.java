@@ -14,12 +14,23 @@ import java.awt.*;
 public class Launcher {
     public static void main(String[] args) {
         PpaassLoggerFactory.INSTANCE.init(AgentPpaassLogger.class);
+        var logger = PpaassLoggerFactory.INSTANCE.getLogger();
         var context =
                 new SpringApplicationBuilder(Launcher.class)
                         .headless(false).run(args);
-        EventQueue.invokeLater(() -> {
-            var mainFrame = context.getBean(MainFrame.class);
-            mainFrame.start();
-        });
+        var agentConfiguration = context.getBean(AgentConfiguration.class);
+        var mainFrame = context.getBean(MainFrame.class);
+        if (agentConfiguration.isWithUi()) {
+            logger.info(() -> "Ppaass agent is starting with UI...");
+            EventQueue.invokeLater(() -> {
+                mainFrame.start(true);
+            });
+            return;
+        }
+        logger.info(() -> "Ppaass agent is starting without UI...");
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            mainFrame.stop(false);
+        }));
+        mainFrame.start(false);
     }
 }

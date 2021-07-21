@@ -52,6 +52,7 @@ public class AgentConfiguration {
     private final ObjectMapper objectMapper;
     private String agentSourceAddress;
     private int delayCloseTimeMillis;
+    private boolean withUi;
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private static class AgentDynamicConfiguration {
@@ -110,6 +111,7 @@ public class AgentConfiguration {
     public AgentConfiguration(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         this.agentInstanceId = UUIDUtil.INSTANCE.generateUuid();
+        this.withUi = true;
     }
 
     @PostConstruct
@@ -359,6 +361,14 @@ public class AgentConfiguration {
 
     public int getDelayCloseTimeMillis() {
         return delayCloseTimeMillis;
+    }
+
+    public void setWithUi(boolean withUi) {
+        this.withUi = withUi;
+    }
+
+    public boolean isWithUi() {
+        return withUi;
     }
 
     public void save() {
