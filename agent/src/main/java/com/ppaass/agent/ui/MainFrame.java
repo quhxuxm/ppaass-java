@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.spi.AbstractLogger;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -24,6 +25,7 @@ import java.util.Comparator;
 import java.util.Locale;
 
 @Service
+@Lazy
 public class MainFrame extends JFrame {
     private static final String TOKEN_LABEL_MESSAGE_KEY = "mainFrame.tokenLabel";
     private static final String AGENT_TCP_PORT_LABEL_MESSAGE_KEY = "mainFrame.agentTcpPortLabel";
