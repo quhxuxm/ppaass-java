@@ -62,7 +62,7 @@ public class MainFrame extends JFrame {
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
-                stop(true);
+                stop();
             }
         });
         this.setIconImage(Toolkit.getDefaultToolkit()
@@ -336,23 +336,13 @@ public class MainFrame extends JFrame {
         return adjustLoggerDialog;
     }
 
-    public void start(boolean withUi) {
+    public void start() {
         this.initialize();
-        if (withUi) {
-            this.setVisible(true);
-            return;
-        }
-        try {
-            agent.start();
-        } catch (Exception e) {
-            logger.error(() -> "Fail to start http agent without ui because of exception.", () -> new Object[]{e});
-        }
+        this.setVisible(true);
     }
 
-    public void stop(boolean withUi) {
-        if (withUi) {
-            this.setVisible(false);
-        }
+    public void stop() {
+        this.setVisible(false);
         this.agent.stop();
     }
 }

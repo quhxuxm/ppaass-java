@@ -19,18 +19,17 @@ public class Launcher {
                 new SpringApplicationBuilder(Launcher.class)
                         .headless(false).run(args);
         var agentConfiguration = context.getBean(AgentConfiguration.class);
-        var mainFrame = context.getBean(MainFrame.class);
         if (agentConfiguration.isWithUi()) {
             logger.info(() -> "Ppaass agent is starting with UI...");
             EventQueue.invokeLater(() -> {
-                mainFrame.start(true);
+                var mainFrame = context.getBean(MainFrame.class);
+                mainFrame.start();
             });
             return;
         }
         logger.info(() -> "Ppaass agent is starting without UI...");
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            mainFrame.stop(false);
-        }));
-        mainFrame.start(false);
+        var agent = context.getBean(Agent.class);
+        Runtime.getRuntime().addShutdownHook(new Thread(agent::stop));
+        agent.start();
     }
 }
