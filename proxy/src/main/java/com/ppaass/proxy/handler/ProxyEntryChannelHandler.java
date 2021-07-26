@@ -9,6 +9,7 @@ import com.ppaass.proxy.IProxyConstant;
 import com.ppaass.proxy.ProxyConfiguration;
 import com.ppaass.proxy.handler.bo.TargetTcpInfo;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import org.springframework.stereotype.Service;
@@ -268,9 +269,10 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         var udpPackage = new DatagramPacket(agentMessage.getBody().getData(), agentMessage.getBody().getData().length,
                 destinationInetSocketAddress);
         logger.debug(
-                () -> "Receive agent message for udp, agent message: \n{}\n",
+                () -> "Receive agent message for udp, agent message: \n{}\nudp data: \n{}\n",
                 () -> new Object[]{
-                        agentMessage
+                        agentMessage,
+                        ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(agentMessage.getBody().getData()))
                 });
         DatagramSocket targetUdpSocket = null;
         try {
@@ -321,6 +323,9 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
             targetUdpSocket.receive(receiveDataPacket);
             int currentReceivedDataLength = receiveDataPacket.getLength();
             byte[] proxyMessageData = Arrays.copyOf(receiveDataPacket.getData(), currentReceivedDataLength);
+            logger.debug(()->"Receive UDP packet:\n{}\n", ()->new Object[]{
+                    ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(proxyMessageData))
+            });
             sendUdpDataToAgent(agentMessage, proxyTcpChannel, proxyMessageData);
             while (currentReceivedDataLength >= UDP_PACKET_MAX_LENGTH) {
                 DatagramPacket nextReceiveDataPacket = new DatagramPacket(receiveDataPacketBuf, UDP_PACKET_MAX_LENGTH);
