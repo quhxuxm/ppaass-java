@@ -24,7 +24,7 @@ import java.util.Arrays;
 @ChannelHandler.Sharable
 public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentMessage> {
     private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
-    private static final int UDP_PACKET_MAX_LENGTH = 64 * 1024;
+    private static final int UDP_PACKET_MAX_LENGTH = 1024 * 1024;
     private final Bootstrap targetTcpBootstrap;
     private final ProxyConfiguration proxyConfiguration;
 
