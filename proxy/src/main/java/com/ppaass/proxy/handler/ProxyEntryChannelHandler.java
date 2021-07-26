@@ -266,7 +266,11 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         var destinationInetSocketAddress =
                 new InetSocketAddress(agentMessage.getBody().getTargetHost(),
                         agentMessage.getBody().getTargetPort());
-        var udpPackage = new DatagramPacket(agentMessage.getBody().getData(), agentMessage.getBody().getData().length,
+        int udpPacketLength = agentMessage.getBody().getData().length;
+        if(udpPacketLength>UDP_PACKET_MAX_LENGTH){
+            udpPacketLength=UDP_PACKET_MAX_LENGTH;
+        }
+        var udpPackage = new DatagramPacket(agentMessage.getBody().getData(), udpPacketLength,
                 destinationInetSocketAddress);
         logger.debug(
                 () -> "Receive agent message for udp, agent message: \n{}\nudp data: \n{}\n",
