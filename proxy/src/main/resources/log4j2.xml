@@ -30,20 +30,20 @@
     <Loggers>
         <logger name="org.springframework"
                 additivity="false"
-                level="ERROR">
+                level="error">
             <appender-ref ref="FILE_APPENDER"/>
         </logger>
         <logger name="io.netty"
                 additivity="false"
-                level="info">
+                level="error">
             <appender-ref ref="FILE_APPENDER"/>
         </logger>
         <logger name="com.ppaass"
                 additivity="false"
-                level="debug">
+                level="error">
             <appender-ref ref="FILE_APPENDER"/>
         </logger>
-        <Root level="ERROR">
+        <Root level="error">
             <appender-ref ref="FILE_APPENDER"/>
         </Root>
     </Loggers>
