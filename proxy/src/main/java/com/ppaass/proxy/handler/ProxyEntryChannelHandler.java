@@ -12,6 +12,11 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
+import io.netty.channel.embedded.EmbeddedChannel;
+import io.netty.handler.codec.dns.DatagramDnsQuery;
+import io.netty.handler.codec.dns.DatagramDnsQueryDecoder;
+import io.netty.handler.codec.dns.DefaultDnsQuestion;
+import io.netty.handler.codec.dns.DnsSection;
 import org.springframework.stereotype.Service;
 
 import java.net.DatagramPacket;
@@ -261,14 +266,35 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                 });
     }
 
+    private void handleDnsQuery(ChannelHandlerContext proxyChannelContext, AgentMessage agentMessage) {
+        var proxyTcpChannel = proxyChannelContext.channel();
+        var dnsQueryData = agentMessage.getBody().getData();
+        InetSocketAddress destinationSocketAddress = new InetSocketAddress(agentMessage.getBody().getTargetHost(), 53);
+        io.netty.channel.socket.DatagramPacket datagramPacket =
+                new io.netty.channel.socket.DatagramPacket(Unpooled.wrappedBuffer(dnsQueryData),
+                        destinationSocketAddress);
+        EmbeddedChannel dnsQueryDecodeChannel = new EmbeddedChannel(new DatagramDnsQueryDecoder());
+        dnsQueryDecodeChannel.writeInbound(datagramPacket);
+        DatagramDnsQuery dnsQuery = dnsQueryDecodeChannel.readInbound();
+        DefaultDnsQuestion dnsQuestion = dnsQuery.recordAt(DnsSection.QUESTION);
+        logger.debug(() -> "DNS question,id=[%s],  name=[%s], question class=[%s], question type=[%s], ttl=[%s]",
+                () -> new Object[]{
+                        dnsQuery.id(),
+                        dnsQuestion.name(),
+                        dnsQuestion.dnsClass(),
+                        dnsQuestion.type().name(),
+                        dnsQuestion.timeToLive()
+                });
+    }
+
     private void handleUdpData(ChannelHandlerContext proxyChannelContext, AgentMessage agentMessage) {
         var proxyTcpChannel = proxyChannelContext.channel();
         var destinationInetSocketAddress =
                 new InetSocketAddress(agentMessage.getBody().getTargetHost(),
                         agentMessage.getBody().getTargetPort());
         int udpPacketLength = agentMessage.getBody().getData().length;
-        if(udpPacketLength>UDP_PACKET_MAX_LENGTH){
-            udpPacketLength=UDP_PACKET_MAX_LENGTH;
+        if (udpPacketLength > UDP_PACKET_MAX_LENGTH) {
+            udpPacketLength = UDP_PACKET_MAX_LENGTH;
         }
         var udpPackage = new DatagramPacket(agentMessage.getBody().getData(), udpPacketLength,
                 destinationInetSocketAddress);
@@ -327,7 +353,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
             targetUdpSocket.receive(receiveDataPacket);
             int currentReceivedDataLength = receiveDataPacket.getLength();
             byte[] proxyMessageData = Arrays.copyOf(receiveDataPacket.getData(), currentReceivedDataLength);
-            logger.debug(()->"Receive UDP packet:\n{}\n", ()->new Object[]{
+            logger.debug(() -> "Receive UDP packet:\n{}\n", () -> new Object[]{
                     ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(proxyMessageData))
             });
             sendUdpDataToAgent(agentMessage, proxyTcpChannel, proxyMessageData);
@@ -430,6 +456,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         switch (agentMessageBodyType) {
             case TCP_DATA -> this.handleTcpData(proxyChannelContext, agentMessage);
             case UDP_DATA -> this.handleUdpData(proxyChannelContext, agentMessage);
+            case DNS_QUERY -> this.handleDnsQuery(proxyChannelContext, agentMessage);
             case TCP_CONNECT -> this.handleTcpConnect(proxyChannelContext, agentMessage);
         }
     }
