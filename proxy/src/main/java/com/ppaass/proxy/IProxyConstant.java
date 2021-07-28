@@ -6,6 +6,7 @@ import io.netty.util.AttributeKey;
 
 public interface IProxyConstant {
     String LAST_INBOUND_HANDLER = "LAST_INBOUND_HANDLER";
+    int DNS_PORT=53;
 
     interface ITargetChannelAttr {
         AttributeKey<TargetTcpInfo> TCP_INFO =

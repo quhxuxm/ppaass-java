@@ -25,6 +25,8 @@ import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.util.Arrays;
 
+import static com.ppaass.proxy.IProxyConstant.DNS_PORT;
+
 @Service
 @ChannelHandler.Sharable
 public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentMessage> {
@@ -269,7 +271,8 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
     private void handleDnsQuery(ChannelHandlerContext proxyChannelContext, AgentMessage agentMessage) {
         var proxyTcpChannel = proxyChannelContext.channel();
         var dnsQueryData = agentMessage.getBody().getData();
-        InetSocketAddress destinationSocketAddress = new InetSocketAddress(agentMessage.getBody().getTargetHost(), 53);
+        InetSocketAddress destinationSocketAddress =
+                new InetSocketAddress(agentMessage.getBody().getTargetHost(), DNS_PORT);
         io.netty.channel.socket.DatagramPacket datagramPacket =
                 new io.netty.channel.socket.DatagramPacket(Unpooled.wrappedBuffer(dnsQueryData),
                         destinationSocketAddress);
