@@ -333,7 +333,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                         allIpAddresses[0].toString()
                 });
         var dnsUdpResponsePacketContentByteBuf = dnsResponseUdpPacket.content();
-        var dnsUdpResponsePacketContentByteArray = ByteBufUtil.getBytes(dnsResponseUdpPacket.content());
+        var dnsUdpResponsePacketContentByteArray = ByteBufUtil.getBytes(dnsUdpResponsePacketContentByteBuf);
         logger.debug(() -> "DNS response: \n{}\n", () -> new Object[]{
                 ByteBufUtil.prettyHexDump(dnsUdpResponsePacketContentByteBuf)
         });
