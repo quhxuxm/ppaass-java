@@ -284,7 +284,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                         dnsQuestion.type().name(),
                         dnsQuestion.timeToLive()
                 });
-        InetAddress[] allIpAddresses = null;
+        InetAddress[] allIpAddresses;
         try {
             allIpAddresses = InetAddress.getAllByName(dnsQuestion.name());
         } catch (UnknownHostException e) {
@@ -311,6 +311,15 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         dnsChannel.writeOutbound(dnsResponse);
         ByteBuf resultByteBuf = dnsChannel.readOutbound();
         this.sendUdpDataToAgent(agentMessage, proxyTcpChannel, ByteBufUtil.getBytes(resultByteBuf));
+        logger.debug(() -> "DNS answer,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}], ip=[{}]",
+                () -> new Object[]{
+                        dnsQuery.id(),
+                        dnsQuestion.name(),
+                        dnsQuestion.dnsClass(),
+                        dnsQuestion.type().name(),
+                        dnsAnswer.timeToLive(),
+                        allIpAddresses[0].toString()
+                });
     }
 
     private void handleUdpData(ChannelHandlerContext proxyChannelContext, AgentMessage agentMessage) {
