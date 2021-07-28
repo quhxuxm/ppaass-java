@@ -41,9 +41,6 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         logger.error(() -> "Exception happen on proxy channel=[{}]", () -> new Object[]{
                 proxyChannel
         });
-        if (proxyChannel.isActive()) {
-            proxyChannel.close();
-        }
         cause.printStackTrace();
     }
 
@@ -273,6 +270,8 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         var dnsQueryData = agentMessage.getBody().getData();
         InetSocketAddress destinationSocketAddress =
                 new InetSocketAddress(agentMessage.getBody().getTargetHost(), DNS_PORT);
+        InetSocketAddress senderSocketAddress =
+                new InetSocketAddress(agentMessage.getBody().getSourceHost(), agentMessage.getBody().getSourcePort());
         io.netty.channel.socket.DatagramPacket datagramPacket =
                 new io.netty.channel.socket.DatagramPacket(Unpooled.wrappedBuffer(dnsQueryData),
                         destinationSocketAddress);
@@ -316,7 +315,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                         allIpAddresses[0].toString()
                 });
         DatagramDnsResponse dnsResponse =
-                new DatagramDnsResponse(dnsQuery.recipient(), dnsQuery.sender(), dnsQuery.id());
+                new DatagramDnsResponse(destinationSocketAddress, senderSocketAddress, dnsQuery.id());
         DefaultDnsRawRecord dnsAnswer = new DefaultDnsRawRecord(dnsQuestion.name(), DnsRecordType.A, 100,
                 Unpooled.wrappedBuffer(allIpAddresses[0].getAddress()));
         dnsResponse.addRecord(DnsSection.QUESTION, dnsQuestion);
