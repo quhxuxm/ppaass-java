@@ -9,20 +9,15 @@ import com.ppaass.proxy.IProxyConstant;
 import com.ppaass.proxy.ProxyConfiguration;
 import com.ppaass.proxy.handler.bo.TargetTcpInfo;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.embedded.EmbeddedChannel;
-import io.netty.handler.codec.dns.DatagramDnsQuery;
-import io.netty.handler.codec.dns.DatagramDnsQueryDecoder;
-import io.netty.handler.codec.dns.DefaultDnsQuestion;
-import io.netty.handler.codec.dns.DnsSection;
+import io.netty.handler.codec.dns.*;
 import org.springframework.stereotype.Service;
 
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetSocketAddress;
-import java.net.SocketException;
+import java.net.*;
 import java.util.Arrays;
 
 import static com.ppaass.proxy.IProxyConstant.DNS_PORT;
@@ -215,7 +210,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
             return;
         }
         targetChannel.writeAndFlush(
-                Unpooled.wrappedBuffer(agentMessage.getBody().getData()))
+                        Unpooled.wrappedBuffer(agentMessage.getBody().getData()))
                 .addListener((ChannelFutureListener) targetChannelFuture -> {
                     if (targetChannelFuture.isSuccess()) {
                         logger.debug(
@@ -276,9 +271,10 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         io.netty.channel.socket.DatagramPacket datagramPacket =
                 new io.netty.channel.socket.DatagramPacket(Unpooled.wrappedBuffer(dnsQueryData),
                         destinationSocketAddress);
-        EmbeddedChannel dnsQueryDecodeChannel = new EmbeddedChannel(new DatagramDnsQueryDecoder());
-        dnsQueryDecodeChannel.writeInbound(datagramPacket);
-        DatagramDnsQuery dnsQuery = dnsQueryDecodeChannel.readInbound();
+        EmbeddedChannel dnsChannel =
+                new EmbeddedChannel(new DatagramDnsQueryDecoder(), new DatagramDnsResponseEncoder());
+        dnsChannel.writeInbound(datagramPacket);
+        DatagramDnsQuery dnsQuery = dnsChannel.readInbound();
         DefaultDnsQuestion dnsQuestion = dnsQuery.recordAt(DnsSection.QUESTION);
         logger.debug(() -> "DNS question,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}]",
                 () -> new Object[]{
@@ -288,6 +284,33 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                         dnsQuestion.type().name(),
                         dnsQuestion.timeToLive()
                 });
+        InetAddress[] allIpAddresses = null;
+        try {
+            allIpAddresses = InetAddress.getAllByName(dnsQuestion.name());
+        } catch (UnknownHostException e) {
+            logger.error(() -> "Fail to get all ip address of the given domain name [{}] because of exception.",
+                    () -> new Object[]{
+                            dnsQuestion.name(),
+                            e
+                    });
+            return;
+        }
+        if (allIpAddresses.length == 0) {
+            logger.error(() -> "Fail to get all ip address of the given domain name [{}] because no ip address return",
+                    () -> new Object[]{
+                            dnsQuestion.name()
+                    });
+            return;
+        }
+        DatagramDnsResponse dnsResponse =
+                new DatagramDnsResponse(dnsQuery.recipient(), dnsQuery.sender(), dnsQuery.id());
+        DefaultDnsRawRecord dnsAnswer = new DefaultDnsRawRecord(dnsQuestion.name(), DnsRecordType.A, 100,
+                Unpooled.wrappedBuffer(allIpAddresses[0].getAddress()));
+        dnsResponse.addRecord(DnsSection.QUESTION, dnsQuestion);
+        dnsResponse.addRecord(DnsSection.ANSWER, dnsAnswer);
+        dnsChannel.writeOutbound(dnsResponse);
+        ByteBuf resultByteBuf = dnsChannel.readOutbound();
+        this.sendUdpDataToAgent(agentMessage, proxyTcpChannel, ByteBufUtil.getBytes(resultByteBuf));
     }
 
     private void handleUdpData(ChannelHandlerContext proxyChannelContext, AgentMessage agentMessage) {
