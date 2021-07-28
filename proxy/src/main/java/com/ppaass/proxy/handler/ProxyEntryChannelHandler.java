@@ -44,6 +44,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         if (proxyChannel.isActive()) {
             proxyChannel.close();
         }
+        cause.printStackTrace();
     }
 
     @Override
