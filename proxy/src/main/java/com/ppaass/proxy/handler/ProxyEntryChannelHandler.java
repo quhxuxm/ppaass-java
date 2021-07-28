@@ -322,7 +322,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         dnsResponse.addRecord(DnsSection.QUESTION, dnsQuestion);
         dnsResponse.addRecord(DnsSection.ANSWER, dnsAnswer);
         dnsChannel.writeOutbound(dnsResponse);
-        io.netty.channel.socket.DatagramPacket dnsResponseUdpPacket = dnsChannel.readOutbound();
+        io.netty.channel.socket.DatagramPacket dnsResponseUdpPacket = dnsChannel.flushOutbound().readOutbound();
         logger.debug(() -> "DNS answer,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}], ip=[{}]",
                 () -> new Object[]{
                         dnsQuery.id(),
