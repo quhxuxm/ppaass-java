@@ -9,7 +9,6 @@ import com.ppaass.proxy.IProxyConstant;
 import com.ppaass.proxy.ProxyConfiguration;
 import com.ppaass.proxy.handler.bo.TargetTcpInfo;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
@@ -40,7 +39,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
     public void exceptionCaught(ChannelHandlerContext proxyChannelContext, Throwable cause) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
         logger.error(() -> "Exception happen on proxy channel=[{}]", () -> new Object[]{
-                proxyChannel, cause
+                proxyChannel
         });
         if (proxyChannel.isActive()) {
             proxyChannel.close();
@@ -322,7 +321,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         dnsResponse.addRecord(DnsSection.QUESTION, dnsQuestion);
         dnsResponse.addRecord(DnsSection.ANSWER, dnsAnswer);
         dnsChannel.writeOutbound(dnsResponse);
-        ByteBuf resultByteBuf = dnsChannel.readOutbound();
+        io.netty.channel.socket.DatagramPacket dnsResponseUdpPacket = dnsChannel.readOutbound();
         logger.debug(() -> "DNS answer,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}], ip=[{}]",
                 () -> new Object[]{
                         dnsQuery.id(),
@@ -332,7 +331,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                         dnsAnswer.timeToLive(),
                         allIpAddresses[0].toString()
                 });
-        this.sendUdpDataToAgent(agentMessage, proxyTcpChannel, ByteBufUtil.getBytes(resultByteBuf));
+        this.sendUdpDataToAgent(agentMessage, proxyTcpChannel, ByteBufUtil.getBytes(dnsResponseUdpPacket.content()));
     }
 
     private void handleUdpData(ChannelHandlerContext proxyChannelContext, AgentMessage agentMessage) {
