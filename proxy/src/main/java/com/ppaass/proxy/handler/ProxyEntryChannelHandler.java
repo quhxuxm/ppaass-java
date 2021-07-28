@@ -280,7 +280,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         dnsQueryDecodeChannel.writeInbound(datagramPacket);
         DatagramDnsQuery dnsQuery = dnsQueryDecodeChannel.readInbound();
         DefaultDnsQuestion dnsQuestion = dnsQuery.recordAt(DnsSection.QUESTION);
-        logger.debug(() -> "DNS question,id=[%s],  name=[%s], question class=[%s], question type=[%s], ttl=[%s]",
+        logger.debug(() -> "DNS question,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}]",
                 () -> new Object[]{
                         dnsQuery.id(),
                         dnsQuestion.name(),
