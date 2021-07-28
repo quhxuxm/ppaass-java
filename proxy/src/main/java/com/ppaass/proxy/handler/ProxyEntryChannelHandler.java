@@ -323,14 +323,15 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         dnsResponse.addRecord(DnsSection.ANSWER, dnsAnswer);
         dnsChannel.writeOutbound(dnsResponse);
         io.netty.channel.socket.DatagramPacket dnsResponseUdpPacket = dnsChannel.flushOutbound().readOutbound();
-        logger.debug(() -> "DNS answer,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}], ip=[{}]",
+        logger.debug(() -> "DNS answer,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}], ip=[{}], packet:\n{}\n{}",
                 () -> new Object[]{
                         dnsQuery.id(),
                         dnsQuestion.name(),
                         dnsQuestion.dnsClass(),
                         dnsQuestion.type().name(),
                         dnsAnswer.timeToLive(),
-                        allIpAddresses[0].toString()
+                        allIpAddresses[0].toString(),
+                        dnsResponseUdpPacket
                 });
         var dnsUdpResponsePacketContentByteBuf = dnsResponseUdpPacket.content();
         var dnsUdpResponsePacketContentByteArray = ByteBufUtil.getBytes(dnsUdpResponsePacketContentByteBuf);
