@@ -473,7 +473,6 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
             if (future.isSuccess()) {
                 return;
             }
-            proxyTcpChannel.close();
             logger
                     .error(() -> "Fail to send udp data to agent because of exception happen when write data to agent, proxy channel = {}.",
                             () -> new Object[]{
