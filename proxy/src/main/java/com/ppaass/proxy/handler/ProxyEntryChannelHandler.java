@@ -302,6 +302,14 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                     });
             return;
         }
+        logger.debug(() -> "DNS get ip address,id=[{}],  name=[{}], question class=[{}], question type=[{}], ip=[{}]",
+                () -> new Object[]{
+                        dnsQuery.id(),
+                        dnsQuestion.name(),
+                        dnsQuestion.dnsClass(),
+                        dnsQuestion.type().name(),
+                        allIpAddresses[0].toString()
+                });
         DatagramDnsResponse dnsResponse =
                 new DatagramDnsResponse(dnsQuery.recipient(), dnsQuery.sender(), dnsQuery.id());
         DefaultDnsRawRecord dnsAnswer = new DefaultDnsRawRecord(dnsQuestion.name(), DnsRecordType.A, 100,
