@@ -30,6 +30,12 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
     @Override
     public void exceptionCaught(ChannelHandlerContext targetChannelContext, Throwable cause) throws Exception {
         var targetChannel = targetChannelContext.channel();
+        if(cause.getMessage().contains("Connection reset")){
+            logger.error(
+                    () -> "Connection reset happen on target channel, and target channel still active,  target channel = {}.",
+                    () -> new Object[]{targetChannel.id().asLongText()});
+            return;
+        }
         if (targetChannel.isActive()) {
             logger.error(
                     () -> "Exception happen on target channel, and target channel still active, we should close it, target channel = {}.",
