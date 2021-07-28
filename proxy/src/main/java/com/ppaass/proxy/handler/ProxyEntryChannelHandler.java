@@ -310,7 +310,6 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         dnsResponse.addRecord(DnsSection.ANSWER, dnsAnswer);
         dnsChannel.writeOutbound(dnsResponse);
         ByteBuf resultByteBuf = dnsChannel.readOutbound();
-        this.sendUdpDataToAgent(agentMessage, proxyTcpChannel, ByteBufUtil.getBytes(resultByteBuf));
         logger.debug(() -> "DNS answer,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}], ip=[{}]",
                 () -> new Object[]{
                         dnsQuery.id(),
@@ -320,6 +319,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                         dnsAnswer.timeToLive(),
                         allIpAddresses[0].toString()
                 });
+        this.sendUdpDataToAgent(agentMessage, proxyTcpChannel, ByteBufUtil.getBytes(resultByteBuf));
     }
 
     private void handleUdpData(ChannelHandlerContext proxyChannelContext, AgentMessage agentMessage) {
