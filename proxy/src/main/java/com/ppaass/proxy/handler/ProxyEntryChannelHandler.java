@@ -14,6 +14,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.dns.*;
+import io.netty.util.ReferenceCountUtil;
 import org.springframework.stereotype.Service;
 
 import java.net.*;
@@ -331,7 +332,13 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                         dnsAnswer.timeToLive(),
                         allIpAddresses[0].toString()
                 });
-        this.sendUdpDataToAgent(agentMessage, proxyTcpChannel, ByteBufUtil.getBytes(dnsResponseUdpPacket.content()));
+        var dnsUdpResponsePacketContentByteBuf = dnsResponseUdpPacket.content();
+        var dnsUdpResponsePacketContentByteArray = ByteBufUtil.getBytes(dnsResponseUdpPacket.content());
+        logger.debug(() -> "DNS response: \n{}\n", () -> new Object[]{
+                ByteBufUtil.prettyHexDump(dnsUdpResponsePacketContentByteBuf)
+        });
+        ReferenceCountUtil.safeRelease(dnsUdpResponsePacketContentByteBuf);
+        this.sendUdpDataToAgent(agentMessage, proxyTcpChannel, dnsUdpResponsePacketContentByteArray);
     }
 
     private void handleUdpData(ChannelHandlerContext proxyChannelContext, AgentMessage agentMessage) {
