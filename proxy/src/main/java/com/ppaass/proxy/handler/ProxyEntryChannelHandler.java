@@ -269,13 +269,13 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
     private void handleDnsQuery(ChannelHandlerContext proxyChannelContext, AgentMessage agentMessage) {
         var proxyTcpChannel = proxyChannelContext.channel();
         var dnsQueryData = agentMessage.getBody().getData();
-        InetSocketAddress destinationSocketAddress =
+        InetSocketAddress originalDestinationSocketAddress =
                 new InetSocketAddress(agentMessage.getBody().getTargetHost(), DNS_PORT);
-        InetSocketAddress senderSocketAddress =
+        InetSocketAddress originalSenderSocketAddress =
                 new InetSocketAddress(agentMessage.getBody().getSourceHost(), agentMessage.getBody().getSourcePort());
         io.netty.channel.socket.DatagramPacket datagramPacket =
                 new io.netty.channel.socket.DatagramPacket(Unpooled.wrappedBuffer(dnsQueryData),
-                        destinationSocketAddress);
+                        originalDestinationSocketAddress);
         EmbeddedChannel dnsChannel =
                 new EmbeddedChannel(new DatagramDnsQueryDecoder(), new DatagramDnsResponseEncoder());
         dnsChannel.writeInbound(datagramPacket);
@@ -316,7 +316,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                         allIpAddresses[0].toString()
                 });
         DatagramDnsResponse dnsResponse =
-                new DatagramDnsResponse(destinationSocketAddress, senderSocketAddress, dnsQuery.id());
+                new DatagramDnsResponse(originalDestinationSocketAddress, originalSenderSocketAddress, dnsQuery.id());
         DefaultDnsRawRecord dnsAnswer = new DefaultDnsRawRecord(dnsQuestion.name(), DnsRecordType.A, 60 * 1000,
                 Unpooled.wrappedBuffer(allIpAddresses[0].getAddress()));
         dnsResponse.addRecord(DnsSection.QUESTION, dnsQuestion);
