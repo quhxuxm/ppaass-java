@@ -398,7 +398,6 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                                         agentMessage,
                                         proxyChannelFuture.cause()
                                 });
-                        proxyTcpChannel.close();
                     });
             return;
         }
@@ -464,7 +463,6 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                                         agentMessage,
                                         proxyChannelFuture.cause()
                                 });
-                        proxyTcpChannel.close();
                     });
         } finally {
             targetUdpSocket.close();
