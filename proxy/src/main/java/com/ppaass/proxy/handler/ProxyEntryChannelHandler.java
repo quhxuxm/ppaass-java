@@ -331,7 +331,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                         dnsQuestion.type().name(),
                         dnsAnswer.timeToLive(),
                         allIpAddresses[0].toString(),
-                        dnsResponseUdpPacket
+                        dnsResponseUdpPacket.toString()
                 });
         var dnsUdpResponsePacketContentByteBuf = dnsResponseUdpPacket.content();
         var dnsUdpResponsePacketContentByteArray = ByteBufUtil.getBytes(dnsUdpResponsePacketContentByteBuf);
