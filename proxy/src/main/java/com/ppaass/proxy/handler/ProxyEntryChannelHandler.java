@@ -307,12 +307,15 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                     });
             return;
         }
-        logger.debug(() -> "DNS get ip address,id=[{}],  name=[{}], question class=[{}], question type=[{}], ip=[{}]",
+        logger.debug(
+                () -> "DNS get ip address,id=[{}],  name=[{}], question class=[{}], question type=[{}], question sender=[{}], question recipient=[{}], ip=[{}]",
                 () -> new Object[]{
                         dnsQuery.id(),
                         dnsQuestion.name(),
                         dnsQuestion.dnsClass(),
                         dnsQuestion.type().name(),
+                        dnsQuery.sender(),
+                        dnsQuery.recipient(),
                         allIpAddresses[0].toString()
                 });
         DatagramDnsResponse dnsResponse =
@@ -324,13 +327,18 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         dnsChannel.writeOutbound(dnsResponse);
         io.netty.channel.socket.DatagramPacket dnsResponseUdpPacket = dnsChannel.flushOutbound().readOutbound();
         logger.debug(
-                () -> "DNS answer,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}], ip=[{}], packet:\n{}\n{}",
+                () -> "DNS answer,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}], question sender=[{}], question recipient=[{}]," +
+                        "answer sender=[{}], answer recipient=[{}], ip=[{}], packet:\n{}\n{}",
                 () -> new Object[]{
                         dnsQuery.id(),
                         dnsQuestion.name(),
                         dnsQuestion.dnsClass(),
                         dnsQuestion.type().name(),
                         dnsAnswer.timeToLive(),
+                        dnsQuery.sender(),
+                        dnsQuery.recipient(),
+                        dnsResponse.sender(),
+                        dnsResponse.recipient(),
                         allIpAddresses[0].toString(),
                         dnsResponseUdpPacket.toString()
                 });
