@@ -323,7 +323,8 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         dnsResponse.addRecord(DnsSection.ANSWER, dnsAnswer);
         dnsChannel.writeOutbound(dnsResponse);
         io.netty.channel.socket.DatagramPacket dnsResponseUdpPacket = dnsChannel.flushOutbound().readOutbound();
-        logger.debug(() -> "DNS answer,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}], ip=[{}], packet:\n{}\n{}",
+        logger.debug(
+                () -> "DNS answer,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}], ip=[{}], packet:\n{}\n{}",
                 () -> new Object[]{
                         dnsQuery.id(),
                         dnsQuestion.name(),
@@ -339,7 +340,8 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                 ByteBufUtil.prettyHexDump(dnsUdpResponsePacketContentByteBuf)
         });
         ReferenceCountUtil.safeRelease(dnsUdpResponsePacketContentByteBuf);
-        this.sendUdpDataToAgent(agentMessage, proxyTcpChannel, dnsUdpResponsePacketContentByteArray);
+        this.sendUdpDataToAgent(agentMessage, proxyTcpChannel, dnsUdpResponsePacketContentByteArray,
+                ProxyMessageBodyType.DNS_ANSWER);
     }
 
     private void handleUdpData(ChannelHandlerContext proxyChannelContext, AgentMessage agentMessage) {
@@ -411,7 +413,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
             logger.debug(() -> "Receive UDP packet:\n{}\n", () -> new Object[]{
                     ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(proxyMessageData))
             });
-            sendUdpDataToAgent(agentMessage, proxyTcpChannel, proxyMessageData);
+            sendUdpDataToAgent(agentMessage, proxyTcpChannel, proxyMessageData, ProxyMessageBodyType.UDP_DATA_SUCCESS);
 //            while (currentReceivedDataLength >= UDP_PACKET_MAX_LENGTH) {
 //                DatagramPacket nextReceiveDataPacket = new DatagramPacket(receiveDataPacketBuf, UDP_PACKET_MAX_LENGTH);
 //                try {
@@ -470,7 +472,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
     }
 
     private void sendUdpDataToAgent(AgentMessage agentMessage, Channel proxyTcpChannel,
-                                    byte[] proxyMessageData) {
+                                    byte[] proxyMessageData, ProxyMessageBodyType proxyMessageBodyType) {
         var proxyMessageBody =
                 new ProxyMessageBody(
                         UUIDUtil.INSTANCE.generateUuid(),
@@ -480,7 +482,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                         agentMessage.getBody().getSourcePort(),
                         agentMessage.getBody().getTargetHost(),
                         agentMessage.getBody().getTargetPort(),
-                        ProxyMessageBodyType.UDP_DATA_SUCCESS,
+                        proxyMessageBodyType,
                         agentMessage.getBody().getAgentChannelId(),
                         null,
                         proxyMessageData);
