@@ -52,9 +52,9 @@ class SAUdpBindListener implements ChannelFutureListener {
                 this.socks5CommandRequest.dstPort(),
                 this.agentConfiguration.getUserToken(),
                 this.agentTcpChannel,
-                agentUdpChannel,
-                this.proxyTcpChannel
+                agentUdpChannel
         );
+        udpConnectionInfo.setProxyTcpChannel(this.proxyTcpChannel);
         this.agentTcpChannel.attr(ISAConstant.SOCKS_UDP_CONNECTION_INFO)
                 .set(udpConnectionInfo);
         this.proxyTcpChannel.attr(ISAConstant.SOCKS_UDP_CONNECTION_INFO)

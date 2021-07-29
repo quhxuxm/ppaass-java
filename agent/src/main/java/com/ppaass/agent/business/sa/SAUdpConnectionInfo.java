@@ -8,7 +8,7 @@ class SAUdpConnectionInfo {
     private final int clientSenderAssociatePort;
     private final Channel agentTcpChannel;
     private final Channel agentUdpChannel;
-    private final Channel proxyTcpChannel;
+    private Channel proxyTcpChannel;
     private final String userToken;
     private String clientSenderHost;
     private int clientSenderPort;
@@ -18,14 +18,12 @@ class SAUdpConnectionInfo {
     public SAUdpConnectionInfo(int agentUdpPort, String clientSenderAssociateHost,
                                int clientSenderAssociatePort,
                                String userToken,
-                               Channel agentTcpChannel, Channel agentUdpChannel,
-                               Channel proxyTcpChannel) {
+                               Channel agentTcpChannel, Channel agentUdpChannel) {
         this.agentUdpPort = agentUdpPort;
         this.clientSenderAssociateHost = clientSenderAssociateHost;
         this.clientSenderAssociatePort = clientSenderAssociatePort;
         this.agentTcpChannel = agentTcpChannel;
         this.agentUdpChannel = agentUdpChannel;
-        this.proxyTcpChannel = proxyTcpChannel;
         this.userToken = userToken;
     }
 
@@ -87,5 +85,9 @@ class SAUdpConnectionInfo {
 
     public void setClientRecipientPort(int clientRecipientPort) {
         this.clientRecipientPort = clientRecipientPort;
+    }
+
+    public void setProxyTcpChannel(Channel proxyTcpChannel) {
+        this.proxyTcpChannel = proxyTcpChannel;
     }
 }
