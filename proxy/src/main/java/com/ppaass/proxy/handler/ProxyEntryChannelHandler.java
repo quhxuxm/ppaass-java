@@ -282,12 +282,64 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                     dnsQuestion.name(),
                     e
             );
+            DatagramDnsResponse dnsResponse =
+                    new DatagramDnsResponse(originalDestinationSocketAddress, originalSenderSocketAddress,
+                            dnsQuery.id());
+            DefaultDnsRawRecord dnsAnswer = new DefaultDnsRawRecord(dnsQuestion.name(), DnsRecordType.SOA, 60 * 1000,
+                    Unpooled.EMPTY_BUFFER);
+            dnsResponse.addRecord(DnsSection.QUESTION, dnsQuestion);
+            dnsResponse.addRecord(DnsSection.AUTHORITY, dnsAnswer);
+            dnsChannel.writeOutbound(dnsResponse);
+            io.netty.channel.socket.DatagramPacket dnsResponseUdpPacket = dnsChannel.flushOutbound().readOutbound();
+            var dnsUdpResponsePacketContentByteBuf = dnsResponseUdpPacket.content();
+            var dnsUdpResponsePacketContentByteArray = ByteBufUtil.getBytes(dnsUdpResponsePacketContentByteBuf);
+            logger.debug(
+                    "DNS answer,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}], question sender=[{}], question recipient=[{}]," +
+                            "answer sender=[{}], answer recipient=[{}], ip=[NONE1]",
+                    dnsQuery.id(),
+                    dnsQuestion.name(),
+                    dnsQuestion.dnsClass(),
+                    dnsQuestion.type().name(),
+                    dnsAnswer.timeToLive(),
+                    dnsQuery.sender(),
+                    dnsQuery.recipient(),
+                    dnsResponse.sender(),
+                    dnsResponse.recipient()
+            );
+            this.sendUdpDataToAgent(agentMessage, proxyTcpChannel, dnsUdpResponsePacketContentByteArray,
+                    ProxyMessageBodyType.DNS_ANSWER);
             return;
         }
         if (allIpAddresses.length == 0) {
             logger.error("Fail to get all ip address of the given domain name [{}] because no ip address return",
                     dnsQuestion.name()
             );
+            DatagramDnsResponse dnsResponse =
+                    new DatagramDnsResponse(originalDestinationSocketAddress, originalSenderSocketAddress,
+                            dnsQuery.id());
+            DefaultDnsRawRecord dnsAnswer = new DefaultDnsRawRecord(dnsQuestion.name(), DnsRecordType.SOA, 60 * 1000,
+                    Unpooled.EMPTY_BUFFER);
+            dnsResponse.addRecord(DnsSection.QUESTION, dnsQuestion);
+            dnsResponse.addRecord(DnsSection.AUTHORITY, dnsAnswer);
+            dnsChannel.writeOutbound(dnsResponse);
+            io.netty.channel.socket.DatagramPacket dnsResponseUdpPacket = dnsChannel.flushOutbound().readOutbound();
+            var dnsUdpResponsePacketContentByteBuf = dnsResponseUdpPacket.content();
+            var dnsUdpResponsePacketContentByteArray = ByteBufUtil.getBytes(dnsUdpResponsePacketContentByteBuf);
+            logger.debug(
+                    "DNS answer,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}], question sender=[{}], question recipient=[{}]," +
+                            "answer sender=[{}], answer recipient=[{}], ip=[NONE2]",
+                    dnsQuery.id(),
+                    dnsQuestion.name(),
+                    dnsQuestion.dnsClass(),
+                    dnsQuestion.type().name(),
+                    dnsAnswer.timeToLive(),
+                    dnsQuery.sender(),
+                    dnsQuery.recipient(),
+                    dnsResponse.sender(),
+                    dnsResponse.recipient()
+            );
+            this.sendUdpDataToAgent(agentMessage, proxyTcpChannel, dnsUdpResponsePacketContentByteArray,
+                    ProxyMessageBodyType.DNS_ANSWER);
             return;
         }
         logger.debug(
