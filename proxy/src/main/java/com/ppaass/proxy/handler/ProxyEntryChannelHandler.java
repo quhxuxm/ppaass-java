@@ -217,19 +217,21 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                     var reconnectTargetChannel = this.targetTcpBootstrap
                             .connect(agentMessage.getBody().getTargetHost(),
                                     agentMessage.getBody().getTargetPort()).sync().channel();
+                    reconnectTargetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO)
+                            .set(targetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO).get());
                     proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).set(reconnectTargetChannel);
                     reconnectTargetChannel.writeAndFlush(Unpooled.wrappedBuffer(agentMessage.getBody().getData()))
                             .addListener((ChannelFutureListener) future -> {
                                 if (!future.isSuccess()) {
                                     logger.trace(
                                             "Success to write agent data to target, target channel={}, agent message:\n{}\n ",
-                                            targetChannel.id().asLongText(),
+                                            reconnectTargetChannel.id().asLongText(),
                                             agentMessage
                                     );
                                     logger.error(
                                             "Fail to write agent data to target because of exception, agent message:\n{}\n ",
                                             agentMessage,
-                                            targetChannelFuture.cause()
+                                            future.cause()
                                     );
                                     var failProxyMessageBody = new ProxyMessageBody(UUIDUtil.INSTANCE.generateUuid(),
                                             proxyConfiguration.getProxyInstanceId(),
@@ -240,7 +242,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                                             agentMessage.getBody().getTargetPort(),
                                             ProxyMessageBodyType.TCP_DATA_FAIL,
                                             agentMessage.getBody().getAgentChannelId(),
-                                            targetChannel.id().asLongText(),
+                                            reconnectTargetChannel.id().asLongText(),
                                             null);
                                     var failProxyMessage = new ProxyMessage(UUIDUtil.INSTANCE.generateUuidInBytes(),
                                             EncryptionType.choose(), failProxyMessageBody);
