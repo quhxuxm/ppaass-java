@@ -6,8 +6,6 @@ import com.ppaass.agent.IAgentConst;
 import com.ppaass.agent.business.ha.HAEntryHandler;
 import com.ppaass.agent.business.sa.SAEntryHandler;
 import com.ppaass.common.handler.ChannelCleanupHandler;
-import com.ppaass.common.log.IPpaassLogger;
-import com.ppaass.common.log.PpaassLoggerFactory;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -17,12 +15,14 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.socksx.SocksPortUnificationServerHandler;
 import io.netty.handler.codec.socksx.SocksVersion;
 import io.netty.handler.timeout.IdleStateHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
 @Service
 class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
-    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
+    private final Logger logger = LoggerFactory.getLogger(DetectProtocolHandler.class);
     private final SAEntryHandler saEntryHandler;
     private final AgentConfiguration agentConfiguration;
     private final HAEntryHandler haEntryHandler;
@@ -43,9 +43,9 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
         var channelProtocolType = agentChannel.attr(IAgentConst.CHANNEL_PROTOCOL_CATEGORY).get();
         if (channelProtocolType != null) {
             logger
-                    .debug(() -> "Incoming request protocol is: {}, agent channel = {}",
-                            () -> new Object[]{channelProtocolType,
-                                    agentChannel.id().asLongText()});
+                    .debug("Incoming request protocol is: {}, agent channel = {}",
+                            channelProtocolType,
+                            agentChannel.id().asLongText());
             agentChannelContext.fireChannelRead(msg);
             return;
         }
@@ -54,9 +54,8 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
         if (messageBuf.writerIndex() == readerIndex) {
             logger
                     .debug(
-                            () -> "Incoming request reader index is the same as writer index, agent channel = {}",
-                            () -> new Object[]{
-                                    agentChannel.id().asLongText()});
+                            "Incoming request reader index is the same as writer index, agent channel = {}",
+                            agentChannel.id().asLongText());
             agentChannel.close();
             return;
         }
@@ -66,9 +65,8 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
                 SocksVersion.SOCKS5.byteValue() == protocolVersionByte) {
             logger
                     .debug(
-                            () -> "Incoming request is a socks request, agent channel = {}",
-                            () -> new Object[]{
-                                    agentChannel.id().asLongText()});
+                            "Incoming request is a socks request, agent channel = {}",
+                            agentChannel.id().asLongText());
             agentChannel.attr(IAgentConst.CHANNEL_PROTOCOL_CATEGORY)
                     .set(ChannelProtocolCategory.SOCKS);
             agentChannelPipeline
@@ -90,9 +88,8 @@ class DetectProtocolHandler extends ChannelInboundHandlerAdapter {
         }
         logger
                 .debug(
-                        () -> "Incoming request is a http request, agent channel = {}",
-                        () -> new Object[]{
-                                agentChannel.id().asLongText()});
+                        "Incoming request is a http request, agent channel = {}",
+                        agentChannel.id().asLongText());
         agentChannel.attr(IAgentConst.CHANNEL_PROTOCOL_CATEGORY)
                 .set(ChannelProtocolCategory.HTTP);
         agentChannelPipeline.addLast(HttpServerCodec.class.getName(), new HttpServerCodec());

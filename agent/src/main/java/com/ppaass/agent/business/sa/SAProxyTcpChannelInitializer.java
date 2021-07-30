@@ -5,19 +5,19 @@ import com.ppaass.common.constant.ICommonConstant;
 import com.ppaass.common.handler.AgentMessageEncoder;
 import com.ppaass.common.handler.PrintExceptionHandler;
 import com.ppaass.common.handler.ProxyMessageDecoder;
-import com.ppaass.common.log.IPpaassLogger;
-import com.ppaass.common.log.PpaassLoggerFactory;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.compression.Lz4FrameDecoder;
 import io.netty.handler.codec.compression.Lz4FrameEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 class SAProxyTcpChannelInitializer extends ChannelInitializer<Channel> {
-    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
+    private final Logger logger = LoggerFactory.getLogger(SAProxyTcpChannelInitializer.class);
     private final AgentConfiguration agentConfiguration;
     private final SAReceiveProxyDataHandler saReceiveProxyDataHandler;
 
@@ -31,7 +31,7 @@ class SAProxyTcpChannelInitializer extends ChannelInitializer<Channel> {
     @Override
     protected void initChannel(Channel proxyChannel) throws Exception {
         logger.info(
-                () -> "Proxy channel created, proxy channel = " + proxyChannel.id().asLongText());
+                "Proxy channel created, proxy channel = {}", proxyChannel.id().asLongText());
         var proxyChannelPipeline = proxyChannel.pipeline();
         if (agentConfiguration.isProxyTcpCompressEnable()) {
             proxyChannelPipeline.addLast(new Lz4FrameDecoder());

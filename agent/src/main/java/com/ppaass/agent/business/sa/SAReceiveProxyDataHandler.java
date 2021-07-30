@@ -1,8 +1,6 @@
 package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.IAgentConst;
-import com.ppaass.common.log.IPpaassLogger;
-import com.ppaass.common.log.PpaassLoggerFactory;
 import com.ppaass.protocol.vpn.message.ProxyMessage;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
@@ -12,6 +10,8 @@ import io.netty.handler.codec.socksx.v5.Socks5AddressEncoder;
 import io.netty.handler.codec.socksx.v5.Socks5AddressType;
 import io.netty.handler.codec.socksx.v5.Socks5CommandStatus;
 import io.netty.util.NetUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.net.InetSocketAddress;
@@ -19,7 +19,7 @@ import java.net.InetSocketAddress;
 @ChannelHandler.Sharable
 @Service
 class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage> {
-    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
+    private final Logger logger = LoggerFactory.getLogger(SAReceiveProxyDataHandler.class);
     private final SASendTcpDataToProxyHandler saSendTcpDataToProxyHandler;
 
     SAReceiveProxyDataHandler(
@@ -30,8 +30,8 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
     @Override
     public void exceptionCaught(ChannelHandlerContext proxyChannelContext, Throwable cause) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
-        logger.error(() -> "Proxy channel exception happen, proxy channel = {}",
-                () -> new Object[]{proxyChannel.id().asLongText(), cause});
+        logger.error("Proxy channel exception happen, proxy channel = {}",
+                proxyChannel.id().asLongText(), cause);
         proxyChannel.close();
     }
 
@@ -53,11 +53,10 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
         var agentChannel = proxyChannel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNEL).get();
         if (agentChannel == null) {
             logger.error(
-                    () -> "The agent channel id in proxy message is not for current proxy channel, discard the proxy message, proxy channel = {}, proxy message:\n{}\n",
-                    () -> new Object[]{
-                            proxyChannel.id().asLongText(),
-                            proxyMessage
-                    });
+                    "The agent channel id in proxy message is not for current proxy channel, discard the proxy message, proxy channel = {}, proxy message:\n{}\n",
+                    proxyChannel.id().asLongText(),
+                    proxyMessage
+            );
             return;
         }
         switch (proxyMessage.getBody().getBodyType()) {
@@ -85,37 +84,33 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
     private void handleTcpDataSuccess(ProxyMessage proxyMessage, Channel proxyChannel,
                                       Channel agentTcpChannel) {
         logger.debug(
-                () -> "Receive TCP_DATA_SUCCESS, proxy message:\n{}\n",
-                () -> new Object[]{
-                        proxyMessage
-                });
+                "Receive TCP_DATA_SUCCESS, proxy message:\n{}\n",
+                proxyMessage
+        );
         if (proxyMessage.getBody().getData() == null) {
-            logger.trace(SAReceiveProxyDataHandler.class,
-                    () -> "Forward proxy data to client success [TCP_DATA_SUCCESS] with empty data, agent channel = {},  proxy channel = {}",
-                    () -> new Object[]{
-                            agentTcpChannel.id().asLongText(),
-                            proxyChannel.id().asLongText()
-                    });
+            logger.trace(
+                    "Forward proxy data to client success [TCP_DATA_SUCCESS] with empty data, agent channel = {},  proxy channel = {}",
+                    agentTcpChannel.id().asLongText(),
+                    proxyChannel.id().asLongText()
+            );
             return;
         }
         var tcpDataByteBuf = Unpooled.wrappedBuffer(proxyMessage.getBody().getData());
         agentTcpChannel.writeAndFlush(
-                tcpDataByteBuf)
+                        tcpDataByteBuf)
                 .addListener((ChannelFutureListener) agentChannelFuture -> {
                     if (agentChannelFuture.isSuccess()) {
-                        logger.trace(SAReceiveProxyDataHandler.class,
-                                () -> "Forward proxy data to client success [TCP_DATA_SUCCESS], agent channel = {},  proxy channel = {}",
-                                () -> new Object[]{
-                                        agentTcpChannel.id().asLongText(),
-                                        proxyChannel.id().asLongText()
-                                });
+                        logger.trace(
+                                "Forward proxy data to client success [TCP_DATA_SUCCESS], agent channel = {},  proxy channel = {}",
+                                agentTcpChannel.id().asLongText(),
+                                proxyChannel.id().asLongText()
+                        );
                         return;
                     }
-                    logger.trace(SAReceiveProxyDataHandler.class,
-                            () -> "Forward proxy data to client fail [TCP_DATA_SUCCESS], close it, agent channel = {},  proxy channel = {}",
-                            () -> new Object[]{
-                                    agentTcpChannel.id().asLongText(), proxyChannel.id().asLongText()
-                            });
+                    logger.trace(
+                            "Forward proxy data to client fail [TCP_DATA_SUCCESS], close it, agent channel = {},  proxy channel = {}",
+                            agentTcpChannel.id().asLongText(), proxyChannel.id().asLongText()
+                    );
                     agentTcpChannel.close();
                 });
     }
@@ -124,11 +119,10 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
         var udpConnectionInfo = proxyChannel.attr(ISAConstant.SOCKS_UDP_CONNECTION_INFO).get();
         if (udpConnectionInfo == null) {
             logger.error(
-                    () -> "No udp connection info attach to agent channel, close the agent channel on UDP_DATA_SUCCESS, proxy channel = {}, proxy message:\n{}\n",
-                    () -> new Object[]{
-                            proxyChannel.id().asLongText(),
-                            proxyMessage
-                    });
+                    "No udp connection info attach to agent channel, close the agent channel on UDP_DATA_SUCCESS, proxy channel = {}, proxy message:\n{}\n",
+                    proxyChannel.id().asLongText(),
+                    proxyMessage
+            );
             return;
         }
         var recipient = new InetSocketAddress(udpConnectionInfo.getClientSenderHost(),
@@ -148,8 +142,8 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
                         .encodeAddress(Socks5AddressType.IPv4, clientRecipientHost,
                                 socks5UdpResponseBuf);
             } catch (Exception e) {
-                logger.error(() -> "Fail to write udp message back to agent because of exception(1).",
-                        () -> new Object[]{e});
+                logger.error("Fail to write udp message back to agent because of exception(1).",
+                        e);
                 return;
             }
         } else {
@@ -161,8 +155,8 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
                                     socks5UdpResponseBuf);
                 } catch (Exception e) {
                     logger
-                            .error(() -> "Fail to write udp message back to agent because of exception(2).",
-                                    () -> new Object[]{e});
+                            .error("Fail to write udp message back to agent because of exception(2).",
+                                    e);
                     return;
                 }
             } else {
@@ -174,8 +168,8 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
                                     socks5UdpResponseBuf);
                 } catch (Exception e) {
                     logger
-                            .error(() -> "Fail to write udp message back to agent because of exception(3).",
-                                    () -> new Object[]{e});
+                            .error("Fail to write udp message back to agent because of exception(3).",
+                                    e);
                     return;
                 }
             }
@@ -190,72 +184,65 @@ class SAReceiveProxyDataHandler extends SimpleChannelInboundHandler<ProxyMessage
     private void handleTcpConnectionClose(ProxyMessage proxyMessage, Channel proxyChannel,
                                           Channel agentTcpChannel) {
         logger.debug(
-                () -> "Receive TCP_CONNECTION_CLOSE, proxy message:\n{}\n",
-                () -> new Object[]{
-                        proxyMessage
-                });
+                "Receive TCP_CONNECTION_CLOSE, proxy message:\n{}\n",
+                proxyMessage
+        );
         agentTcpChannel.close();
     }
 
     private void handleTcpDataFail(ProxyMessage proxyMessage, Channel proxyChannel,
                                    Channel agentTcpChannel) {
         logger.debug(
-                () -> "Receive TCP_DATA_FAIL, proxy message:\n{}\n",
-                () -> new Object[]{
-                        proxyMessage
-                });
+                "Receive TCP_DATA_FAIL, proxy message:\n{}\n",
+                proxyMessage
+        );
         agentTcpChannel.close();
     }
 
     private void handleTcpConnectFail(ProxyMessage proxyMessage, Channel proxyChannel,
                                       Channel agentTcpChannel) {
         logger.debug(
-                () -> "Receive TCP_CONNECT_FAIL, proxy message:\n{}\n",
-                () -> new Object[]{
-                        proxyMessage
-                });
+                "Receive TCP_CONNECT_FAIL, proxy message:\n{}\n",
+                proxyMessage
+        );
         var addrType = SAUtil.INSTANCE.parseAddrType(proxyMessage.getBody().getTargetHost());
         agentTcpChannel.writeAndFlush(
-                new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE,
-                        addrType))
+                        new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE,
+                                addrType))
                 .addListener((ChannelFutureListener) agentChannelFuture -> {
                     logger.info(
-                            () -> "Close agent channel on receive TCP_CONNECT_FAIL, agent channel = {},  proxy channel = {}",
-                            () -> new Object[]{
-                                    agentTcpChannel.id().asLongText(),
-                                    proxyChannel.id().asLongText()
-                            });
+                            "Close agent channel on receive TCP_CONNECT_FAIL, agent channel = {},  proxy channel = {}",
+                            agentTcpChannel.id().asLongText(),
+                            proxyChannel.id().asLongText()
+                    );
                     agentTcpChannel.close();
                 });
     }
 
     private void handleTcpConnectSuccess(ProxyMessage proxyMessage, Channel proxyChannel, Channel agentTcpChannel) {
         logger.debug(
-                () -> "Receive TCP_CONNECT_SUCCESS, proxy message:\n{}\n",
-                () -> new Object[]{
-                        proxyMessage
-                });
+                "Receive TCP_CONNECT_SUCCESS, proxy message:\n{}\n",
+                proxyMessage
+        );
         var addrType = SAUtil.INSTANCE.parseAddrType(proxyMessage.getBody().getTargetHost());
         agentTcpChannel.writeAndFlush(new DefaultSocks5CommandResponse(Socks5CommandStatus.SUCCESS,
-                addrType,
-                proxyMessage.getBody().getTargetHost(), proxyMessage.getBody().getTargetPort()))
+                        addrType,
+                        proxyMessage.getBody().getTargetHost(), proxyMessage.getBody().getTargetPort()))
                 .addListener((ChannelFutureListener) agentChannelFuture -> {
                     if (agentChannelFuture.isSuccess()) {
                         logger.debug(
-                                () -> "Success to send socks5 SUCCESS to client, read more from client channel,agent channel = {},  proxy channel = {}",
-                                () -> new Object[]{
-                                        agentTcpChannel.id().asLongText(), proxyChannel.id().asLongText()
-                                });
+                                "Success to send socks5 SUCCESS to client, read more from client channel,agent channel = {},  proxy channel = {}",
+                                agentTcpChannel.id().asLongText(), proxyChannel.id().asLongText()
+                        );
                         agentTcpChannel.pipeline().addBefore(IAgentConst.LAST_INBOUND_HANDLER,
                                 SAEntryHandler.class.getName(),
                                 this.saSendTcpDataToProxyHandler);
                         return;
                     }
                     logger.debug(
-                            () -> "Fail to send socks5 SUCCESS to client, close client channel, agent channel = {},  proxy channel = {}",
-                            () -> new Object[]{
-                                    agentTcpChannel.id().asLongText(), proxyChannel.id().asLongText()
-                            });
+                            "Fail to send socks5 SUCCESS to client, close client channel, agent channel = {},  proxy channel = {}",
+                            agentTcpChannel.id().asLongText(), proxyChannel.id().asLongText()
+                    );
                     agentTcpChannel.close();
                 });
     }

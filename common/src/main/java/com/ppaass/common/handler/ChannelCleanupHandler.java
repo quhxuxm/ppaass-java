@@ -1,17 +1,17 @@
 package com.ppaass.common.handler;
 
-import com.ppaass.common.log.IPpaassLogger;
-import com.ppaass.common.log.PpaassLoggerFactory;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ChannelHandler.Sharable
 public class ChannelCleanupHandler extends ChannelInboundHandlerAdapter {
-    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
+    private final Logger logger = LoggerFactory.getLogger(ChannelCleanupHandler.class);
     public static final ChannelCleanupHandler INSTANCE = new ChannelCleanupHandler();
 
     private ChannelCleanupHandler() {
@@ -29,6 +29,9 @@ public class ChannelCleanupHandler extends ChannelInboundHandlerAdapter {
             return;
         }
         Channel channel = channelContext.channel();
-        channel.close();
+        if (channel.isActive()) {
+            channel.close();
+        }
+        logger.debug("Cleanup idle channel: {}", channel);
     }
 }

@@ -1,8 +1,6 @@
 package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
-import com.ppaass.common.log.IPpaassLogger;
-import com.ppaass.common.log.PpaassLoggerFactory;
 import com.ppaass.common.util.UUIDUtil;
 import com.ppaass.protocol.vpn.message.AgentMessage;
 import com.ppaass.protocol.vpn.message.AgentMessageBody;
@@ -13,12 +11,14 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
 @Service
 class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
-    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
+    private final Logger logger = LoggerFactory.getLogger(SASendTcpDataToProxyHandler.class);
     private final AgentConfiguration agentConfiguration;
 
     SASendTcpDataToProxyHandler(AgentConfiguration agentConfiguration) {
@@ -62,25 +62,22 @@ class SASendTcpDataToProxyHandler extends SimpleChannelInboundHandler<ByteBuf> {
                 EncryptionType.choose(),
                 agentMessageBody);
         logger.debug(
-                () -> "Forward client original message to proxy, agent channel = {}, proxy channel = {}",
-                () -> new Object[]{
-                        agentChannel.id().asLongText(), proxyTcpChannel.id().asLongText()
-                });
+                "Forward client original message to proxy, agent channel = {}, proxy channel = {}",
+                agentChannel.id().asLongText(), proxyTcpChannel.id().asLongText()
+        );
         proxyTcpChannel.writeAndFlush(agentMessage).addListener((ChannelFutureListener) proxyChannelFuture -> {
             if (proxyChannelFuture.isSuccess()) {
                 logger.debug(
-                        () -> "Success forward client original message to proxy, agent channel = {}, proxy channel = {}",
-                        () -> new Object[]{
-                                agentChannel.id().asLongText(), proxyTcpChannel.id().asLongText()
-                        });
+                        "Success forward client original message to proxy, agent channel = {}, proxy channel = {}",
+                        agentChannel.id().asLongText(), proxyTcpChannel.id().asLongText()
+                );
                 return;
             }
             logger.error(
-                    () -> "Fail forward client original message to proxy because of exception, agent channel = {}, proxy channel = {}",
-                    () -> new Object[]{
-                            agentChannel.id().asLongText(), proxyTcpChannel.id().asLongText(),
-                            proxyChannelFuture.cause()
-                    });
+                    "Fail forward client original message to proxy because of exception, agent channel = {}, proxy channel = {}",
+                    agentChannel.id().asLongText(), proxyTcpChannel.id().asLongText(),
+                    proxyChannelFuture.cause()
+            );
             agentChannel.close();
         });
     }

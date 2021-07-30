@@ -2,8 +2,6 @@ package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.IAgentConst;
-import com.ppaass.common.log.IPpaassLogger;
-import com.ppaass.common.log.PpaassLoggerFactory;
 import com.ppaass.common.util.UUIDUtil;
 import com.ppaass.protocol.vpn.message.AgentMessage;
 import com.ppaass.protocol.vpn.message.AgentMessageBody;
@@ -13,12 +11,14 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
 @Service
 class SASendUdpDataToProxyHandler extends SimpleChannelInboundHandler<SAUdpProtocolMessage> {
-    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
+    private final Logger logger = LoggerFactory.getLogger(SASendUdpDataToProxyHandler.class);
     private final AgentConfiguration agentConfiguration;
     private final SAProxyResourceManager saProxyResourceManager;
 
@@ -75,19 +75,17 @@ class SASendUdpDataToProxyHandler extends SimpleChannelInboundHandler<SAUdpProto
                 .addListener((ChannelFutureListener) proxyChannelFuture -> {
                     if (!proxyChannelFuture.isSuccess()) {
                         logger
-                                .error(() -> "Fail to write udp message to proxy because of exception, udp connection info: \n{}\n.",
-                                        () -> new Object[]{
-                                                udpConnectionInfo,
-                                                proxyChannelFuture.cause()
-                                        });
+                                .error("Fail to write udp message to proxy because of exception, udp connection info: \n{}\n.",
+                                        udpConnectionInfo,
+                                        proxyChannelFuture.cause()
+                                );
                         return;
                     }
                     logger
-                            .debug(() -> "Success to write udp message to proxy, udp connection info: \n{}\n.",
-                                    () -> new Object[]{
-                                            udpConnectionInfo,
-                                            proxyChannelFuture.cause()
-                                    });
+                            .debug("Success to write udp message to proxy, udp connection info: \n{}\n.",
+                                    udpConnectionInfo,
+                                    proxyChannelFuture.cause()
+                            );
                 });
     }
 }

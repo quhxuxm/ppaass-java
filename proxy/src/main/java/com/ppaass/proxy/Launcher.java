@@ -1,25 +1,23 @@
 package com.ppaass.proxy;
 
-import com.ppaass.common.log.PpaassLoggerFactory;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class Launcher {
     public static void main(String[] args) {
-        PpaassLoggerFactory.INSTANCE.init(ProxyPpaassLogger.class);
-        var logger = PpaassLoggerFactory.INSTANCE.getLogger();
+        var logger = LoggerFactory.getLogger(Launcher.class);
         var context = SpringApplication.run(Launcher.class, args);
         var proxy = context.getBean(Proxy.class);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            logger.info(() -> "Begin to stop proxy...");
+            logger.info("Begin to stop proxy...");
             proxy.stop();
-            logger.info(() -> "Proxy stopped...");
+            logger.info("Proxy stopped...");
         }));
-        logger.info(() -> "Begin to start proxy [id = {}] ...",
-                () -> new Object[]{proxy.getInstanceId()});
+        logger.info("Begin to start proxy [id = {}] ...", proxy.getInstanceId());
         proxy.start();
         logger
-                .info(() -> "Proxy started [id = {}]...", () -> new Object[]{proxy.getInstanceId()});
+                .info("Proxy started [id = {}]...", proxy.getInstanceId());
     }
 }

@@ -6,8 +6,6 @@ import com.ppaass.common.constant.ICommonConstant;
 import com.ppaass.common.handler.AgentMessageEncoder;
 import com.ppaass.common.handler.PrintExceptionHandler;
 import com.ppaass.common.handler.ProxyMessageDecoder;
-import com.ppaass.common.log.IPpaassLogger;
-import com.ppaass.common.log.PpaassLoggerFactory;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelInitializer;
@@ -25,7 +23,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 class HAProxyResourceManager implements IAgentResourceManager {
-    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
     private final AgentConfiguration agentConfiguration;
     private Bootstrap proxyTcpChannelBootstrapForHttp;
     private Bootstrap proxyTcpChannelBootstrapForHttps;

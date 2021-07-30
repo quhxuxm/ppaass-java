@@ -1,7 +1,5 @@
 package com.ppaass.agent.business.ha;
 
-import com.ppaass.common.log.IPpaassLogger;
-import com.ppaass.common.log.PpaassLoggerFactory;
 import com.ppaass.common.util.UUIDUtil;
 import com.ppaass.protocol.vpn.message.AgentMessage;
 import com.ppaass.protocol.vpn.message.AgentMessageBody;
@@ -14,10 +12,12 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpRequestEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 
 class HAUtil {
-    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
+    private final Logger logger = LoggerFactory.getLogger(HAUtil.class);
     private static final String HTTP_SCHEMA = "http://";
     private static final String HTTPS_SCHEMA = "https://";
     private static final String SCHEMA_AND_HOST_SEP = "://";
@@ -86,9 +86,9 @@ class HAUtil {
             try {
                 port = Integer.parseInt(hostNameAndPortParts[1]);
             } catch (NumberFormatException e) {
-                logger.error(HAUtil.class,
-                        () -> "Fail to parse port from request uri, uri = {}",
-                        () -> new Object[]{uri});
+                logger.error(
+                        "Fail to parse port from request uri, uri = {}",
+                        uri);
             }
         }
         return new HAConnectionInfo(

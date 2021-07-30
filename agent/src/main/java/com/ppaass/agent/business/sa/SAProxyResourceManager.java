@@ -2,8 +2,6 @@ package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.IAgentResourceManager;
-import com.ppaass.common.log.IPpaassLogger;
-import com.ppaass.common.log.PpaassLoggerFactory;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelOption;
@@ -14,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 class SAProxyResourceManager implements IAgentResourceManager {
-    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
     private final SAUdpChannelInitializer saUdpChannelInitializer;
     private final SAProxyTcpChannelInitializer saProxyTcpChannelInitializer;
     private final AgentConfiguration agentConfiguration;

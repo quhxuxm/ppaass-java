@@ -1,8 +1,6 @@
 package com.ppaass.agent.business.sa;
 
 import com.ppaass.common.handler.PrintExceptionHandler;
-import com.ppaass.common.log.IPpaassLogger;
-import com.ppaass.common.log.PpaassLoggerFactory;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.nio.NioDatagramChannel;
@@ -11,7 +9,6 @@ import org.springframework.stereotype.Service;
 @ChannelHandler.Sharable
 @Service
 class SAUdpChannelInitializer extends ChannelInitializer<NioDatagramChannel> {
-    private final IPpaassLogger logger= PpaassLoggerFactory.INSTANCE.getLogger();
     private final SASendUdpDataToProxyHandler SASendUdpDataToProxyHandler;
 
     public SAUdpChannelInitializer(

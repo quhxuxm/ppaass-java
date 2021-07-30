@@ -1,14 +1,14 @@
 package com.ppaass.common.handler;
 
-import com.ppaass.common.log.IPpaassLogger;
-import com.ppaass.common.log.PpaassLoggerFactory;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ChannelHandler.Sharable
 public class PrintExceptionHandler extends ChannelInboundHandlerAdapter {
-    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
+    private final Logger logger = LoggerFactory.getLogger(PrintExceptionHandler.class);
     public static final PrintExceptionHandler INSTANCE = new PrintExceptionHandler();
 
     private PrintExceptionHandler() {
@@ -17,10 +17,9 @@ public class PrintExceptionHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         logger
-                .trace(PrintExceptionHandler.class, () -> "Exception in the channel pipeline, channel = {}",
-                        () -> new Object[]{
-                                ctx.channel().id(), cause
-                        });
+                .trace("Exception in the channel pipeline, channel = {}",
+                        ctx.channel().id(), cause
+                );
         ctx.fireExceptionCaught(cause);
     }
 }

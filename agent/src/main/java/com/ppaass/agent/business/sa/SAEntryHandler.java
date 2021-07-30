@@ -2,8 +2,6 @@ package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
 import com.ppaass.agent.IAgentConst;
-import com.ppaass.common.log.IPpaassLogger;
-import com.ppaass.common.log.PpaassLoggerFactory;
 import com.ppaass.common.util.UUIDUtil;
 import com.ppaass.protocol.vpn.message.AgentMessage;
 import com.ppaass.protocol.vpn.message.AgentMessageBody;
@@ -13,12 +11,14 @@ import io.netty.channel.*;
 import io.netty.handler.codec.socksx.SocksMessage;
 import io.netty.handler.codec.socksx.SocksVersion;
 import io.netty.handler.codec.socksx.v5.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @ChannelHandler.Sharable
 @Service
 public class SAEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
-    private final IPpaassLogger logger = PpaassLoggerFactory.INSTANCE.getLogger();
+    private final Logger logger = LoggerFactory.getLogger(SAEntryHandler.class);
     private final AgentConfiguration agentConfiguration;
     private final SAProxyResourceManager saProxyResourceManager;
 
@@ -33,18 +33,17 @@ public class SAEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
         var agentChannel = agentChannelContext.channel();
         if (SocksVersion.UNKNOWN == socksRequest.version()) {
             logger.error(
-                    () -> "Incoming protocol is unknown protocol, agent channel = {}.", () -> new Object[]{
-                            agentChannel.id().asLongText()
-                    });
+                    "Incoming protocol is unknown protocol, agent channel = {}.",
+                    agentChannel.id().asLongText()
+            );
             agentChannel.close();
             return;
         }
         if (SocksVersion.SOCKS4a == socksRequest.version()) {
             logger
-                    .error(() -> "Socks4a not support, agent channel = {}.",
-                            () -> new Object[]{
-                                    agentChannel.id().asLongText()
-                            });
+                    .error("Socks4a not support, agent channel = {}.",
+                            agentChannel.id().asLongText()
+                    );
             agentChannel.close();
             return;
         }
@@ -52,13 +51,12 @@ public class SAEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
         if (socksRequest instanceof Socks5InitialRequest) {
             logger
                     .debug(
-                            () -> "Socks5 initial request coming always NO_AUTH, agent channel = {}",
-                            () -> new Object[]{
-                                    agentChannel.id().asLongText()
-                            });
+                            "Socks5 initial request coming always NO_AUTH, agent channel = {}",
+                            agentChannel.id().asLongText()
+                    );
             agentChannelPipeline.addFirst(new Socks5CommandRequestDecoder());
             agentChannelContext.writeAndFlush(
-                    new DefaultSocks5InitialResponse(Socks5AuthMethod.NO_AUTH))
+                            new DefaultSocks5InitialResponse(Socks5AuthMethod.NO_AUTH))
                     .addListener((ChannelFutureListener) agentChannelFuture -> {
                         if (!agentChannelFuture.isSuccess()) {
                             agentChannel.close();
@@ -71,10 +69,9 @@ public class SAEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
         if (!(socksRequest instanceof Socks5CommandRequest)) {
             logger
                     .error(
-                            () -> "Wrong socks5 request, agent channel = {} ",
-                            () -> new Object[]{
-                                    agentChannel.id().asLongText()
-                            });
+                            "Wrong socks5 request, agent channel = {} ",
+                            agentChannel.id().asLongText()
+                    );
             agentChannel.close();
             return;
         }
@@ -82,21 +79,19 @@ public class SAEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
         if (socks5CommandRequest.type() == Socks5CommandType.CONNECT) {
             logger
                     .debug(
-                            () -> "Socks5 connect request coming, agent channel = {}",
-                            () -> new Object[]{
-                                    agentChannel.id().asLongText()
-                            });
+                            "Socks5 connect request coming, agent channel = {}",
+                            agentChannel.id().asLongText()
+                    );
             try {
                 Channel proxyChannel =
                         this.saProxyResourceManager.getProxyTcpChannelBootstrap().connect().sync().channel();
                 this.processProxyConnect(agentChannel, proxyChannel, socks5CommandRequest);
             } catch (Exception e) {
                 logger
-                        .error(() -> "Fail to create proxy tcp channel connection because of exception, target host={}, target port={}.",
-                                () -> new Object[]{
-                                        socks5CommandRequest.dstAddr(),
-                                        socks5CommandRequest.dstPort(),
-                                        e});
+                        .error("Fail to create proxy tcp channel connection because of exception, target host={}, target port={}.",
+                                socks5CommandRequest.dstAddr(),
+                                socks5CommandRequest.dstPort(),
+                                e);
                 agentChannel.writeAndFlush(new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE,
                         socks5CommandRequest.dstAddrType())).addListener(ChannelFutureListener.CLOSE);
             }
@@ -105,10 +100,9 @@ public class SAEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
         if (socks5CommandRequest.type() == Socks5CommandType.UDP_ASSOCIATE) {
             logger
                     .debug(
-                            () -> "Socks5 udp associate request coming, agent channel = {}",
-                            () -> new Object[]{
-                                    agentChannel.id().asLongText()
-                            });
+                            "Socks5 udp associate request coming, agent channel = {}",
+                            agentChannel.id().asLongText()
+                    );
             agentChannel.config().setOption(ChannelOption.SO_KEEPALIVE, true);
             try {
                 var proxyTcpChannel =
@@ -119,8 +113,8 @@ public class SAEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
                                 agentConfiguration, socks5CommandRequest));
             } catch (Exception e) {
                 logger
-                        .error(() -> "Fail to bind udp channel to proxy tcp channel because of exception.",
-                                () -> new Object[]{e});
+                        .error("Fail to bind udp channel to proxy tcp channel because of exception.",
+                                e);
                 agentChannel.writeAndFlush(new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE,
                         socks5CommandRequest.dstAddrType())).addListener(ChannelFutureListener.CLOSE);
             }
@@ -128,18 +122,17 @@ public class SAEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
         }
         logger
                 .error(
-                        () -> "Wrong socks5 request, agent channel = {} ",
-                        () -> new Object[]{
-                                agentChannel.id().asLongText()
-                        });
+                        "Wrong socks5 request, agent channel = {} ",
+                        agentChannel.id().asLongText()
+                );
         agentChannel.close();
     }
 
     private void processProxyConnect(Channel agentChannel, Channel proxyChannel,
                                      Socks5CommandRequest socks5CommandRequest) {
         logger.debug(
-                () -> "Success connect to proxy, agent channel = {}, proxy channel = {}",
-                () -> new Object[]{agentChannel.id().asLongText(), proxyChannel.id().asLongText()});
+                "Success connect to proxy, agent channel = {}, proxy channel = {}",
+                agentChannel.id().asLongText(), proxyChannel.id().asLongText());
         agentChannel.attr(ISAConstant.IAgentChannelConstant.PROXY_CHANNEL)
                 .set(proxyChannel);
         agentChannel.attr(ISAConstant.IAgentChannelConstant.TARGET_HOST).set(socks5CommandRequest.dstAddr());
@@ -163,27 +156,27 @@ public class SAEntryHandler extends SimpleChannelInboundHandler<SocksMessage> {
             agentChannelPipeline.remove(SAEntryHandler.class.getName());
         } catch (Exception e) {
             logger.debug(
-                    () -> "Fail to remove SocksV5Handler from proxy channel pipeline, proxy channel = {}",
-                    () -> new Object[]{proxyChannel.id().asLongText()});
+                    "Fail to remove SocksV5Handler from proxy channel pipeline, proxy channel = {}",
+                    proxyChannel.id().asLongText());
         }
         logger.trace(
-                () -> "Send TCP_CONNECT from agent to proxy [BEGIN] , agent channel = {}, proxy channel = {}",
-                () -> new Object[]{proxyChannel.id().asLongText()});
+                "Send TCP_CONNECT from agent to proxy [BEGIN] , agent channel = {}, proxy channel = {}",
+                agentChannel.id().asLongText(), proxyChannel.id().asLongText());
         proxyChannel.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNEL).set(agentChannel);
         proxyChannel.writeAndFlush(agentMessage)
                 .addListener((ChannelFutureListener) proxyWriteChannelFuture -> {
                     if (proxyWriteChannelFuture.isSuccess()) {
                         logger.trace(
-                                () -> "Send TCP_CONNECT from agent to proxy [SUCCESS], agent channel = {}, proxy channel = {}",
-                                () -> new Object[]{agentChannel.id().asLongText(), proxyChannel.id().asLongText()});
+                                "Send TCP_CONNECT from agent to proxy [SUCCESS], agent channel = {}, proxy channel = {}",
+                                agentChannel.id().asLongText(), proxyChannel.id().asLongText());
                         return;
                     }
                     logger.debug(
-                            () -> "Send TCP_CONNECT from agent to proxy [FAIL], agent channel = {}, proxy channel = {}",
-                            () -> new Object[]{agentChannel.id().asLongText(), proxyChannel.id().asLongText()});
+                            "Send TCP_CONNECT from agent to proxy [FAIL], agent channel = {}, proxy channel = {}",
+                            agentChannel.id().asLongText(), proxyChannel.id().asLongText());
                     agentChannel.writeAndFlush(
-                            new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE,
-                                    socks5CommandRequest.dstAddrType()))
+                                    new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE,
+                                            socks5CommandRequest.dstAddrType()))
                             .addListener(ChannelFutureListener.CLOSE);
                 });
     }

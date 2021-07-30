@@ -23,12 +23,8 @@
             <artifactId>vpn</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.ppaass.common</groupId>
-            <artifactId>log</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.ppaass.common</groupId>
-            <artifactId>util</artifactId>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
     </dependencies>
     <build>
