@@ -12,7 +12,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.dns.*;
-import io.netty.util.ReferenceCountUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -207,10 +206,10 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                         Unpooled.wrappedBuffer(agentMessage.getBody().getData()))
                 .addListener((ChannelFutureListener) targetChannelFuture -> {
                     if (targetChannelFuture.isSuccess()) {
-                        logger.debug(
-                                "Success to write agent data to target, agent message:\n{}\n ",
-                                agentMessage,
-                                targetChannelFuture.cause()
+                        logger.trace(
+                                "Success to write agent data to target, target channel={}, agent message:\n{}\n ",
+                                targetChannel.id().asLongText(),
+                                agentMessage
                         );
                         return;
                     }
