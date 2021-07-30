@@ -469,7 +469,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                         UUIDUtil.INSTANCE.generateUuidInBytes(),
                         EncryptionType.choose(),
                         proxyMessageBody);
-        proxyTcpChannel.writeAndFlush(proxyMessage).syncUninterruptibly().addListener(future -> {
+        proxyTcpChannel.writeAndFlush(proxyMessage).addListener(future -> {
             if (future.isSuccess()) {
                 return;
             }
