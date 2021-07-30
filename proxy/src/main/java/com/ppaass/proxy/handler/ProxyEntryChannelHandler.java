@@ -214,40 +214,54 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                         return;
                     }
                     targetChannel.close();
-                    logger.error(
-                            "Fail to write agent data to target because of exception, agent message:\n{}\n ",
-                            agentMessage,
-                            targetChannelFuture.cause()
-                    );
-                    var failProxyMessageBody = new ProxyMessageBody(UUIDUtil.INSTANCE.generateUuid(),
-                            proxyConfiguration.getProxyInstanceId(),
-                            agentMessage.getBody().getUserToken(),
-                            agentMessage.getBody().getSourceHost(),
-                            agentMessage.getBody().getSourcePort(),
-                            agentMessage.getBody().getTargetHost(),
-                            agentMessage.getBody().getTargetPort(),
-                            ProxyMessageBodyType.TCP_DATA_FAIL,
-                            agentMessage.getBody().getAgentChannelId(),
-                            targetChannel.id().asLongText(),
-                            null);
-                    var failProxyMessage = new ProxyMessage(UUIDUtil.INSTANCE.generateUuidInBytes(),
-                            EncryptionType.choose(), failProxyMessageBody);
-                    proxyChannel.writeAndFlush(failProxyMessage)
-                            .addListener((ChannelFutureListener) proxyChannelFuture -> {
-                                if (proxyChannelFuture.isSuccess()) {
-                                    logger.debug(
-                                            "Success to write TCP_DATA_FAIL(2) result to agent, agent message:\n{}\n",
-                                            agentMessage,
-                                            proxyChannelFuture.cause()
+                    var reconnectTargetChannel = this.targetTcpBootstrap
+                            .connect(agentMessage.getBody().getTargetHost(),
+                                    agentMessage.getBody().getTargetPort()).sync().channel();
+                    proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).set(reconnectTargetChannel);
+                    reconnectTargetChannel.writeAndFlush(Unpooled.wrappedBuffer(agentMessage.getBody().getData()))
+                            .addListener((ChannelFutureListener) future -> {
+                                if (!future.isSuccess()) {
+                                    logger.trace(
+                                            "Success to write agent data to target, target channel={}, agent message:\n{}\n ",
+                                            targetChannel.id().asLongText(),
+                                            agentMessage
                                     );
-                                    return;
+                                    logger.error(
+                                            "Fail to write agent data to target because of exception, agent message:\n{}\n ",
+                                            agentMessage,
+                                            targetChannelFuture.cause()
+                                    );
+                                    var failProxyMessageBody = new ProxyMessageBody(UUIDUtil.INSTANCE.generateUuid(),
+                                            proxyConfiguration.getProxyInstanceId(),
+                                            agentMessage.getBody().getUserToken(),
+                                            agentMessage.getBody().getSourceHost(),
+                                            agentMessage.getBody().getSourcePort(),
+                                            agentMessage.getBody().getTargetHost(),
+                                            agentMessage.getBody().getTargetPort(),
+                                            ProxyMessageBodyType.TCP_DATA_FAIL,
+                                            agentMessage.getBody().getAgentChannelId(),
+                                            targetChannel.id().asLongText(),
+                                            null);
+                                    var failProxyMessage = new ProxyMessage(UUIDUtil.INSTANCE.generateUuidInBytes(),
+                                            EncryptionType.choose(), failProxyMessageBody);
+                                    proxyChannel.writeAndFlush(failProxyMessage)
+                                            .addListener((ChannelFutureListener) proxyChannelFuture -> {
+                                                if (proxyChannelFuture.isSuccess()) {
+                                                    logger.debug(
+                                                            "Success to write TCP_DATA_FAIL(2) result to agent, agent message:\n{}\n",
+                                                            agentMessage,
+                                                            proxyChannelFuture.cause()
+                                                    );
+                                                    return;
+                                                }
+                                                logger.error(
+                                                        "Fail to write TCP_DATA_FAIL(2) result to agent because of exception, agent message:\n{}\n",
+                                                        agentMessage,
+                                                        proxyChannelFuture.cause()
+                                                );
+                                                proxyChannel.close();
+                                            });
                                 }
-                                logger.error(
-                                        "Fail to write TCP_DATA_FAIL(2) result to agent because of exception, agent message:\n{}\n",
-                                        agentMessage,
-                                        proxyChannelFuture.cause()
-                                );
-                                proxyChannel.close();
                             });
                 });
     }
@@ -258,7 +272,8 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         InetSocketAddress originalDestinationSocketAddress =
                 new InetSocketAddress(agentMessage.getBody().getTargetHost(), DNS_PORT);
         InetSocketAddress originalSenderSocketAddress =
-                new InetSocketAddress(agentMessage.getBody().getSourceHost(), agentMessage.getBody().getSourcePort());
+                new InetSocketAddress(agentMessage.getBody().getSourceHost(),
+                        agentMessage.getBody().getSourcePort());
         io.netty.channel.socket.DatagramPacket datagramPacket =
                 new io.netty.channel.socket.DatagramPacket(Unpooled.wrappedBuffer(dnsQueryData),
                         originalDestinationSocketAddress);
@@ -285,8 +300,9 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
             DatagramDnsResponse dnsResponse =
                     new DatagramDnsResponse(originalDestinationSocketAddress, originalSenderSocketAddress,
                             dnsQuery.id(), DnsOpCode.QUERY, DnsResponseCode.NXDOMAIN);
-            DefaultDnsRawRecord dnsAnswer = new DefaultDnsRawRecord(dnsQuestion.name(), DnsRecordType.SOA, 60 * 1000,
-                    Unpooled.EMPTY_BUFFER);
+            DefaultDnsRawRecord dnsAnswer =
+                    new DefaultDnsRawRecord(dnsQuestion.name(), DnsRecordType.SOA, 60 * 1000,
+                            Unpooled.EMPTY_BUFFER);
             dnsResponse.addRecord(DnsSection.QUESTION, dnsQuestion);
             dnsResponse.addRecord(DnsSection.AUTHORITY, dnsAnswer);
             dnsChannel.writeOutbound(dnsResponse);
@@ -317,8 +333,9 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
             DatagramDnsResponse dnsResponse =
                     new DatagramDnsResponse(originalDestinationSocketAddress, originalSenderSocketAddress,
                             dnsQuery.id(), DnsOpCode.QUERY, DnsResponseCode.NXDOMAIN);
-            DefaultDnsRawRecord dnsAnswer = new DefaultDnsRawRecord(dnsQuestion.name(), DnsRecordType.SOA, 60 * 1000,
-                    Unpooled.EMPTY_BUFFER);
+            DefaultDnsRawRecord dnsAnswer =
+                    new DefaultDnsRawRecord(dnsQuestion.name(), DnsRecordType.SOA, 60 * 1000,
+                            Unpooled.EMPTY_BUFFER);
             dnsResponse.addRecord(DnsSection.QUESTION, dnsQuestion);
             dnsResponse.addRecord(DnsSection.AUTHORITY, dnsAnswer);
             dnsChannel.writeOutbound(dnsResponse);
@@ -353,7 +370,8 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                 allIpAddresses[0].toString()
         );
         DatagramDnsResponse dnsResponse =
-                new DatagramDnsResponse(originalDestinationSocketAddress, originalSenderSocketAddress, dnsQuery.id());
+                new DatagramDnsResponse(originalDestinationSocketAddress, originalSenderSocketAddress,
+                        dnsQuery.id());
         DefaultDnsRawRecord dnsAnswer = new DefaultDnsRawRecord(dnsQuestion.name(), DnsRecordType.A, 60 * 1000,
                 Unpooled.wrappedBuffer(allIpAddresses[0].getAddress()));
         dnsResponse.addRecord(DnsSection.QUESTION, dnsQuestion);
@@ -445,7 +463,8 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
             logger.debug("Receive UDP packet:\n{}\n",
                     ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(proxyMessageData))
             );
-            sendUdpDataToAgent(agentMessage, proxyTcpChannel, proxyMessageData, ProxyMessageBodyType.UDP_DATA_SUCCESS);
+            sendUdpDataToAgent(agentMessage, proxyTcpChannel, proxyMessageData,
+                    ProxyMessageBodyType.UDP_DATA_SUCCESS);
 //            while (currentReceivedDataLength >= UDP_PACKET_MAX_LENGTH) {
 //                DatagramPacket nextReceiveDataPacket = new DatagramPacket(receiveDataPacketBuf, UDP_PACKET_MAX_LENGTH);
 //                try {
