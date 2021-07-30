@@ -284,7 +284,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
             );
             DatagramDnsResponse dnsResponse =
                     new DatagramDnsResponse(originalDestinationSocketAddress, originalSenderSocketAddress,
-                            dnsQuery.id());
+                            dnsQuery.id(), DnsOpCode.QUERY, DnsResponseCode.NXDOMAIN);
             DefaultDnsRawRecord dnsAnswer = new DefaultDnsRawRecord(dnsQuestion.name(), DnsRecordType.SOA, 60 * 1000,
                     Unpooled.EMPTY_BUFFER);
             dnsResponse.addRecord(DnsSection.QUESTION, dnsQuestion);
@@ -316,7 +316,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
             );
             DatagramDnsResponse dnsResponse =
                     new DatagramDnsResponse(originalDestinationSocketAddress, originalSenderSocketAddress,
-                            dnsQuery.id());
+                            dnsQuery.id(), DnsOpCode.QUERY, DnsResponseCode.NXDOMAIN);
             DefaultDnsRawRecord dnsAnswer = new DefaultDnsRawRecord(dnsQuestion.name(), DnsRecordType.SOA, 60 * 1000,
                     Unpooled.EMPTY_BUFFER);
             dnsResponse.addRecord(DnsSection.QUESTION, dnsQuestion);
