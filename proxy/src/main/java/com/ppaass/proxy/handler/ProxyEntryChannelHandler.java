@@ -312,9 +312,11 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         dnsResponse.addRecord(DnsSection.ANSWER, dnsAnswer);
         dnsChannel.writeOutbound(dnsResponse);
         io.netty.channel.socket.DatagramPacket dnsResponseUdpPacket = dnsChannel.flushOutbound().readOutbound();
+        var dnsUdpResponsePacketContentByteBuf = dnsResponseUdpPacket.content();
+        var dnsUdpResponsePacketContentByteArray = ByteBufUtil.getBytes(dnsUdpResponsePacketContentByteBuf);
         logger.debug(
                 "DNS answer,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}], question sender=[{}], question recipient=[{}]," +
-                        "answer sender=[{}], answer recipient=[{}], ip=[{}], packet:\n{}\n{}",
+                        "answer sender=[{}], answer recipient=[{}], ip=[{}], packet:\n{}\n",
                 dnsQuery.id(),
                 dnsQuestion.name(),
                 dnsQuestion.dnsClass(),
@@ -325,12 +327,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                 dnsResponse.sender(),
                 dnsResponse.recipient(),
                 allIpAddresses[0].toString(),
-                dnsResponseUdpPacket.toString()
-        );
-        var dnsUdpResponsePacketContentByteBuf = dnsResponseUdpPacket.content();
-        var dnsUdpResponsePacketContentByteArray = ByteBufUtil.getBytes(dnsUdpResponsePacketContentByteBuf);
-        logger.debug("DNS response: \n{}\n",
-                ByteBufUtil.prettyHexDump(dnsUdpResponsePacketContentByteBuf)
+                ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(dnsUdpResponsePacketContentByteArray))
         );
         ReferenceCountUtil.safeRelease(dnsUdpResponsePacketContentByteBuf);
         this.sendUdpDataToAgent(agentMessage, proxyTcpChannel, dnsUdpResponsePacketContentByteArray,
