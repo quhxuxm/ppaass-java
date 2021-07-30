@@ -39,10 +39,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
     @Override
     public void exceptionCaught(ChannelHandlerContext proxyChannelContext, Throwable cause) throws Exception {
         var proxyChannel = proxyChannelContext.channel();
-        logger.error("Exception happen on proxy channel=[{}]",
-                proxyChannel
-        );
-        cause.printStackTrace();
+        logger.error("Exception happen on proxy channel=[{}]", proxyChannel, cause);
     }
 
     @Override
