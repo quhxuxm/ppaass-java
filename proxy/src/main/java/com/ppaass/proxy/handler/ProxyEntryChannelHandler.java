@@ -325,7 +325,6 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                 dnsResponse.recipient(),
                 allIpAddresses[0].toString()
         );
-        ReferenceCountUtil.safeRelease(dnsUdpResponsePacketContentByteBuf);
         this.sendUdpDataToAgent(agentMessage, proxyTcpChannel, dnsUdpResponsePacketContentByteArray,
                 ProxyMessageBodyType.DNS_ANSWER);
     }
