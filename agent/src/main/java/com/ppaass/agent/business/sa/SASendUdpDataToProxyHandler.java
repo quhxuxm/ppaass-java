@@ -1,7 +1,6 @@
 package com.ppaass.agent.business.sa;
 
 import com.ppaass.agent.AgentConfiguration;
-import com.ppaass.agent.IAgentConst;
 import com.ppaass.common.util.UUIDUtil;
 import com.ppaass.protocol.vpn.message.AgentMessage;
 import com.ppaass.protocol.vpn.message.AgentMessageBody;
@@ -20,12 +19,9 @@ import org.springframework.stereotype.Service;
 class SASendUdpDataToProxyHandler extends SimpleChannelInboundHandler<SAUdpProtocolMessage> {
     private final Logger logger = LoggerFactory.getLogger(SASendUdpDataToProxyHandler.class);
     private final AgentConfiguration agentConfiguration;
-    private final SAProxyResourceManager saProxyResourceManager;
 
-    SASendUdpDataToProxyHandler(AgentConfiguration agentConfiguration,
-                                SAProxyResourceManager saProxyResourceManager) {
+    SASendUdpDataToProxyHandler(AgentConfiguration agentConfiguration) {
         this.agentConfiguration = agentConfiguration;
-        this.saProxyResourceManager = saProxyResourceManager;
     }
 
     @Override
@@ -64,13 +60,6 @@ class SASendUdpDataToProxyHandler extends SimpleChannelInboundHandler<SAUdpProto
                         EncryptionType.choose(),
                         agentMessageBody);
         var proxyTcpChannelForUdpTransfer = udpConnectionInfo.getProxyTcpChannel();
-        if (!proxyTcpChannelForUdpTransfer.isActive()) {
-            proxyTcpChannelForUdpTransfer =
-                    this.saProxyResourceManager.getProxyTcpChannelBootstrap().connect().sync().channel();
-            proxyTcpChannelForUdpTransfer.attr(ISAConstant.SOCKS_UDP_CONNECTION_INFO)
-                    .set(udpConnectionInfo);
-            proxyTcpChannelForUdpTransfer.attr(IAgentConst.IProxyChannelAttr.AGENT_CHANNEL).set(agentUdpChannel);
-        }
         proxyTcpChannelForUdpTransfer.writeAndFlush(agentMessage)
                 .addListener((ChannelFutureListener) proxyChannelFuture -> {
                     if (!proxyChannelFuture.isSuccess()) {
