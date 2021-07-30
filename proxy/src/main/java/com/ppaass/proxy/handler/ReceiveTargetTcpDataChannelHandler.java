@@ -156,9 +156,9 @@ public class ReceiveTargetTcpDataChannelHandler extends SimpleChannelInboundHand
                 proxyChannel.writeAndFlush(proxyMessage).sync()
                         .addListener((ChannelFutureListener) proxyChannelFuture -> {
                             if (proxyChannelFuture.isSuccess()) {
-                                logger.debug(
-                                        "Success to write target data to agent, tcp info: \n{}\n",
-                                        targetTcpInfo
+                                logger.trace(
+                                        "Success to write target data to agent, tcp info: \n{}\n, proxy message:\n{}\n",
+                                        targetTcpInfo, proxyMessage
                                 );
                                 return;
                             }
