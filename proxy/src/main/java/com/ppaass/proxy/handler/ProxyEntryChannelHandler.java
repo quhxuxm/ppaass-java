@@ -214,6 +214,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                         return;
                     }
                     targetChannel.close();
+                    logger.trace("The target channel is broke, target channel={}", targetChannel);
                     var reconnectTargetChannel = this.targetTcpBootstrap
                             .connect(agentMessage.getBody().getTargetHost(),
                                     agentMessage.getBody().getTargetPort()).sync().channel();
