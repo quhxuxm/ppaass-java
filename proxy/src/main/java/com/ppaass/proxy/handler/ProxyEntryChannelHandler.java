@@ -66,8 +66,12 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
     private void handleTcpConnect(ChannelHandlerContext proxyChannelContext, AgentMessage agentMessage) {
         var proxyChannel = proxyChannelContext.channel();
         logger.debug("Begin to create TCP connection for: {}", agentMessage);
+        var targetHost = agentMessage.getBody().getTargetHost();
+        if(agentMessage.getBody().getTargetPort() == 853){
+            targetHost="dns.google";
+        }
         this.targetTcpBootstrap
-                .connect(agentMessage.getBody().getTargetHost(),
+                .connect(targetHost,
                         agentMessage.getBody().getTargetPort())
                 .addListener((ChannelFutureListener) targetChannelFuture -> {
                     if (!targetChannelFuture.isSuccess()) {
