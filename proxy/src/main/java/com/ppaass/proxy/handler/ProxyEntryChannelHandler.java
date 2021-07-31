@@ -214,57 +214,41 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                         return;
                     }
                     targetChannel.close();
-                    logger.trace("The target channel is broke, target channel={}", targetChannel);
-                    var reconnectTargetChannel = this.targetTcpBootstrap
-                            .connect(agentMessage.getBody().getTargetHost(),
-                                    agentMessage.getBody().getTargetPort()).sync().channel();
-                    reconnectTargetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO)
-                            .set(targetChannel.attr(IProxyConstant.ITargetChannelAttr.TCP_INFO).get());
-                    proxyChannel.attr(IProxyConstant.IProxyChannelAttr.TARGET_CHANNEL).set(reconnectTargetChannel);
-                    reconnectTargetChannel.writeAndFlush(Unpooled.wrappedBuffer(agentMessage.getBody().getData()))
-                            .addListener((ChannelFutureListener) future -> {
-                                if (!future.isSuccess()) {
-                                    logger.trace(
-                                            "Success to write agent data to target, target channel={}, agent message:\n{}\n ",
-                                            reconnectTargetChannel.id().asLongText(),
-                                            agentMessage
-                                    );
-                                    logger.error(
-                                            "Fail to write agent data to target because of exception, agent message:\n{}\n ",
+                    logger.error(
+                            "Fail to write agent data to target because of exception, target channel={}, agent message:\n{}\n ",
+                            targetChannel,
+                            agentMessage,
+                            targetChannelFuture.cause()
+                    );
+                    var failProxyMessageBody = new ProxyMessageBody(UUIDUtil.INSTANCE.generateUuid(),
+                            proxyConfiguration.getProxyInstanceId(),
+                            agentMessage.getBody().getUserToken(),
+                            agentMessage.getBody().getSourceHost(),
+                            agentMessage.getBody().getSourcePort(),
+                            agentMessage.getBody().getTargetHost(),
+                            agentMessage.getBody().getTargetPort(),
+                            ProxyMessageBodyType.TCP_DATA_FAIL,
+                            agentMessage.getBody().getAgentChannelId(),
+                            targetChannel.id().asLongText(),
+                            null);
+                    var failProxyMessage = new ProxyMessage(UUIDUtil.INSTANCE.generateUuidInBytes(),
+                            EncryptionType.choose(), failProxyMessageBody);
+                    proxyChannel.writeAndFlush(failProxyMessage)
+                            .addListener((ChannelFutureListener) proxyChannelFuture -> {
+                                if (proxyChannelFuture.isSuccess()) {
+                                    logger.debug(
+                                            "Success to write TCP_DATA_FAIL(2) result to agent, agent message:\n{}\n",
                                             agentMessage,
-                                            future.cause()
+                                            proxyChannelFuture.cause()
                                     );
-                                    var failProxyMessageBody = new ProxyMessageBody(UUIDUtil.INSTANCE.generateUuid(),
-                                            proxyConfiguration.getProxyInstanceId(),
-                                            agentMessage.getBody().getUserToken(),
-                                            agentMessage.getBody().getSourceHost(),
-                                            agentMessage.getBody().getSourcePort(),
-                                            agentMessage.getBody().getTargetHost(),
-                                            agentMessage.getBody().getTargetPort(),
-                                            ProxyMessageBodyType.TCP_DATA_FAIL,
-                                            agentMessage.getBody().getAgentChannelId(),
-                                            reconnectTargetChannel.id().asLongText(),
-                                            null);
-                                    var failProxyMessage = new ProxyMessage(UUIDUtil.INSTANCE.generateUuidInBytes(),
-                                            EncryptionType.choose(), failProxyMessageBody);
-                                    proxyChannel.writeAndFlush(failProxyMessage)
-                                            .addListener((ChannelFutureListener) proxyChannelFuture -> {
-                                                if (proxyChannelFuture.isSuccess()) {
-                                                    logger.debug(
-                                                            "Success to write TCP_DATA_FAIL(2) result to agent, agent message:\n{}\n",
-                                                            agentMessage,
-                                                            proxyChannelFuture.cause()
-                                                    );
-                                                    return;
-                                                }
-                                                logger.error(
-                                                        "Fail to write TCP_DATA_FAIL(2) result to agent because of exception, agent message:\n{}\n",
-                                                        agentMessage,
-                                                        proxyChannelFuture.cause()
-                                                );
-                                                proxyChannel.close();
-                                            });
+                                    return;
                                 }
+                                logger.error(
+                                        "Fail to write TCP_DATA_FAIL(2) result to agent because of exception, agent message:\n{}\n",
+                                        agentMessage,
+                                        proxyChannelFuture.cause()
+                                );
+                                proxyChannel.close();
                             });
                 });
     }
