@@ -1,21 +1,23 @@
 #Prepare base env
-# sudo apt update
-# sudo apt upgrade -y
-# sudo iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
-# sudo mkdir /opt/java
-# sudo apt install maven -y
-# sudo apt install unzip -y
+sudo apt update
+sudo apt upgrade -y
+sudo iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
+#sudo mkdir /opt/java
+sudo apt install openjdk-17-jdk -y
+sudo apt install maven -y
+sudo apt install unzip -y
 # sudo wget https://download.java.net/java/GA/jdk15.0.2/0d1cfde4252546c6931946de8db48ee2/7/GPL/openjdk-15.0.2_linux-x64_bin.tar.gz
 # sudo tar -zxf openjdk-15.0.2_linux-x64_bin.tar.gz -C /opt/java/
 # sudo update-alternatives --install /usr/bin/java java /opt/java/jdk-15.0.2/bin/java 100
 # sudo update-alternatives --config java
 
 #Create swap file
-#sudo fallocate -l 4G /swapfile
-#sudo chmod 600 /swapfile
-#sudo mkswap /swapfile
-#sudo swapon --show
-#sudo free -h
+sudo swapoff /swapfile
+sudo fallocate -l 4G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+sudo free -h
 #echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 
 # Start install ppaass
@@ -25,13 +27,6 @@ sudo rm -rf /tmp/sourcecode
 # Build
 sudo mkdir /tmp/sourcecode
 sudo mkdir /tmp/build
-
-# Pull ppaass-common
-cd /tmp/sourcecode
-sudo git clone https://github.com/quhxuxm/ppaass-common.git ppaass-common
-cd /tmp/sourcecode/ppaass-common
-sudo git pull
-sudo mvn clean install
 
 # Pull ppaass-protocol
 cd /tmp/sourcecode
