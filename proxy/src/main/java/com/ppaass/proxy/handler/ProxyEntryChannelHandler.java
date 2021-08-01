@@ -9,16 +9,15 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
-import io.netty.channel.embedded.EmbeddedChannel;
-import io.netty.handler.codec.dns.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.util.Arrays;
-
-import static com.ppaass.proxy.IProxyConstant.DNS_PORT;
 
 @Service
 @ChannelHandler.Sharable
@@ -252,139 +251,6 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                 });
     }
 
-    private void handleDnsQuery(ChannelHandlerContext proxyChannelContext, AgentMessage agentMessage) {
-        var proxyTcpChannel = proxyChannelContext.channel();
-        var dnsQueryData = agentMessage.getBody().getData();
-        InetSocketAddress originalDestinationSocketAddress =
-                new InetSocketAddress(agentMessage.getBody().getTargetHost(), DNS_PORT);
-        InetSocketAddress originalSenderSocketAddress =
-                new InetSocketAddress(agentMessage.getBody().getSourceHost(),
-                        agentMessage.getBody().getSourcePort());
-        io.netty.channel.socket.DatagramPacket datagramPacket =
-                new io.netty.channel.socket.DatagramPacket(Unpooled.wrappedBuffer(dnsQueryData),
-                        originalDestinationSocketAddress);
-        EmbeddedChannel dnsChannel =
-                new EmbeddedChannel(new DatagramDnsQueryDecoder(), new DatagramDnsResponseEncoder());
-        dnsChannel.writeInbound(datagramPacket);
-        DatagramDnsQuery dnsQuery = dnsChannel.readInbound();
-        DefaultDnsQuestion dnsQuestion = dnsQuery.recordAt(DnsSection.QUESTION);
-        logger.debug(
-                "Receive UDP packet, DNS question,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}]",
-                dnsQuery.id(),
-                dnsQuestion.name(),
-                dnsQuestion.dnsClass(),
-                dnsQuestion.type().name(),
-                dnsQuestion.timeToLive()
-        );
-        InetAddress[] allIpAddresses;
-        try {
-            allIpAddresses = InetAddress.getAllByName(dnsQuestion.name());
-        } catch (UnknownHostException e) {
-            logger.error("Fail to get all ip address of the given domain name [{}] because of exception.",
-                    dnsQuestion.name(),
-                    e
-            );
-            DatagramDnsResponse dnsResponse =
-                    new DatagramDnsResponse(originalDestinationSocketAddress, originalSenderSocketAddress,
-                            dnsQuery.id(), DnsOpCode.QUERY, DnsResponseCode.NXDOMAIN);
-            DefaultDnsRawRecord dnsAnswer =
-                    new DefaultDnsRawRecord(dnsQuestion.name(), DnsRecordType.SOA, 60 * 1000,
-                            Unpooled.EMPTY_BUFFER);
-            dnsResponse.addRecord(DnsSection.QUESTION, dnsQuestion);
-            dnsResponse.addRecord(DnsSection.AUTHORITY, dnsAnswer);
-            dnsChannel.writeOutbound(dnsResponse);
-            io.netty.channel.socket.DatagramPacket dnsResponseUdpPacket = dnsChannel.flushOutbound().readOutbound();
-            var dnsUdpResponsePacketContentByteBuf = dnsResponseUdpPacket.content();
-            var dnsUdpResponsePacketContentByteArray = ByteBufUtil.getBytes(dnsUdpResponsePacketContentByteBuf);
-            logger.debug(
-                    "Prepare UDP packet, DNS answer,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}], question sender=[{}], question recipient=[{}]," +
-                            "answer sender=[{}], answer recipient=[{}], ip=[NONE1]",
-                    dnsQuery.id(),
-                    dnsQuestion.name(),
-                    dnsQuestion.dnsClass(),
-                    dnsQuestion.type().name(),
-                    dnsAnswer.timeToLive(),
-                    dnsQuery.sender(),
-                    dnsQuery.recipient(),
-                    dnsResponse.sender(),
-                    dnsResponse.recipient()
-            );
-            this.sendUdpDataToAgent(agentMessage, proxyTcpChannel, dnsUdpResponsePacketContentByteArray,
-                    ProxyMessageBodyType.DNS_ANSWER);
-            return;
-        }
-        if (allIpAddresses.length == 0) {
-            logger.error("Fail to get all ip address of the given domain name [{}] because no ip address return",
-                    dnsQuestion.name()
-            );
-            DatagramDnsResponse dnsResponse =
-                    new DatagramDnsResponse(originalDestinationSocketAddress, originalSenderSocketAddress,
-                            dnsQuery.id(), DnsOpCode.QUERY, DnsResponseCode.NXDOMAIN);
-            DefaultDnsRawRecord dnsAnswer =
-                    new DefaultDnsRawRecord(dnsQuestion.name(), DnsRecordType.SOA, 60 * 1000,
-                            Unpooled.EMPTY_BUFFER);
-            dnsResponse.addRecord(DnsSection.QUESTION, dnsQuestion);
-            dnsResponse.addRecord(DnsSection.AUTHORITY, dnsAnswer);
-            dnsChannel.writeOutbound(dnsResponse);
-            io.netty.channel.socket.DatagramPacket dnsResponseUdpPacket = dnsChannel.flushOutbound().readOutbound();
-            var dnsUdpResponsePacketContentByteBuf = dnsResponseUdpPacket.content();
-            var dnsUdpResponsePacketContentByteArray = ByteBufUtil.getBytes(dnsUdpResponsePacketContentByteBuf);
-            logger.debug(
-                    "Prepare DUP packet, DNS answer,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}], question sender=[{}], question recipient=[{}]," +
-                            "answer sender=[{}], answer recipient=[{}], ip=[NONE2]",
-                    dnsQuery.id(),
-                    dnsQuestion.name(),
-                    dnsQuestion.dnsClass(),
-                    dnsQuestion.type().name(),
-                    dnsAnswer.timeToLive(),
-                    dnsQuery.sender(),
-                    dnsQuery.recipient(),
-                    dnsResponse.sender(),
-                    dnsResponse.recipient()
-            );
-            this.sendUdpDataToAgent(agentMessage, proxyTcpChannel, dnsUdpResponsePacketContentByteArray,
-                    ProxyMessageBodyType.DNS_ANSWER);
-            return;
-        }
-        logger.debug(
-                "Prepare UDP packet, DNS get ip address,id=[{}],  name=[{}], question class=[{}], question type=[{}], question sender=[{}], question recipient=[{}], ip=[{}]",
-                dnsQuery.id(),
-                dnsQuestion.name(),
-                dnsQuestion.dnsClass(),
-                dnsQuestion.type().name(),
-                dnsQuery.sender(),
-                dnsQuery.recipient(),
-                allIpAddresses[0].toString()
-        );
-        DatagramDnsResponse dnsResponse =
-                new DatagramDnsResponse(originalDestinationSocketAddress, originalSenderSocketAddress,
-                        dnsQuery.id());
-        DefaultDnsRawRecord dnsAnswer = new DefaultDnsRawRecord(dnsQuestion.name(), DnsRecordType.A, 60 * 1000,
-                Unpooled.wrappedBuffer(allIpAddresses[0].getAddress()));
-        dnsResponse.addRecord(DnsSection.QUESTION, dnsQuestion);
-        dnsResponse.addRecord(DnsSection.ANSWER, dnsAnswer);
-        dnsChannel.writeOutbound(dnsResponse);
-        io.netty.channel.socket.DatagramPacket dnsResponseUdpPacket = dnsChannel.flushOutbound().readOutbound();
-        var dnsUdpResponsePacketContentByteBuf = dnsResponseUdpPacket.content();
-        var dnsUdpResponsePacketContentByteArray = ByteBufUtil.getBytes(dnsUdpResponsePacketContentByteBuf);
-        logger.debug(
-                "Prepare UDP packet, DNS answer,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}], question sender=[{}], question recipient=[{}]," +
-                        "answer sender=[{}], answer recipient=[{}], ip=[{}]",
-                dnsQuery.id(),
-                dnsQuestion.name(),
-                dnsQuestion.dnsClass(),
-                dnsQuestion.type().name(),
-                dnsAnswer.timeToLive(),
-                dnsQuery.sender(),
-                dnsQuery.recipient(),
-                dnsResponse.sender(),
-                dnsResponse.recipient(),
-                allIpAddresses[0].toString()
-        );
-        this.sendUdpDataToAgent(agentMessage, proxyTcpChannel, dnsUdpResponsePacketContentByteArray,
-                ProxyMessageBodyType.DNS_ANSWER);
-    }
-
     private void handleUdpData(ChannelHandlerContext proxyChannelContext, AgentMessage agentMessage) {
         var proxyTcpChannel = proxyChannelContext.channel();
         var destinationInetSocketAddress =
@@ -532,7 +398,6 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         switch (agentMessageBodyType) {
             case TCP_DATA -> this.handleTcpData(proxyChannelContext, agentMessage);
             case UDP_DATA -> this.handleUdpData(proxyChannelContext, agentMessage);
-            case DNS_QUERY -> this.handleDnsQuery(proxyChannelContext, agentMessage);
             case TCP_CONNECT -> this.handleTcpConnect(proxyChannelContext, agentMessage);
         }
     }
