@@ -291,17 +291,19 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                     .addListener((ChannelFutureListener) proxyChannelFuture -> {
                         if (proxyChannelFuture.isSuccess()) {
                             logger.debug(
-                                    "Success to write UDP_DATA result to agent, agent message:{}",
+                                    "Success to write UDP_DATA_FAIL result to agent, agent message:{}",
                                     agentMessage,
                                     proxyChannelFuture.cause()
                             );
+                            proxyChannelContext.close();
                             return;
                         }
                         logger.error(
-                                "Fail to write UDP_DATA result to agent because of exception, agent message:{}",
+                                "Fail to write UDP_DATA_FAIL result to agent because of exception, agent message:{}",
                                 agentMessage,
                                 proxyChannelFuture.cause()
                         );
+                        proxyChannelContext.close();
                     });
             return;
         }
@@ -339,7 +341,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                     .addListener((ChannelFutureListener) proxyChannelFuture -> {
                         if (proxyChannelFuture.isSuccess()) {
                             logger.debug(
-                                    "Success to write UDP_DATA result to agent, agent message:{}",
+                                    "Success to write UDP_DATA_FAIL result to agent, agent message:{}",
                                     agentMessage,
                                     proxyChannelFuture.cause()
                             );
@@ -347,7 +349,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                             return;
                         }
                         logger.error(
-                                "Fail to write UDP_DATA result to agent because of exception, agent message:{}",
+                                "Fail to write UDP_DATA_FAIL result to agent because of exception, agent message:{}",
                                 agentMessage,
                                 proxyChannelFuture.cause()
                         );
