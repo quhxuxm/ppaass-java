@@ -425,14 +425,14 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                     .addListener((ChannelFutureListener) proxyChannelFuture -> {
                         if (proxyChannelFuture.isSuccess()) {
                             logger.debug(
-                                    "Success to write UDP_DATA result to agent, agent message:\n{}\n",
+                                    "Success to write UDP_DATA result to agent, agent message:{}",
                                     agentMessage,
                                     proxyChannelFuture.cause()
                             );
                             return;
                         }
                         logger.error(
-                                "Fail to write UDP_DATA result to agent because of exception, agent message:\n{}\n",
+                                "Fail to write UDP_DATA result to agent because of exception, agent message:{}",
                                 agentMessage,
                                 proxyChannelFuture.cause()
                         );
@@ -447,13 +447,13 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
             targetUdpSocket.receive(receiveDataPacket);
             int currentReceivedDataLength = receiveDataPacket.getLength();
             byte[] proxyMessageData = Arrays.copyOf(receiveDataPacket.getData(), currentReceivedDataLength);
-            logger.debug("Receive UDP packet:\n{}\n",
+            logger.debug("Receive UDP packet:{}",
                     ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(proxyMessageData))
             );
             sendUdpDataToAgent(agentMessage, proxyTcpChannel, proxyMessageData,
                     ProxyMessageBodyType.UDP_DATA_SUCCESS);
         } catch (Exception e) {
-            logger.error("Fail to send UDP message to target UDP socket, agent message:\n{}\n",
+            logger.error("Fail to send UDP message to target UDP socket, agent message:{}",
                     agentMessage, e
             );
             var failProxyMessageBody = new ProxyMessageBody(UUIDUtil.INSTANCE.generateUuid(),
@@ -473,14 +473,14 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                     .addListener((ChannelFutureListener) proxyChannelFuture -> {
                         if (proxyChannelFuture.isSuccess()) {
                             logger.debug(
-                                    "Success to write UDP_DATA result to agent, agent message:\n{}\n",
+                                    "Success to write UDP_DATA result to agent, agent message:{}",
                                     agentMessage,
                                     proxyChannelFuture.cause()
                             );
                             return;
                         }
                         logger.error(
-                                "Fail to write UDP_DATA result to agent because of exception, agent message:\n{}\n",
+                                "Fail to write UDP_DATA result to agent because of exception, agent message:{}",
                                 agentMessage,
                                 proxyChannelFuture.cause()
                         );
@@ -505,7 +505,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
                         agentMessage.getBody().getAgentChannelId(),
                         null,
                         proxyMessageData);
-        logger.debug("Send UDP packet to agent, packet type = [{}], package content:\n{}\n", proxyMessageBodyType,
+        logger.debug("Send UDP packet to agent, packet type = [{}], package content:{}", proxyMessageBodyType,
                 ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(proxyMessageData)));
         var proxyMessage =
                 new ProxyMessage(
