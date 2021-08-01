@@ -268,7 +268,8 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         dnsChannel.writeInbound(datagramPacket);
         DatagramDnsQuery dnsQuery = dnsChannel.readInbound();
         DefaultDnsQuestion dnsQuestion = dnsQuery.recordAt(DnsSection.QUESTION);
-        logger.debug("DNS question,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}]",
+        logger.debug(
+                "Receive UDP packet, DNS question,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}]",
                 dnsQuery.id(),
                 dnsQuestion.name(),
                 dnsQuestion.dnsClass(),
@@ -296,7 +297,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
             var dnsUdpResponsePacketContentByteBuf = dnsResponseUdpPacket.content();
             var dnsUdpResponsePacketContentByteArray = ByteBufUtil.getBytes(dnsUdpResponsePacketContentByteBuf);
             logger.debug(
-                    "DNS answer,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}], question sender=[{}], question recipient=[{}]," +
+                    "Prepare UDP packet, DNS answer,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}], question sender=[{}], question recipient=[{}]," +
                             "answer sender=[{}], answer recipient=[{}], ip=[NONE1]",
                     dnsQuery.id(),
                     dnsQuestion.name(),
@@ -329,7 +330,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
             var dnsUdpResponsePacketContentByteBuf = dnsResponseUdpPacket.content();
             var dnsUdpResponsePacketContentByteArray = ByteBufUtil.getBytes(dnsUdpResponsePacketContentByteBuf);
             logger.debug(
-                    "DNS answer,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}], question sender=[{}], question recipient=[{}]," +
+                    "Prepare DUP packet, DNS answer,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}], question sender=[{}], question recipient=[{}]," +
                             "answer sender=[{}], answer recipient=[{}], ip=[NONE2]",
                     dnsQuery.id(),
                     dnsQuestion.name(),
@@ -346,7 +347,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
             return;
         }
         logger.debug(
-                "DNS get ip address,id=[{}],  name=[{}], question class=[{}], question type=[{}], question sender=[{}], question recipient=[{}], ip=[{}]",
+                "Prepare UDP packet, DNS get ip address,id=[{}],  name=[{}], question class=[{}], question type=[{}], question sender=[{}], question recipient=[{}], ip=[{}]",
                 dnsQuery.id(),
                 dnsQuestion.name(),
                 dnsQuestion.dnsClass(),
@@ -367,7 +368,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         var dnsUdpResponsePacketContentByteBuf = dnsResponseUdpPacket.content();
         var dnsUdpResponsePacketContentByteArray = ByteBufUtil.getBytes(dnsUdpResponsePacketContentByteBuf);
         logger.debug(
-                "DNS answer,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}], question sender=[{}], question recipient=[{}]," +
+                "Prepare UDP packet, DNS answer,id=[{}],  name=[{}], question class=[{}], question type=[{}], ttl=[{}], question sender=[{}], question recipient=[{}]," +
                         "answer sender=[{}], answer recipient=[{}], ip=[{}]",
                 dnsQuery.id(),
                 dnsQuestion.name(),
@@ -396,7 +397,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
         var udpPackage = new DatagramPacket(agentMessage.getBody().getData(), udpPacketLength,
                 destinationInetSocketAddress);
         logger.debug(
-                "Receive agent message for udp, agent message: \n{}\nudp data: \n{}\n",
+                "Receive agent message for UDP packet, agent message: \n{}\nudp data: \n{}\n",
                 agentMessage,
                 ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(agentMessage.getBody().getData()))
         );
@@ -451,21 +452,6 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
             );
             sendUdpDataToAgent(agentMessage, proxyTcpChannel, proxyMessageData,
                     ProxyMessageBodyType.UDP_DATA_SUCCESS);
-//            while (currentReceivedDataLength >= UDP_PACKET_MAX_LENGTH) {
-//                DatagramPacket nextReceiveDataPacket = new DatagramPacket(receiveDataPacketBuf, UDP_PACKET_MAX_LENGTH);
-//                try {
-//                    targetUdpSocket.receive(nextReceiveDataPacket);
-//                } catch (Exception e) {
-//                    logger.debug(() -> "No more data from target UDP socket, agent message:\n{}\n",
-//                            () -> new Object[]{
-//                                    agentMessage, e
-//                            });
-//                    break;
-//                }
-//                currentReceivedDataLength = nextReceiveDataPacket.getLength();
-//                byte[] nextProxyMessageData = Arrays.copyOf(nextReceiveDataPacket.getData(), currentReceivedDataLength);
-//                sendUdpDataToAgent(agentMessage, proxyTcpChannel, nextProxyMessageData);
-//            }
         } catch (Exception e) {
             logger.error("Fail to send UDP message to target UDP socket, agent message:\n{}\n",
                     agentMessage, e
