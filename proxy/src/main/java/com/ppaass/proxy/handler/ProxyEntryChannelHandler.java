@@ -306,7 +306,7 @@ public class ProxyEntryChannelHandler extends SimpleChannelInboundHandler<AgentM
             return;
         }
         try {
-            targetUdpSocket.setSoTimeout(this.proxyConfiguration.getTargetUdpReceiveTimeout());
+//            targetUdpSocket.setSoTimeout(this.proxyConfiguration.getTargetUdpReceiveTimeout());
             targetUdpSocket.send(udpPackage);
             var receiveDataPacketBuf = new byte[UDP_PACKET_MAX_LENGTH];
             DatagramPacket receiveDataPacket = new DatagramPacket(receiveDataPacketBuf, UDP_PACKET_MAX_LENGTH);
