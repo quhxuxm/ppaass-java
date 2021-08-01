@@ -1,6 +1,6 @@
 package com.ppaass.proxy;
 
-import com.ppaass.proxy.handler.bo.TargetTcpInfo;
+import com.ppaass.proxy.handler.TargetTcpInfo;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 

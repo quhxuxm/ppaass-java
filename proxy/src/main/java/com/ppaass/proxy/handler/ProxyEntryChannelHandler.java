@@ -5,7 +5,6 @@ import com.ppaass.common.util.UUIDUtil;
 import com.ppaass.protocol.vpn.message.*;
 import com.ppaass.proxy.IProxyConstant;
 import com.ppaass.proxy.ProxyConfiguration;
-import com.ppaass.proxy.handler.bo.TargetTcpInfo;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;

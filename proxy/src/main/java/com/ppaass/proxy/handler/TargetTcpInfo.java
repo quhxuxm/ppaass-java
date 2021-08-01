@@ -1,4 +1,4 @@
-package com.ppaass.proxy.handler.bo;
+package com.ppaass.proxy.handler;
 
 import io.netty.channel.Channel;
 
