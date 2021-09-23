@@ -16,11 +16,10 @@ public class CleanupInactiveProxyChannelHandler extends ChannelInboundHandlerAda
 
     @Override
     public void userEventTriggered(ChannelHandlerContext proxyChannelContext, Object evt) throws Exception {
-        if (!(evt instanceof IdleStateEvent)) {
+        if (!(evt instanceof IdleStateEvent idleStateEvent)) {
             proxyChannelContext.fireUserEventTriggered(evt);
             return;
         }
-        IdleStateEvent idleStateEvent = (IdleStateEvent) evt;
         if (IdleState.ALL_IDLE != idleStateEvent.state()) {
             proxyChannelContext.fireUserEventTriggered(idleStateEvent);
             return;
