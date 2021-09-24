@@ -51,7 +51,7 @@ cd /tmp/build/proxy
 sudo chmod 777 *.sh
 
 #Start with the low configuration by default
-sudo nohup ./start-low.sh >run.log 2>&1 &
+sudo nohup ./start.sh >run.log 2>&1 &
 #Start with the high configuration
 #sudo nohup ./start-high.sh >run.log 2>&1 &
 
