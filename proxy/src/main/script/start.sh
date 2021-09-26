@@ -1,1 +1,1 @@
-java -jar -server -XX:+UseParallelGC -Xms256m -Xmx256m  proxy-1.0-SNAPSHOT.jar --spring.config.location=classpath:application.properties,optional:./config/application-low.properties
+java -jar -server -Dio.netty.recycler.maxCapacity=32 -Dio.netty.noResourceLeakDetection=true -XX:+UseG1GC -XX:+UseCompressedOops -XX:+UseCompressedClassPointers -XX:+SegmentedCodeCache  -XX:+ExplicitGCInvokesConcurrent -Xms1024m -Xmx1024m -XX:MaxDirectMemorySize=512m  proxy-1.0-SNAPSHOT.jar --spring.config.location=classpath:application.properties
